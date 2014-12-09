@@ -101,7 +101,7 @@ namespace Http.PathProvider.StaticContent
 				}, STATIC_PATH_PROVIDER_CACHE_ID);
 				if (result != null)
 				{
-					context.Response.ContentType = MimeHelper.GetMime(relativePath);
+					//context.Response.ContentType = MimeHelper.GetMime(relativePath);
 					yield return CoroutineResult.Return(result);
 				}
 			}
@@ -206,6 +206,28 @@ namespace Http.PathProvider.StaticContent
 					_cacheEngine.InvalidateItem(realPath, STATIC_PATH_PROVIDER_CACHE_ID);
 				}
 			}
+		}
+
+		public IEnumerable<string> FindFiles(string dir)
+		{
+			var oriDir = dir.Replace('/', Path.DirectorySeparatorChar).TrimStart(Path.DirectorySeparatorChar);
+
+			dir = Path.Combine(_root, oriDir);
+			if(!Directory.Exists(dir)) yield break;
+			foreach (var file in Directory.GetFiles(dir))
+			{
+				var res = "/" + oriDir.Trim('/') + "/" + Path.GetFileName(file);
+				yield return res;
+					;
+			}
+		}
+
+		public IEnumerable<string> FindDirs(string dir)
+		{
+			dir = dir.Replace('/', Path.DirectorySeparatorChar).TrimStart(Path.DirectorySeparatorChar);
+			dir = Path.Combine(_root, dir);
+			if (!Directory.Exists(dir)) yield break;
+			foreach (var file in Directory.GetFiles(dir)) yield return file;
 		}
 	}
 }

@@ -51,7 +51,8 @@ namespace Http.Renderer.Razor.Helpers
 		}
 
 		public HtmlHelper(IHttpContext context, ViewContext viewContext,
-			object nodeCsTemplateBase, string localPath, dynamic viewBag,IRoutingHandler routingHandler)
+			object nodeCsTemplateBase, string localPath, dynamic viewBag,
+			IRoutingHandler routingHandler)
 		{
 			Lambda = new LambdaHelper();
 			_localPath = localPath;
@@ -60,7 +61,7 @@ namespace Http.Renderer.Razor.Helpers
 			ViewBag = viewBag;
 			_context = context;
 		}
-		
+
 		public LambdaHelper Lambda { get; set; }
 
 		public RawString ActionLink(string title, string action, string controller)
@@ -81,9 +82,9 @@ namespace Http.Renderer.Razor.Helpers
 			var htmlAttributes = ReflectionUtils.ObjectToDictionary(htmlAttributesOb);
 			result.Add("action", action);
 			result.Add("controller", controller);
-			var link = _routingHandler.ResolveFromParams(result);
+			var link = _routingHandler.ResolveFromParams(result).ToString();
 			if (htmlAttributes == null) htmlAttributes = new Dictionary<string, object>();
-			htmlAttributes.Add("href", link);
+			htmlAttributes.Add("href", "/" + _context.RootDir.Trim('/') + "/" + link.TrimStart('/'));
 			return new RawString(TagBuilder.TagWithValue("a", title, htmlAttributes));
 		}
 
@@ -132,7 +133,7 @@ namespace Http.Renderer.Razor.Helpers
 			{
 				//resulting = RazorEngine.Razor.Resolve(straight, model);
 			}
-
+			return new RawString("Partial NOT IMPLEMENTED");
 			/*var dwb = new DynamicViewBag();
 			dwb.AddValue("NodeCsContext", _context);
 			dwb.AddValue("NodeCsLocalPath", _localPath);
@@ -143,7 +144,6 @@ namespace Http.Renderer.Razor.Helpers
 			var resultContent = template.Run(context);
 			return new RawString(resultContent);
 			 */
-			throw new NotImplementedException();
 		}
 
 		public void RenderAction(string action, string controller)

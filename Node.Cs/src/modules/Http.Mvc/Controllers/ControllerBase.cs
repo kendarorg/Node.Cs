@@ -58,6 +58,7 @@ namespace HttpMvc.Controllers
 				}
 				return _dynamicViewDataDictionary;
 			}
+			set { _dynamicViewDataDictionary = value; }
 		}
 
 		public Dictionary<string, object> ViewData
@@ -103,7 +104,6 @@ namespace HttpMvc.Controllers
 		{
 			return new PartialViewResponse(action, model, ViewBag);
 		}
-
 
 		protected IResponse RedirectToAction(string action, string controller = null)
 		{

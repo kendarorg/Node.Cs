@@ -1,6 +1,22 @@
-﻿using CoroutinesLib.Shared;
+// ===========================================================
+// Copyright (C) 2014-2015 Kendar.org
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+// files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+// modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software 
+// is furnished to do so, subject to the following conditions:
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS 
+// BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF 
+// OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// ===========================================================
+
+
+using CoroutinesLib.Shared;
 using CoroutinesLib.Shared.Enums;
 using GenericHelpers;
+using Http.Contexts;
 using Http.Shared;
 using Http.Shared.Contexts;
 using Http.Shared.Controllers;
@@ -30,6 +46,7 @@ namespace Http.Coroutines
 		private readonly List<IPathProvider> _pathProviders;
 		private readonly List<IRenderer> _renderers;
 		private readonly List<string> _defaulList;
+		private readonly object _viewBag;
 		private ICoroutineThread _coroutine;
 
 
@@ -57,10 +74,9 @@ namespace Http.Coroutines
 			ErrorPageString = "{SERVER_TYPE} Detailed Error - {HTTP_CODE} - {SHORT_DESCRIPTION} - {LONG_DESCRIPTION}";
 		}
 
-		public ExecuteRequestCoroutine(
-				string virtualDir,
-				IHttpContext context, object model, ModelStateDictionary modelStateDictionary,
-				List<IPathProvider> pathProviders, List<IRenderer> renderers, List<string> defaulList)
+		public ExecuteRequestCoroutine(string virtualDir, IHttpContext context, object model, 
+			ModelStateDictionary modelStateDictionary, List<IPathProvider> pathProviders,
+			List<IRenderer> renderers, List<string> defaulList, object viewBag)
 		{
 			_context = context;
 			_model = model;
@@ -69,6 +85,7 @@ namespace Http.Coroutines
 			_pathProviders = pathProviders;
 			_renderers = renderers;
 			_defaulList = defaulList;
+			_viewBag = viewBag;
 		}
 
 		public void Initialize()
@@ -91,7 +108,10 @@ namespace Http.Coroutines
 			var relativePath = requestPath;
 			if (requestPath.StartsWith(_virtualDir.TrimEnd('/')))
 			{
-				relativePath = requestPath.Substring(_virtualDir.Length - 1);
+				if (_virtualDir.Length >0 )
+				{
+					relativePath = requestPath.Substring(_virtualDir.Length - 1);
+				}
 			}
 
 			for (int index = 0; index < _pathProviders.Count; index++)
@@ -114,7 +134,8 @@ namespace Http.Coroutines
 								renderer,
 								relativePath, pathProvider, _context,
 								HttpListenerExceptionHandler,
-								_model, _modelStateDictionary);
+								_model, _modelStateDictionary,
+								_viewBag);
 					}
 					return;
 				}
@@ -274,6 +295,7 @@ namespace Http.Coroutines
 
 		public IEnumerable<ICoroutineResult> Execute()
 		{
+			_status = RunningStatus.Running;
 			foreach (var item in _coroutine.Execute())
 			{
 				_status = _coroutine.Status;
@@ -306,16 +328,16 @@ namespace Http.Coroutines
 
 		public void OnDestroy()
 		{
-			if (_context.Parent == null)
+			if (!(_context.Parent is WrappedHttpContext))
 			{
 				var filtersHandler = ServiceLocator.Locator.Resolve<IFilterHandler>();
 				filtersHandler.OnPostExecute(_context);
 				_context.Response.Close();
-			}
+			}/*
 			else
 			{
-				_context.Response.Close();
-			}
+				//_context.Response.Close();
+			}*/
 			_coroutine.OnDestroy();
 		}
 

@@ -13,15 +13,38 @@
 // ===========================================================
 
 
+using System;
 using System.Collections.Generic;
+using System.Dynamic;
+using System.IO;
+using Http.Renderer.Razor.Utils;
 
 namespace Http.Renderer.Razor.Integration
 {
 	public interface IRazorTemplate
 	{
 		List<BufferItem> Buffer { get; }
-		void Execute();
+		
+		#region MVC complient
+		string Layout { get; set; }
+		dynamic ViewBag { get; }
+		RawString RenderBody();
+
+		// you may skip the layout using the parameter skipLayoutwhich can be handy 
+		// when rendering template partials (controls)
+		RawString RenderPage(string name, object model = null, bool skipLayout = false);
+
+		RawString RenderSection(string sectionName, bool required = false);
+		bool IsSectionDefined(string sectionName);
+		#endregion
+
+		#region Added through GeneratedClassContext
+		void DefineSection(string name, Action action);
+		void WriteLiteralTo(TextWriter writer, object value);
+		void WriteTo(TextWriter writer, object value);
 		void Write(object value);
 		void WriteLiteral(object value);
+		void Execute();
+		#endregion
 	}
 }

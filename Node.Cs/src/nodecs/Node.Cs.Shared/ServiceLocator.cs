@@ -21,8 +21,8 @@ namespace NodeCs.Shared
 {
 	public interface IServiceLocator
 	{
-		T Resolve<T>();
-		object Resolve(Type t);
+		T Resolve<T>(bool nullIfNotFound = false);
+		object Resolve(Type t,bool nullIfNotFound = false);
 		void Release(object ob);
 		void Register(Type t);
 		void Register<T>(Func<Type,object> resolver, bool isSingleton = true);
@@ -126,7 +126,7 @@ namespace NodeCs.Shared
 			}
 		}
 
-		public T Resolve<T>()
+		public T Resolve<T>(bool nullIfNotFound = false)
 		{
 			if (_services.ContainsKey(typeof (T)))
 			{
@@ -141,14 +141,15 @@ namespace NodeCs.Shared
 				var result = ChildLocator.Resolve<T>();
 				if(result != null) return  result;
 			}
-			if (typeof (T).IsAbstract || typeof (T).IsInterface)
+			if (typeof(T).IsAbstract || typeof(T).IsInterface || nullIfNotFound)
 			{
 				return default(T);
 			}
+			if (IsSystem(typeof (T))) return default(T);
 			return Activator.CreateInstance<T>();
 		}
 
-		public object Resolve(Type t)
+		public object Resolve(Type t,bool nullIfNotFound = false)
 		{
 			if (_services.ContainsKey(t))
 			{
@@ -164,11 +165,21 @@ namespace NodeCs.Shared
 				if (result != null) return result;
 			}
 
-			if (t.IsAbstract || t.IsInterface)
+			if (t.IsAbstract || t.IsInterface || nullIfNotFound)
 			{
 				return null;
 			}
+			if (IsSystem(t)) return null;
 			return Activator.CreateInstance(t);
+		}
+
+		private bool IsSystem(Type type)
+		{
+			var ns = type.Namespace ?? "";
+			return type.IsPrimitive ||
+						 ns.StartsWith("System.") ||
+						 ns == "System." ||
+			       type.Module.ScopeName == "CommonLanguageRuntimeLibrary";
 		}
 
 

@@ -35,12 +35,8 @@ namespace Http.Routing
 			_routeDefinitions = new List<RouteDefinition>();
 		}
 
-		public void AddStaticRoute(string route)
+		public void MapStaticRoute(string route)
 		{
-			if (!route.StartsWith("~/"))
-			{
-				throw new Exception(string.Format("Invalid route '{0}' not starting with ~", route));
-			}
 			route = route.TrimStart('~');
 			if (route.StartsWith("/"))
 			{
@@ -203,19 +199,15 @@ namespace Http.Routing
 		}
 
 
-		public void AddRoute(string route, dynamic parameters = null)
+		public void MapRoute(string name,string url, dynamic defaults = null)
 		{
-			if (!route.StartsWith("~/"))
+			url = url.TrimStart('~');
+			if (url.StartsWith("/"))
 			{
-				throw new Exception(string.Format("Invalid route '{0}' not starting with ~", route));
-			}
-			route = route.TrimStart('~');
-			if (route.StartsWith("/"))
-			{
-				route = route.TrimStart('/');
+				url = url.TrimStart('/');
 			}
 
-			var routeDefinition = new RouteDefinition(route, ReflectionUtils.ObjectToDictionary(parameters));
+			var routeDefinition = new RouteDefinition(url, ReflectionUtils.ObjectToDictionary(defaults));
 			CheckForConflicting(routeDefinition);
 			_routeDefinitions.Add(routeDefinition);
 		}
@@ -346,8 +338,9 @@ namespace Http.Routing
 			//var url = "/" + string.Join("/", routeSplitted);
 			if (routeMissing.Length > 0)
 			{
-				routeSplitted.Append("?");
-				routeSplitted.Append(routeMissing);
+				return null;
+				/*routeSplitted.Append("?");
+				routeSplitted.Append(routeMissing);*/
 			}
 			return routeSplitted.ToString();
 		}
@@ -396,6 +389,11 @@ namespace Http.Routing
 			var routeDefinition = new RouteDefinition(route, new Dictionary<string, object>(), false, true);
 			CheckForConflicting(routeDefinition);
 			_routeDefinitions.Add(routeDefinition);
+		}
+
+		public void EnableQuerySupport()
+		{
+			//throw new NotImplementedException();
 		}
 	}
 }
