@@ -13,6 +13,9 @@
 // ===========================================================
 
 
+using System;
+using System.Collections.Generic;
+using CoroutinesLib.Shared;
 using Http.Shared;
 using Http.Shared.Contexts;
 using Http.Shared.Controllers;
@@ -21,22 +24,23 @@ using NodeCs.Shared;
 
 namespace HttpMvc
 {
-	public class DataResponseHandler:IResponseHandler
+	public class DataResponseHandler : IResponseHandler
 	{
-		public void Handle(IHttpContext context, IResponse response)
+		public IEnumerable<ICoroutineResult> Handle(IHttpContext context, IResponse response)
 		{
 			var filtersHandler = ServiceLocator.Locator.Resolve<IFilterHandler>();
-			var dataResponse = (DataResponse) response;
+			var dataResponse = (DataResponse)response;
 			filtersHandler.OnPostExecute(context);
 			context.Response.ContentEncoding = dataResponse.ContentEncoding;
 			context.Response.ContentType = dataResponse.ContentType;
-			context.Response.OutputStream.WriteAsync(dataResponse.Data, 0, dataResponse.Data.Length)
-				.ContinueWith((a) => context.Response.Close());
+			yield return CoroutineResult.RunTask(
+				context.Response.OutputStream.WriteAsync(dataResponse.Data, 0, dataResponse.Data.Length))
+				.AndWait();
 		}
 
 		public bool CanHandle(IResponse response)
 		{
-			return response as DataResponse !=null;
+			return response as DataResponse != null;
 		}
 	}
 }

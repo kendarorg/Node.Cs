@@ -30,12 +30,10 @@ using Http.Shared.Routing;
 using NodeCs.Shared;
 using NodeCs.Shared.Caching;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
-using System.Reflection;
 using System.Threading;
 
 namespace Http
@@ -48,8 +46,22 @@ namespace Http
 		private string _host;
 		private Thread _thread;
 		private HttpListener _listener;
-
 		private SecurityDefinition _securityDefinition = new SecurityDefinition();
+		private readonly List<IPathProvider> _pathProviders = new List<IPathProvider>();
+		private readonly List<IRenderer> _renderers = new List<IRenderer>();
+		private IRoutingHandler _routingHandler;
+		private ConcurrentBool _running;
+		private readonly Dictionary<string, ControllerWrapperDescriptor> _controllers =
+						new Dictionary<string, ControllerWrapperDescriptor>(StringComparer.OrdinalIgnoreCase);
+		private readonly IConversionService _conversionService;
+		private string _errorPageString;
+		private readonly List<IResponseHandler> _responseHandlers = new List<IResponseHandler>();
+		private readonly List<string> _defaulList = new List<string>();
+
+		private readonly IFilterHandler _filtersHandler;
+		private bool _fallBackResult;
+		private string _fallBackResultMessage;
+
 
 		public HttpModule()
 		{
@@ -102,11 +114,10 @@ namespace Http
 			Process.Start("IExplore.exe", listenAddress);
 		}
 
-		private ConcurrentBool _running;
-
 		public void Start()
 		{
 			if (IsRunning) return;
+			ExecuteRequestCoroutine.ErrorPageString = _errorPageString;
 			_thread = new Thread(RunHttpModule);
 			_running = true;
 			_thread.Start();
@@ -127,9 +138,6 @@ namespace Http
 			_running = false;
 			Thread.Sleep(WAIT_INCOMING_MS * 2);
 		}
-
-		private bool _fallBackResult;
-		private string _fallBackResultMessage;
 
 		public void RunHttpModule()
 		{
@@ -181,6 +189,11 @@ namespace Http
 			return string.Join(":", _host, _virtualDir, _port);
 		}
 
+		/// <summary>
+		/// This is the first entry point when the server receives the data from
+		/// the client.
+		/// </summary>
+		/// <param name="result"></param>
 		private void ListenerCallback(IAsyncResult result)
 		{
 			var listener = (HttpListener)result.AsyncState;
@@ -194,20 +207,22 @@ namespace Http
 			{
 				return;
 			}
+
 			if (!IsRunning)
 			{
-				_filtersHandler.OnPostExecute(context);
+				//It's a dead coroutine. No need to handle other things.
 				context.Response.Close();
 				return;
 			}
 
 			try
 			{
+				//If no real module exists to serve the content, simply return a server courtesy page.
 				if (_fallBackResult)
 				{
 					var now = DateTime.UtcNow;
 					var responseString = "<HTML><BODY>" + _fallBackResultMessage + "Timestamp:" + now + ":" +
-							NodeRoot.Lpad(now.Millisecond.ToString(), 4, "0") + "</BODY></HTML>";
+									NodeRoot.Lpad(now.Millisecond.ToString(), 4, "0") + "</BODY></HTML>";
 					byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
 					context.Response.BinaryWrite(buffer);
 					_filtersHandler.OnPostExecute(context);
@@ -216,59 +231,45 @@ namespace Http
 				else
 				{
 					// ReSharper disable once PossibleNullReferenceException
-					ExecuteRequest(context, HttpListenerExceptionHandler);
+					ExecuteRequest(context);
 				}
 			}
 			catch (HttpException httpException)
 			{
-				WriteException(context, httpException);
+				ExecuteRequestCoroutine.WriteException(context, httpException);
 			}
 			catch (Exception ex)
 			{
-				var httpException = FindHttpException(ex);
+				var httpException = ExecuteRequestCoroutine.FindHttpException(ex);
 				if (httpException != null)
 				{
-					WriteException(context, (HttpException)httpException);
+					ExecuteRequestCoroutine.WriteException(context, (HttpException)httpException);
 				}
 				else
 				{
-					WriteException(context, 500, ex);
+					ExecuteRequestCoroutine.WriteException(context, 500, ex);
 				}
 
 			}
 		}
 
-		private Exception FindHttpException(Exception exception)
-		{
-			if (exception is HttpException)
-			{
-				return exception;
-			}
-			if (exception.InnerException != null)
-			{
-				if (exception.InnerException is HttpException)
-				{
-					return exception.InnerException;
-				}
-				var tmpEx = FindHttpException(exception.InnerException);
-				if (tmpEx == null) return null;
-			}
-			return null;
-		}
-
-		internal bool HttpListenerExceptionHandler(Exception ex, IHttpContext context)
-		{
-			var httpException = FindHttpException(ex);
-			if (httpException != null)
-			{
-				WriteException(context, (HttpException)httpException);
-			}
-			else
-			{
-				WriteException(context, 500, ex);
-			}
-			return true;
-		}
+		//private Exception FindHttpException(Exception exception)
+		//{
+		//    if (exception is HttpException)
+		//    {
+		//        return exception;
+		//    }
+		//    if (exception.InnerException != null)
+		//    {
+		//        if (exception.InnerException is HttpException)
+		//        {
+		//            return exception.InnerException;
+		//        }
+		//        var tmpEx = FindHttpException(exception.InnerException);
+		//        if (tmpEx == null) return null;
+		//    }
+		//    return null;
+		//}
 
 		internal IControllerWrapperInstance CreateController(RouteInstance instance)
 		{
@@ -279,87 +280,69 @@ namespace Http
 			return cld.CreateWrapper(controller);
 		}
 
-		public void HandleResponse(IHttpContext context, IResponse response)
+		public IEnumerable<ICoroutineResult> HandleResponse(IHttpContext context, IResponse response)
 		{
-			foreach (var handler in _responseHandlers)
+			for (int index = 0; index < _responseHandlers.Count; index++)
 			{
+				var handler = _responseHandlers[index];
 				if (handler.CanHandle(response))
 				{
-					handler.Handle(context, response);
-					return;
+					foreach (var item in handler.Handle(context, response))
+					{
+						yield return item;
+						yield break;
+					}
 				}
 			}
 		}
 
-		public void ExecuteRequest(IHttpContext context, object model, ModelStateDictionary modelStateDictionary)
-		{
-			var runner = ServiceLocator.Locator.Resolve<ICoroutinesManager>();
-			if (context.Request.Url == null)
+		/*
+			internal bool HttpListenerExceptionHandler(Exception ex, IHttpContext context)
 			{
-				throw new HttpException(500, string.Format("Missing url."));
-			}
-			string requestPath;
-
-			if (context.Request.Url.IsAbsoluteUri)
-			{
-				requestPath = context.Request.Url.LocalPath.Trim();
-			}
-			else
-			{
-				requestPath = context.Request.Url.ToString().Trim();
-			}
-			var relativePath = requestPath;
-			if (requestPath.StartsWith(_virtualDir.TrimEnd('/')))
-			{
-				relativePath = requestPath.Substring(_virtualDir.Length - 1);
-			}
-
-			for (int index = 0; index < _pathProviders.Count; index++)
-			{
-				var pathProvider = _pathProviders[index];
-				var isDir = false;
-				if (pathProvider.Exists(relativePath, out isDir))
-				{
-					if (isDir)
+					var httpException = FindHttpException(ex);
+					if (httpException != null)
 					{
-						string tmpPath = null;
-						for (int i = 0; i < _defaulList.Count; i++)
-						{
-							var def = _defaulList[i];
-							tmpPath = relativePath.TrimEnd('/') + '/' + def;
-							if (pathProvider.Exists(tmpPath, out isDir))
-							{
-								if (!isDir) break;
-							}
-							tmpPath = null;
-						}
-						if (tmpPath != null)
-						{
-							relativePath = tmpPath;
-						}
-					}
-					var renderer = FindRenderer(relativePath);
-					if (renderer == null)
-					{
-						runner.StartCoroutine(new StaticItemCoroutine(relativePath, pathProvider, context, HttpListenerExceptionHandler));
+							WriteException(context, (HttpException)httpException);
 					}
 					else
 					{
-						runner.StartCoroutine(new RenderizableItemCoroutine(renderer, relativePath, pathProvider, context,
-								HttpListenerExceptionHandler, model, modelStateDictionary));
+							WriteException(context, 500, ex);
 					}
-					return;
+					return true;
+			}*/
+
+		private IRenderer FindRenderer(ref string relativePath, IPathProvider pathProvider, bool isDir)
+		{
+			if (isDir)
+			{
+				string tmpPath = null;
+				for (int i = 0; i < _defaulList.Count; i++)
+				{
+					var def = _defaulList[i];
+					tmpPath = relativePath.TrimEnd('/') + '/' + def;
+					if (pathProvider.Exists(tmpPath, out isDir))
+					{
+						if (!isDir) break;
+					}
+					tmpPath = null;
+				}
+				if (tmpPath != null)
+				{
+					relativePath = tmpPath;
 				}
 			}
-			throw new HttpException(404, string.Format("Not found '{0}'.", context.Request.Url));
+			var renderer = GetPossibleRenderer(relativePath);
+			return renderer;
 		}
 
+
 		/// <summary>
-		/// Main entry point
+		/// Main entry point for the http request. This will be called only upon REAL REQUESTS. Not by
+		/// forwarded items.
 		/// </summary>
 		/// <param name="context"></param>
 		/// <param name="specialHandler"></param>
-		internal void ExecuteRequest(IHttpContext context, Func<Exception, IHttpContext, bool> specialHandler)
+		internal void ExecuteRequest(IHttpContext context)
 		{
 			var runner = ServiceLocator.Locator.Resolve<ICoroutinesManager>();
 			if (context.Request.Url == null)
@@ -373,11 +356,7 @@ namespace Http
 				relativePath = requestPath.Substring(_virtualDir.Length - 1);
 			}
 			_filtersHandler.OnPreExecute(context);
-            var sessionManager = ServiceLocator.Locator.Resolve<ISessionManager>();
-            if (sessionManager != null)
-            {
-                sessionManager.InitializeSession(context);
-            }
+			
 			if (_routingHandler != null)
 			{
 				var match = _routingHandler.Resolve(relativePath, context);
@@ -385,7 +364,7 @@ namespace Http
 				{
 					if (match.BlockRoute)
 					{
-						WriteException(context, new HttpException(404, "Missing " + context.Request.Url));
+						ExecuteRequestCoroutine.WriteException(context, new HttpException(404, "Missing " + context.Request.Url));
 						return;
 					}
 					if (!match.StaticRoute)
@@ -395,18 +374,25 @@ namespace Http
 						{
 							context.RouteParams = match.Parameters ?? new Dictionary<string, object>();
 							controller.Instance.Set("Httpcontext", context);
-							runner.StartCoroutine(new RoutedItemCoroutine(match, controller, context, specialHandler, _conversionService,
-									null));
+							runner.StartCoroutine(
+									new RoutedItemCoroutine(match, controller, context,
+											 _conversionService,
+											null));
 							return;
 						}
 					}
 				}
-
 			}
-			ExecuteRequest(context, null, new ModelStateDictionary());
+
+			var executeRequestCoroutine = new ExecuteRequestCoroutine(
+					_virtualDir,
+					context, null, new ModelStateDictionary(),
+					_pathProviders, _renderers, _defaulList);
+			executeRequestCoroutine.Initialize();
+			runner.StartCoroutine(executeRequestCoroutine);
 		}
 
-		private IRenderer FindRenderer(string relativePath)
+		private IRenderer GetPossibleRenderer(string relativePath)
 		{
 			var file = UrlUtils.GetFileName(relativePath);
 			var extension = PathUtils.GetExtension(file);
@@ -420,10 +406,6 @@ namespace Http
 			}
 			return null;
 		}
-
-		private readonly List<IPathProvider> _pathProviders = new List<IPathProvider>();
-		private readonly List<IRenderer> _renderers = new List<IRenderer>();
-		private IRoutingHandler _routingHandler;
 
 		public IRoutingHandler RoutingHandler
 		{
@@ -449,6 +431,7 @@ namespace Http
 		{
 			_conversionService.AddConverter(converter, firstMime, mimes);
 		}
+
 		public void RegisterConverter(string mime, ISerializer converter)
 		{
 			_conversionService.AddConverter(converter, mime);
@@ -462,7 +445,6 @@ namespace Http
 				pathProvider.ShowDirectoryContent(showDirectoryContent);
 				_pathProviders.Add(pathProvider);
 			}
-
 		}
 
 		public void UnregisterPathProvider(IPathProvider pathProvider)
@@ -472,8 +454,6 @@ namespace Http
 				_pathProviders.Remove(pathProvider);
 			}
 		}
-
-		private readonly List<IResponseHandler> _responseHandlers = new List<IResponseHandler>();
 
 		public void RegisterResponseHandler(IResponseHandler renderer)
 		{
@@ -502,7 +482,7 @@ namespace Http
 				_renderers.Remove(renderer);
 			}
 		}
-		private readonly List<string> _defaulList = new List<string>();
+
 		public void RegisterDefaultFiles(string fileName)
 		{
 			if (!_defaulList.Any((f) => string.Equals(f, fileName, StringComparison.OrdinalIgnoreCase)))
@@ -520,12 +500,6 @@ namespace Http
 			}
 		}
 
-		private readonly Dictionary<string, ControllerWrapperDescriptor> _controllers =
-				new Dictionary<string, ControllerWrapperDescriptor>(StringComparer.OrdinalIgnoreCase);
-
-		private readonly IConversionService _conversionService;
-		private string _errorPageString;
-
 		private void CallClientInitializers()
 		{
 			var par = GetParameter<string>("authenticationType");
@@ -540,7 +514,7 @@ namespace Http
 				var initializer = (ILocatorInitialize)ServiceLocator.Locator.Resolve(type);
 				initializer.InitializeLocator(ServiceLocator.Locator);
 			}
-            IAuthenticationDataProvider authenticationDataProvider = null;
+			IAuthenticationDataProvider authenticationDataProvider = null;
 			foreach (var type in AssembliesManager.LoadTypesInheritingFrom<IAuthenticationDataProviderFactory>())
 			{
 				var initializer = (IAuthenticationDataProviderFactory)ServiceLocator.Locator.Resolve(type);
@@ -548,28 +522,28 @@ namespace Http
 				ServiceLocator.Locator.Register<IAuthenticationDataProvider>(authenticationDataProvider);
 				break;
 			}
-            if (authenticationDataProvider == null)
-            {
-                ServiceLocator.Locator.Register<IAuthenticationDataProvider>(NullAuthenticationDataProvider.Instance);
-            }
-            ISessionManager sessionManager = null;
-            foreach (var type in AssembliesManager.LoadTypesInheritingFrom<ISessionManagerFactory>())
-            {
-                var initializer = (ISessionManagerFactory)ServiceLocator.Locator.Resolve(type);
-                sessionManager = initializer.CreateSessionManager();
-                ServiceLocator.Locator.Register<ISessionManager>(sessionManager);
-                break;
-            }
-            if (sessionManager == null)
-            {
-                ServiceLocator.Locator.Register<ISessionManager>(new BasicSessionManager());
-            }
-            var sessionCache = GetParameter<INodeModule>(HttpParameters.HttpSessionCache);
-            if (sessionCache != null)
-            {
-                ServiceLocator.Locator.Resolve<ISessionManager>().SetCachingEngine(sessionCache.GetParameter<ICacheEngine>(HttpParameters.CacheInstance));
+			if (authenticationDataProvider == null)
+			{
+				ServiceLocator.Locator.Register<IAuthenticationDataProvider>(NullAuthenticationDataProvider.Instance);
+			}
+			ISessionManager sessionManager = null;
+			foreach (var type in AssembliesManager.LoadTypesInheritingFrom<ISessionManagerFactory>())
+			{
+				var initializer = (ISessionManagerFactory)ServiceLocator.Locator.Resolve(type);
+				sessionManager = initializer.CreateSessionManager();
+				ServiceLocator.Locator.Register<ISessionManager>(sessionManager);
+				break;
+			}
+			if (sessionManager == null)
+			{
+				ServiceLocator.Locator.Register<ISessionManager>(new BasicSessionManager());
+			}
+			var sessionCache = GetParameter<INodeModule>(HttpParameters.HttpSessionCache);
+			if (sessionCache != null)
+			{
+				ServiceLocator.Locator.Resolve<ISessionManager>().SetCachingEngine(sessionCache.GetParameter<ICacheEngine>(HttpParameters.CacheInstance));
 
-            }
+			}
 			if (_routingHandler == null) return;
 			foreach (var type in AssembliesManager.LoadTypesInheritingFrom<IRouteInitializer>())
 			{
@@ -610,100 +584,145 @@ namespace Http
 			}
 		}
 
-		static readonly Hashtable _respStatus = new Hashtable();
-		private readonly IFilterHandler _filtersHandler;
 
-		static HttpModule()
-		{
-			_respStatus.Add(200, "Ok");
-			_respStatus.Add(201, "Created");
-			_respStatus.Add(202, "Accepted");
-			_respStatus.Add(204, "No Content");
-
-			_respStatus.Add(301, "Moved Permanently");
-			_respStatus.Add(302, "Redirection");
-			_respStatus.Add(304, "Not Modified");
-
-			_respStatus.Add(400, "Bad Request");
-			_respStatus.Add(401, "Unauthorized");
-			_respStatus.Add(403, "Forbidden");
-			_respStatus.Add(404, "Not Found");
-
-			_respStatus.Add(500, "Internal Server Error");
-			_respStatus.Add(501, "Not Implemented");
-			_respStatus.Add(502, "Bad Gateway");
-			_respStatus.Add(503, "Service Unavailable");
-		}
-
-
-
+		/*
 		private void WriteException(IHttpContext context, HttpException httpException)
 		{
-			var sd = "Unknown error";
-			if (_respStatus.Contains(httpException.Code))
-			{
-				sd = (string)_respStatus[httpException.Code];
-			}
-			var errorModel = new ErrorDescriptor()
-			{
-				Exception = httpException,
-				HttpCode = httpException.Code,
-				ShortDescription = sd,
-				LongDescription = httpException.Message,
-				ServerType = "Node.Cs http module V." + Assembly.GetExecutingAssembly().GetName().Version
-			};
-			OutputException(errorModel, context);
+				var sd = "Unknown error";
+				if (_respStatus.Contains(httpException.Code))
+				{
+						sd = (string)_respStatus[httpException.Code];
+				}
+				var errorModel = new ErrorDescriptor()
+				{
+						Exception = httpException,
+						HttpCode = httpException.Code,
+						ShortDescription = sd,
+						LongDescription = httpException.Message,
+						ServerType = "Node.Cs http module V." + Assembly.GetExecutingAssembly().GetName().Version
+				};
+				OutputException(errorModel, context);
 		}
 
 		private void WriteException(IHttpContext context, int httpCode, Exception exception)
 		{
-			var sd = "Unknown error";
-			if (_respStatus.Contains(httpCode))
-			{
-				sd = (string)_respStatus[httpCode];
-			}
-			var errorModel = new ErrorDescriptor()
-			{
-				Exception = exception,
-				HttpCode = httpCode,
-				ShortDescription = sd,
-				LongDescription = exception.Message,
-				ServerType = "Node.Cs http module V." + Assembly.GetExecutingAssembly().GetName().Version
-			};
-			OutputException(errorModel, context);
+				var sd = "Unknown error";
+				if (_respStatus.Contains(httpCode))
+				{
+						sd = (string)_respStatus[httpCode];
+				}
+				var errorModel = new ErrorDescriptor()
+				{
+						Exception = exception,
+						HttpCode = httpCode,
+						ShortDescription = sd,
+						LongDescription = exception.Message,
+						ServerType = "Node.Cs http module V." + Assembly.GetExecutingAssembly().GetName().Version
+				};
+				OutputException(errorModel, context);
 		}
 
 		private void OutputException(ErrorDescriptor errorModel, IHttpContext context)
 		{
-			var es = _errorPageString;
-			es = es.Replace("{SERVER_TYPE}", errorModel.ServerType);
-			es = es.Replace("{HTTP_CODE}", errorModel.HttpCode.ToString());
-			es = es.Replace("{SHORT_DESCRIPTION}", errorModel.ShortDescription);
-			es = es.Replace("{LONG_DESCRIPTION}", errorModel.LongDescription);
-			es = es.Replace("{STACK_TRACE}", errorModel.HttpCode == 500 ? BuildStackTrace(errorModel.Exception) : string.Empty);
+				var es = _errorPageString;
+				es = es.Replace("{SERVER_TYPE}", errorModel.ServerType);
+				es = es.Replace("{HTTP_CODE}", errorModel.HttpCode.ToString());
+				es = es.Replace("{SHORT_DESCRIPTION}", errorModel.ShortDescription);
+				es = es.Replace("{LONG_DESCRIPTION}", errorModel.LongDescription);
+				es = es.Replace("{STACK_TRACE}", errorModel.HttpCode == 500 ? BuildStackTrace(errorModel.Exception) : string.Empty);
 
-			byte[] buffer = System.Text.Encoding.UTF8.GetBytes(es);
-			context.Response.BinaryWrite(buffer);
-			_filtersHandler.OnPostExecute(context);
-			context.Response.Close();
+				byte[] buffer = System.Text.Encoding.UTF8.GetBytes(es);
+				context.Response.BinaryWrite(buffer);
+				_filtersHandler.OnPostExecute(context);
+				context.Response.Close();
 		}
 
 		private string BuildStackTrace(Exception exception)
 		{
-			var result = "<hr size='3'>";
-			result += exception.GetType().Namespace + "." + exception.GetType().Name + ":" + exception.Message;
-			result += "<hr size='1'>";
-			result += "<pre>" + exception.StackTrace + "</pre>";
-			var inner = exception.InnerException;
-			while (inner != null)
-			{
-				result += "<hr size='3'>";
-				result += inner.GetType().Namespace + "." + inner.GetType().Name + ":" + inner.Message;
+				var result = "<hr size='3'>";
+				result += exception.GetType().Namespace + "." + exception.GetType().Name + ":" + exception.Message;
 				result += "<hr size='1'>";
-				result += "<pre>" + inner.StackTrace + "</pre>";
-				inner = inner.InnerException;
-			}
-			return result;
+				result += "<pre>" + exception.StackTrace + "</pre>";
+				var inner = exception.InnerException;
+				while (inner != null)
+				{
+						result += "<hr size='3'>";
+						result += inner.GetType().Namespace + "." + inner.GetType().Name + ":" + inner.Message;
+						result += "<hr size='1'>";
+						result += "<pre>" + inner.StackTrace + "</pre>";
+						inner = inner.InnerException;
+				}
+				return result;
 		}
+*/
+
+		/// <summary>
+		/// This Execute request
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="model"></param>
+		/// <param name="modelStateDictionary"></param>
+		public ICoroutineResult ExecuteRequestInternal(IHttpContext context, object model, ModelStateDictionary modelStateDictionary)
+		{
+			var executeRequestCoroutine = new ExecuteRequestCoroutine(
+					_virtualDir,
+					context, model, new ModelStateDictionary(),
+					_pathProviders, _renderers, _defaulList);
+
+			executeRequestCoroutine.Initialize();
+			return CoroutineResult.RunCoroutine(executeRequestCoroutine)
+					.WithTimeout(TimeSpan.FromSeconds(60))
+					.AndWait();/*
+            runner.StartCoroutine(executeRequestCoroutine);
+
+            var runner = ServiceLocator.Locator.Resolve<ICoroutinesManager>();
+            if (context.Request.Url == null)
+            {
+                throw new HttpException(500, string.Format("Missing url."));
+            }
+            string requestPath;
+
+            if (context.Request.Url.IsAbsoluteUri)
+            {
+                requestPath = context.Request.Url.LocalPath.Trim();
+            }
+            else
+            {
+                requestPath = context.Request.Url.ToString().Trim();
+            }
+
+            var relativePath = requestPath;
+            if (requestPath.StartsWith(_virtualDir.TrimEnd('/')))
+            {
+                relativePath = requestPath.Substring(_virtualDir.Length - 1);
+            }
+
+            for (int index = 0; index < _pathProviders.Count; index++)
+            {
+                var pathProvider = _pathProviders[index];
+                var isDir = false;
+                if (pathProvider.Exists(relativePath, out isDir))
+                {
+                    var renderer = FindRenderer(ref relativePath, pathProvider, isDir);
+                    if (renderer == null)
+                    {
+                        runner.StartCoroutine(new StaticItemCoroutine(
+                            relativePath, pathProvider, context,
+                            HttpListenerExceptionHandler));
+                    }
+                    else
+                    {
+                        runner.StartCoroutine(new RenderizableItemCoroutine(
+                            renderer,
+                            relativePath, pathProvider, context,
+                            HttpListenerExceptionHandler,
+                            model, modelStateDictionary));
+                    }
+                    return;
+                }
+            }
+            throw new HttpException(404, string.Format("Not found '{0}'.", context.Request.Url));*/
+		}
+
 	}
 }

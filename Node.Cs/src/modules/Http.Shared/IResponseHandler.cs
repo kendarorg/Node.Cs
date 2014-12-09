@@ -12,6 +12,8 @@
 // OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ===========================================================
 
+using System.Collections.Generic;
+using CoroutinesLib.Shared;
 using Http.Shared.Contexts;
 using Http.Shared.Controllers;
 
@@ -19,7 +21,7 @@ namespace Http.Shared
 {
 	public interface IResponseHandler
 	{
-		void Handle(IHttpContext context, IResponse response);
+		IEnumerable<ICoroutineResult> Handle(IHttpContext context, IResponse response);
 		bool CanHandle(IResponse response);
 	}
 }

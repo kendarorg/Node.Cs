@@ -33,17 +33,15 @@ namespace Http.Coroutines
 	{
 		private readonly RouteInstance _match;
 		private readonly IControllerWrapperInstance _controller;
-		private readonly Func<Exception, IHttpContext, bool> _specialHandler;
 		private readonly IHttpContext _context;
 		private readonly IConversionService _conversionService;
 
-		public RoutedItemCoroutine(RouteInstance match, IControllerWrapperInstance controllerInstance, IHttpContext context, Func<Exception, IHttpContext, bool> specialHandler, IConversionService conversionService, object model)
+		public RoutedItemCoroutine(RouteInstance match, IControllerWrapperInstance controllerInstance, IHttpContext context, IConversionService conversionService, object model)
 		{
 			InstanceName = "RouteItem(" + string.Join(",", match.Parameters.Keys) + ")";
 			_match = match;
 			_context = context;
 			_controller = controllerInstance;
-			_specialHandler = specialHandler;
 			_conversionService = conversionService;
 		}
 
@@ -90,7 +88,7 @@ namespace Http.Coroutines
 			foreach (var method in methods)
 			{
 				if (TryInvoke(method, allParams, _controller.Instance, hasConverter, _context, false,
-					out methResult))
+						out methResult))
 				{
 					methodInvoked = true;
 					break;
@@ -105,9 +103,19 @@ namespace Http.Coroutines
 		}
 
 		private IEnumerator<IResponse> _enumerableResult;
+		private bool _iInitializedSession = false;
 
 		public override IEnumerable<ICoroutineResult> OnCycle()
 		{
+			if (_context.Session == null)
+			{
+				var sessionManager = ServiceLocator.Locator.Resolve<ISessionManager>();
+				if (sessionManager != null)
+				{
+					_iInitializedSession = true;
+					sessionManager.InitializeSession(_context);
+				}
+			}
 			if (_enumerableResult.MoveNext())
 			{
 				var result = _enumerableResult.Current as WaitResponse;
@@ -121,11 +129,26 @@ namespace Http.Coroutines
 					ServiceLocator.Locator.Release(_controller.Instance.Instance);
 
 					var httpModule = ServiceLocator.Locator.Resolve<HttpModule>();
-					httpModule.HandleResponse(_context, response);
+					foreach (var item in httpModule.HandleResponse(_context, response))
+					{
+						yield return item;
+					}
 				}
 			}
 			else
 			{
+				if (_iInitializedSession)
+				{
+					if (_context.Session != null)
+					{
+						var sessionManager = ServiceLocator.Locator.Resolve<ISessionManager>();
+						sessionManager.SaveSession(_context);
+					}
+				}
+				if (_context.Parent == null)
+				{
+					_context.Response.Close();
+				}
 				TerminateElaboration();
 			}
 
@@ -166,16 +189,26 @@ namespace Http.Coroutines
 			{
 				ServiceLocator.Locator.Release(_controller.Instance.Instance);
 			}
+			if (_iInitializedSession)
+			{
+				if (_context.Session != null)
+				{
+					var sessionManager = ServiceLocator.Locator.Resolve<ISessionManager>();
+					sessionManager.SaveSession(_context);
+				}
+			}
+			if (_context.Parent == null)
+			{
+				_context.Response.Close();
+			}
 
-			if (_specialHandler != null) _specialHandler(exception, _context);
-
-			return true;
+			throw exception;
 		}
 
 		private bool TryInvoke(MethodWrapperDescriptor method,
-			Dictionary<string, object> allParams,
-			ClassWrapper.ClassWrapper controllerWrapper, bool hasConverter,
-			IHttpContext context, bool isChildRequest, out object methResult)
+				Dictionary<string, object> allParams,
+				ClassWrapper.ClassWrapper controllerWrapper, bool hasConverter,
+				IHttpContext context, bool isChildRequest, out object methResult)
 		{
 			try
 			{
@@ -226,10 +259,10 @@ namespace Http.Coroutines
 					{
 						var parType = par.ParameterType;
 						if (!parType.IsValueType &&
-								!parType.IsArray &&
-								!(parType == typeof(string)) &&
-								!parType.IsEnum &&
-								!(parType == typeof(object)))
+										!parType.IsArray &&
+										!(parType == typeof(string)) &&
+										!parType.IsEnum &&
+										!(parType == typeof(object)))
 						{
 							try
 							{
