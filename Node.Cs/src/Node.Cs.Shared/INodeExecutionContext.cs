@@ -1,11 +1,12 @@
 ﻿using System;
 using ConcurrencyHelpers.Containers;
+using GenericHelpers;
 
 namespace Node.Cs
 {
 	public interface INodeExecutionContext
 	{
-		string[] Args { get; }
+		CommandLineParser Args { get; }
 		Version Version { get; }
 		string NodeCsExecutablePath { get; }
 		LockFreeItem<string> NodeCsExtraBinDirecotry { get; }

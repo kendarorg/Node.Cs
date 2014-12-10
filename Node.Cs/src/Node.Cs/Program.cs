@@ -1,5 +1,6 @@
 ﻿
 using Castle.Windsor;
+using GenericHelpers;
 
 namespace Node.Cs
 {
@@ -7,8 +8,11 @@ namespace Node.Cs
 	{
 		static void Main(string[] args)
 		{
+			const string helpMessage = "Node.cs -execute file.cs -service serviceName";
+			string[] allowMultiple = {"execute"};
+			var clp = new CommandLineParser(args, helpMessage, null, ';', allowMultiple);
 			var container = new WindsorContainer();
-			var entryPoint = new NodeCsEntryPoint(args, container);
+			var entryPoint = new NodeCsEntryPoint(clp, container);
 			entryPoint.Run();
 		}
 	}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
+using GenericHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Node.Cs.CommandHandlers;
@@ -27,7 +28,7 @@ namespace Node.Cs
 		{
 			//Setup
 			var console = MockOf<INodeConsole>();
-			SetupTarget(new NodeCsEntryPointForTest(new string[] { }, Container, NodeCsEntryPointForTest.Once));
+			SetupTarget(new NodeCsEntryPointForTest(new CommandLineParser(new string[0], ""), Container, NodeCsEntryPointForTest.Once));
 
 			//Act
 			Target.Run();
@@ -40,11 +41,12 @@ namespace Node.Cs
 		public void Constructor_ShouldInitializeExecutionContext()
 		{
 			//Setup
-			SetupTarget(new NodeCsEntryPointForTest(new[]
+			var clp = new CommandLineParser(new[]
 			{
-				"par1",
-				"par2"
-			}, Container, NodeCsEntryPointForTest.Once));
+				"-par1",
+				"-par2"
+			}, "");
+			SetupTarget(new NodeCsEntryPointForTest(clp, Container, NodeCsEntryPointForTest.Once));
 
 			//Act
 			Target.Run();
@@ -54,8 +56,8 @@ namespace Node.Cs
 
 			Assert.IsNotNull(context);
 
-			SetsAssert.Contains(context.Args, "par1", 0);
-			SetsAssert.Contains(context.Args, "par2", 1);
+			Assert.IsTrue(clp.Has("par1"));
+			Assert.IsTrue(clp.Has("par2"));
 
 			Assert.AreEqual(Path.GetFileName(context.NodeCsExecutablePath), "node.cs.lib.dll", true);
 		}
@@ -67,7 +69,7 @@ namespace Node.Cs
 			const string command = "do stuff";
 			var console = MockOf<INodeConsole>();
 			console.Setup(c => c.ReadLine()).Returns(command);
-			SetupTarget(new NodeCsEntryPointForTest(new string[] { }, Container, NodeCsEntryPointForTest.Once));
+			SetupTarget(new NodeCsEntryPointForTest(new CommandLineParser(new string[0], ""), Container, NodeCsEntryPointForTest.Once));
 
 			//Act
 			Target.Run();
@@ -90,20 +92,20 @@ namespace Node.Cs
 			var obtainedLines = new List<string>();
 
 			var expected = new Exception(exceptionMessage);
-			
+
 			commandHandler.Setup(a => a.Run(command)).Throws(expected);
 			console.Setup(c => c.ReadLine()).Returns(command);
-			console.Setup(c => c.WriteLine(It.IsAny<string>(),It.IsAny<object[]>()))
-				.Callback<string,object[]>((s,p) => obtainedLines.Add(string.Format(s,p)));
+			console.Setup(c => c.WriteLine(It.IsAny<string>(), It.IsAny<object[]>()))
+				.Callback<string, object[]>((s, p) => obtainedLines.Add(string.Format(s, p)));
 
-			var target = new NodeCsEntryPointForTest(new string[] { }, Container, NodeCsEntryPointForTest.Once);
+			var target = new NodeCsEntryPointForTest(new CommandLineParser(new string[0], ""), Container, NodeCsEntryPointForTest.Once);
 
 			//Act
 			target.Run();
 
 			//Verify
-			console.Verify(a => a.WriteLine(It.IsAny<string>(), It.IsAny<object[]>()),Times.Once);
-			Assert.AreEqual(1,obtainedLines.Count);
+			console.Verify(a => a.WriteLine(It.IsAny<string>(), It.IsAny<object[]>()), Times.Once);
+			Assert.AreEqual(1, obtainedLines.Count);
 			var line = obtainedLines.First();
 			Assert.IsTrue(line.Contains(exceptionMessage));
 			Assert.IsTrue(line.Contains(command));
@@ -115,8 +117,8 @@ namespace Node.Cs
 		{
 			//Setup
 			const bool runAsService = true;
-			var console = MockOf<INodeConsole>();
-			SetupTarget(new NodeCsEntryPointForTest(new string[] { }, Container, NodeCsEntryPointForTest.Once));
+			InitializeMock<INodeConsole>();
+			SetupTarget(new NodeCsEntryPointForTest(new CommandLineParser(new string[0], ""), Container, NodeCsEntryPointForTest.Once));
 
 			//Act
 			Target.Run(runAsService);

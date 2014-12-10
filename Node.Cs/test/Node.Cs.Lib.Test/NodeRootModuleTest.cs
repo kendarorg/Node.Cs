@@ -26,27 +26,23 @@ namespace Node.Cs
 		[TestMethod]
 		public void PreInitialize_ShouldRegisterRequiredCommands()
 		{
-			//Setup
-			var registeredCommands = new List<CommandDescriptor>();
-			SetupTarget();
-			var commandsHandler = MockOf<IUiCommandsHandler>();
-			commandsHandler.Setup(a => a.RegisterCommand(It.IsAny<CommandDescriptor>()))
-				.Callback((CommandDescriptor cd) => registeredCommands.Add(cd));
-
-			//Act
-			Target.PreInitialize();
-
-			//Verify
-			Assert.AreEqual(4, registeredCommands.Count);
-
 			RunSeries(
 				(item) =>
 				{
-					var position = SetsAssert.Contains<string, CommandDescriptor>(registeredCommands, item, (a) => a.CommandId);
-					var selected = registeredCommands[position];
-					Assert.IsNotNull(selected);
-					Assert.IsNotNull(selected.CalledFunction);
-					Assert.IsFalse(string.IsNullOrWhiteSpace(selected.ShortHelp));
+					//Setup
+					CommandDescriptor registeredCommand = null;
+					SetupTarget();
+					var commandsHandler = MockOf<IUiCommandsHandler>();
+					commandsHandler.Setup(a => a.RegisterCommand(It.IsAny<CommandDescriptor>()))
+						.Callback((CommandDescriptor cd) => registeredCommand = cd);
+
+					//Act
+					Target.PreInitialize();
+
+					//Verify
+					Assert.IsNotNull(registeredCommand);
+					Assert.IsNotNull(registeredCommand.CalledFunction);
+					Assert.IsFalse(string.IsNullOrWhiteSpace(registeredCommand.ShortHelp));
 				},
 				_commands);
 

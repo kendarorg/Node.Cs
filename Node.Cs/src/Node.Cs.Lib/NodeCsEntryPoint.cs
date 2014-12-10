@@ -1,5 +1,6 @@
 ﻿using Castle.MicroKernel.Registration;
 using Castle.Windsor;
+using GenericHelpers;
 using Node.Cs.CommandHandlers;
 using Node.Cs.Consoles;
 using System;
@@ -14,7 +15,7 @@ namespace Node.Cs
 		private readonly WindsorContainer _container;
 		private readonly NodeExecutionContext _executionContext;
 
-		public NodeCsEntryPoint(string[] args, WindsorContainer container)
+		public NodeCsEntryPoint(CommandLineParser args, WindsorContainer container)
 		{
 			var asm = Assembly.GetCallingAssembly();
 			var uri = new UriBuilder(asm.CodeBase);
@@ -88,6 +89,12 @@ namespace Node.Cs
 			_container.Register(
 				Component.For<IBasicNodeCommands>()
 					.ImplementedBy<BasicNodeCommands>()
+					.LifestyleSingleton()
+					.OnlyNewServices());
+
+			_container.Register(
+				Component.For<ICommandParser>()
+					.ImplementedBy<BasicCommandParser>()
 					.LifestyleSingleton()
 					.OnlyNewServices());
 

@@ -8,6 +8,26 @@ using Moq;
 
 namespace Node.Cs.Test
 {
+	public abstract class TestBase<T, TI> : TestBase
+		where T : class, TI
+		where TI : class
+	{
+		protected TI Target { get; private set; }
+		protected virtual void SetupTarget(T target = default(T))
+		{
+			if (target == default(T))
+			{
+				Container.Register(
+					Component.For<TI>().ImplementedBy<T>().LifestyleSingleton());
+				Target = Container.Resolve<TI>();
+			}
+			else
+			{
+				Target = target;
+			}
+		}
+	}
+
 	public abstract class TestBase<T> : TestBase where T : class
 	{
 		protected T Target { get; private set; }
@@ -114,6 +134,37 @@ namespace Node.Cs.Test
 				value = string.Empty;
 			}
 			fi.SetValue(exception, message + value);
+		}
+
+
+		protected Tuple<TA, TB, TC> Tuple<TA, TB, TC>(TA item1, TB item2, TC item3)
+		{
+			return new Tuple<TA, TB, TC>(item1, item2, item3);
+		}
+
+		[DebuggerStepThrough]
+		[DebuggerNonUserCode]
+		protected void RunSeries<TA, TB, TC>(Action<TA, TB, TC> action, params Tuple<TA, TB, TC>[] pars)
+		{
+			TA par1 = default(TA);
+			TB par2 = default(TB);
+			TC par3 = default(TC);
+			try
+			{
+				foreach (var par in pars)
+				{
+					TestInitialize();
+					par1 = par.Item1;
+					par2 = par.Item2;
+					par3 = par.Item3;
+					action.Invoke(par1, par2, par3);
+				}
+			}
+			catch (Exception ex)
+			{
+				AddMessage(ex, string.Format("\r\nExecuting with parameters '{0}', '{1}', '{2}'.", par1, par2, par3));
+				throw;
+			}
 		}
 	}
 }

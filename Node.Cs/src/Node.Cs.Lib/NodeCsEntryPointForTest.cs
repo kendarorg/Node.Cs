@@ -1,4 +1,5 @@
 ﻿using Castle.Windsor;
+using GenericHelpers;
 
 namespace Node.Cs
 {
@@ -7,7 +8,7 @@ namespace Node.Cs
 		public const int Once = 1;
 		public int CyclesToRun { get; set; }
 
-		public NodeCsEntryPointForTest(string[] args, WindsorContainer container, int cyclesToRun) : 
+		public NodeCsEntryPointForTest(CommandLineParser args, WindsorContainer container, int cyclesToRun) : 
 			base(args, container)
 		{
 			CyclesToRun = cyclesToRun;

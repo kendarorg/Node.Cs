@@ -1,12 +1,13 @@
 ﻿using ConcurrencyHelpers.Containers;
 using System;
+using GenericHelpers;
 
 namespace Node.Cs
 {
 	public class NodeExecutionContext : INodeExecutionContext
 	{
 		public NodeExecutionContext(
-			string[] args,
+			CommandLineParser args,
 			Version version,
 			string nodeCsExecutablePath,
 			string nodeCsExtraBinDirecotry,
@@ -18,7 +19,7 @@ namespace Node.Cs
 			NodeCsExtraBinDirecotry = new LockFreeItem<string>(nodeCsExtraBinDirecotry);
 			CurrentDirectory = new LockFreeItem<string>(currentDirectory);
 		}
-		public string[] Args { get; private set; }
+		public CommandLineParser Args { get; private set; }
 		public Version Version { get; private set; }
 		public string NodeCsExecutablePath { get; private set; }
 		public LockFreeItem<string> NodeCsExtraBinDirecotry { get; private set; }
