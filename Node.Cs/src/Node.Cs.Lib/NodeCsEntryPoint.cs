@@ -1,5 +1,6 @@
 ﻿using Castle.MicroKernel.Registration;
 using Castle.Windsor;
+using Node.Cs.CommandHandlers;
 using Node.Cs.Consoles;
 using System;
 using System.Reflection;
@@ -8,6 +9,8 @@ namespace Node.Cs
 {
 	public class NodeCsEntryPoint : INodeCsEntryPoint
 	{
+		public const string COMMAND_ERROR_FORMAT = "Error executing command '{0}'. Error was: '{1}'";
+
 		private readonly WindsorContainer _container;
 		private readonly NodeExecutionContext _executionContext;
 
@@ -38,6 +41,11 @@ namespace Node.Cs
 			}
 		}
 
+		protected virtual bool ShouldContinueRunning()
+		{
+			return true;
+		}
+
 		private static void RunAsService()
 		{
 			throw new NotImplementedException("Cannot run Node.Cs as a service");
@@ -47,16 +55,19 @@ namespace Node.Cs
 		{
 			var commandsHandler = _container.Resolve<IUiCommandsHandler>();
 			var console = _container.Resolve<INodeConsole>();
-			while (true)
+			while (ShouldContinueRunning())
 			{
 				var command = console.ReadLine();
 				if (!string.IsNullOrWhiteSpace(command))
 				{
-					if (command.ToLowerInvariant().Trim() == "exit")
+					try
 					{
-						return;
+						commandsHandler.Run(command);
 					}
-					commandsHandler.Run(command);
+					catch (Exception ex)
+					{
+						console.WriteLine(COMMAND_ERROR_FORMAT, command, ex.Message);
+					}
 				}
 			}
 		}
@@ -74,12 +85,21 @@ namespace Node.Cs
 
 		private void SetupMainDependencies()
 		{
-			var nodeConsole = new BasicNodeConsole();
-			var commandHandler = new UiCommandsHandler();
+			_container.Register(
+				Component.For<IBasicNodeCommands>()
+					.ImplementedBy<BasicNodeCommands>()
+					.LifestyleSingleton()
+					.OnlyNewServices());
 
 			_container.Register(
 				Component.For<INodeConsole>()
-					.Instance(nodeConsole)
+					.ImplementedBy<BasicNodeConsole>()
+					.LifestyleSingleton()
+					.OnlyNewServices());
+
+			_container.Register(
+				Component.For<IUiCommandsHandler>()
+					.ImplementedBy<UiCommandsHandler>()
 					.LifestyleSingleton()
 					.OnlyNewServices());
 
@@ -87,12 +107,6 @@ namespace Node.Cs
 				Component.For<INodeCsEntryPoint>()
 					.Instance(this)
 					.LifestyleSingleton());
-
-			_container.Register(
-				Component.For<IUiCommandsHandler>()
-					.Instance(commandHandler)
-					.LifestyleSingleton()
-					.OnlyNewServices());
 
 			_container.Register(
 				Classes.FromThisAssembly()

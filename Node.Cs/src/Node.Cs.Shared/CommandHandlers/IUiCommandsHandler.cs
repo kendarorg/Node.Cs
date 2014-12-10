@@ -1,5 +1,5 @@
 ﻿
-namespace Node.Cs
+namespace Node.Cs.CommandHandlers
 {
 	public interface IUiCommandsHandler
 	{

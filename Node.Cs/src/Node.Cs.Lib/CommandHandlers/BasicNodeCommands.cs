@@ -1,24 +1,36 @@
 ﻿
 using System;
+using Node.Cs.Consoles;
 
 namespace Node.Cs.CommandHandlers
 {
-	public static class BasicNodeCommands
+	public class BasicNodeCommands:IBasicNodeCommands
 	{
+		private readonly INodeConsole _console;
+
+		public BasicNodeCommands(INodeConsole console)
+		{
+			_console = console;
+		}
 
 		/// <summary>
 		/// Runs a .cs file
 		/// </summary>
 		/// <param name="context"></param>
 		/// <param name="path"></param>
-		public static void Run(NodeExecutionContext context, string path)
+		public void Run(NodeExecutionContext context, string path)
 		{
 			throw new NotImplementedException();
 		}
 
-		public static void Echo(NodeExecutionContext context, string message)
+		public void Echo(NodeExecutionContext context, string message)
 		{
-			throw new NotImplementedException();
+			_console.WriteLine(message);
+		}
+
+		public void Exit(NodeExecutionContext context, int errorCode)
+		{
+			Environment.Exit(errorCode);
 		}
 	}
 }

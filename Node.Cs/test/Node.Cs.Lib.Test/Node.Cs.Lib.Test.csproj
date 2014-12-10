@@ -91,6 +91,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="NodeCsEntryPointTest.cs" />
+    <Compile Include="NodeRootModuleTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

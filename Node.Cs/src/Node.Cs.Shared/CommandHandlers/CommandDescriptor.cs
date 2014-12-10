@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Node.Cs
+namespace Node.Cs.CommandHandlers
 {
 	public class CommandDescriptor
 	{

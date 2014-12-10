@@ -5,22 +5,28 @@ namespace Node.Cs
 {
 	public class NodeRootModule : INodeModule
 	{
-		public NodeRootModule(IUiCommandsHandler commandsHandler)
+		private readonly IUiCommandsHandler _commandsHandler;
+		private readonly IBasicNodeCommands _nodeCommands;
+
+		public NodeRootModule(IUiCommandsHandler commandsHandler,IBasicNodeCommands basicNodeCommands)
 		{
 			_commandsHandler = commandsHandler;
+			_nodeCommands = basicNodeCommands;
 		}
-		public IUiCommandsHandler _commandsHandler;
 
 		public void PreInitialize()
 		{
 			_commandsHandler.RegisterCommand(
 				new CommandDescriptor(
-					"run", new Action<NodeExecutionContext, string>(BasicNodeCommands.Run), "run [c# file]"));
-
+					"run", new Action<NodeExecutionContext, string>(_nodeCommands.Run), "run [c# file]"));
 
 			_commandsHandler.RegisterCommand(
 				new CommandDescriptor(
-					"echo", new Action<NodeExecutionContext, string>(BasicNodeCommands.Echo), "echo [Message]"));
+					"echo", new Action<NodeExecutionContext, string>(_nodeCommands.Echo), "echo [Message]"));
+
+			_commandsHandler.RegisterCommand(
+				new CommandDescriptor(
+					"exit", new Action<NodeExecutionContext,int>(_nodeCommands.Exit), "exit (errorCode)"));
 
 			_commandsHandler.RegisterCommand(
 				new CommandDescriptor(

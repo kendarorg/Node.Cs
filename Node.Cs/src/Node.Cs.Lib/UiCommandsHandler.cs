@@ -1,4 +1,6 @@
-﻿namespace Node.Cs
+﻿using Node.Cs.CommandHandlers;
+
+namespace Node.Cs
 {
 	public class UiCommandsHandler : IUiCommandsHandler
 	{
