@@ -79,7 +79,7 @@
     <Compile Include="Consoles\BasicNodeConsole.cs" />
     <Compile Include="NodeCsEntryPointForTest.cs" />
     <Compile Include="NodeRootModule.cs" />
-    <Compile Include="UiCommandsHandler.cs" />
+    <Compile Include="CommandHandlers\UiCommandsHandler.cs" />
     <Compile Include="NodeCsEntryPoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

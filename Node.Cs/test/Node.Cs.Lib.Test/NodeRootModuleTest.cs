@@ -9,6 +9,12 @@ namespace Node.Cs
 	[TestClass]
 	public class NodeRootModuleTest : TestBase<NodeRootModule>
 	{
+        [TestInitialize]
+        public override void TestInitialize()
+        {
+            base.TestInitialize();
+        }
+
 		private static readonly string[] _commands =
 		{
 			"run", 
@@ -16,13 +22,7 @@ namespace Node.Cs
 			"echo", 
 			"help"
 		};
-
-		[TestInitialize]
-		public override void TestInitialize()
-		{
-			base.TestInitialize();
-		}
-
+        
 		[TestMethod]
 		public void PreInitialize_ShouldRegisterRequiredCommands()
 		{

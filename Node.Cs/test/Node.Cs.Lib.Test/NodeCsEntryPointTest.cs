@@ -18,7 +18,7 @@ namespace Node.Cs
 		[TestInitialize]
 		public override void TestInitialize()
 		{
-			base.TestInitialize();
+            base.TestInitialize();
 			InitializeMock<INodeConsole>();
 			InitializeMock<IUiCommandsHandler>();
 		}

@@ -90,6 +90,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="UiCommandsHandlerTest.cs" />
     <Compile Include="BasicCommandParserTest.cs" />
     <Compile Include="NodeCsEntryPointTest.cs" />
     <Compile Include="NodeRootModuleTest.cs" />
