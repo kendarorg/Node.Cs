@@ -18,17 +18,17 @@ namespace Node.Cs
 		}
 
 		[TestMethod]
-		public void Parse_ShouldCreateTheCorrectResult()
+		public void Parse_ShouldCorrectlyWork_WithStandardPatterns()
 		{
 			var commands = new[]
 			{
 				Tuple("do","do",""),
 				Tuple(" do\r\n","do",""),
 				Tuple("\tdo\f","do",""),
-				/*Tuple("do test.cs","do","test.cs"),
+				Tuple("do test.cs","do","test.cs"),
 				Tuple("do multiple parameters","do","multiple#parameters"),
 				Tuple("do \"string with double commas\" other","do","\"string with double commas\"#other"),
-				Tuple("do \"string with \\\" stuff inside\" other","do","\"string with \\\" stuff inside\"#other"),*/
+				Tuple("do \"string with \\\" stuff inside\" other","do","\"string with \\\" stuff inside\"#other"),
 			};
 			RunSeries(
 				(item1, item2, item3) =>

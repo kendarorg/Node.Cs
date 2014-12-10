@@ -29,6 +29,7 @@ namespace Node.Cs.CommandHandlers
 			bool inString = false;
 			item = item.Trim();
 			int currentItem = -1;
+            char stringDelimiter = '\0';
 			string lastItem = string.Empty;
 			for (int index = 0; index < item.Length; index++)
 			{
@@ -39,7 +40,10 @@ namespace Node.Cs.CommandHandlers
 					{
 						if (index > 1 && !IsSeparator(item[index - 1]))
 						{
-							preParsedBlocks.Add(lastItem);
+                            if (lastItem.Length > 0)
+                            {
+                                preParsedBlocks.Add(lastItem);
+                            }
 							lastItem = string.Empty;
 						}
 						continue;
@@ -48,15 +52,33 @@ namespace Node.Cs.CommandHandlers
 						(index > 1 && IsStringDelimiter(item[index - 1], ch)) ||
 						(index == 0 && IsStringDelimiter(' ', ch)))
 					{
-						
+                        stringDelimiter = ch;
+                        lastItem = ch.ToString();
+                        inString = true;
 					}
 					else
 					{
 						lastItem += ch;
 					}
-				}
+                }
+                else if (
+                        (index > 1 && IsStringDelimiter(item[index - 1], ch)) ||
+                        (index == 0 && IsStringDelimiter(' ', ch)))
+                {
+                    lastItem += ch;
+                    inString = false;
+                }
+                else
+                {
+                    lastItem += ch;
+
+                }
 
 			}
+            if (lastItem.Length > 0)
+            {
+                preParsedBlocks.Add(lastItem);
+            }
 			var result = new ParsedCommand();
 			for (int index = 0; index < preParsedBlocks.Count; index++)
 			{
