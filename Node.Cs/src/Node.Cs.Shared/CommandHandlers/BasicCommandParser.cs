@@ -17,12 +17,7 @@ namespace Node.Cs.CommandHandlers
         {
             return (ch == '\"' || ch == '\'') && prevCh != '\\';
         }
-
-        private static bool IsLetter(char ch)
-        {
-            return !IsSeparator(ch) && !IsStringDelimiter(' ', ch);
-        }
-
+		
         public ParsedCommand Parse(string item)
         {
             
