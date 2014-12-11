@@ -13,6 +13,7 @@
 // ===========================================================
 
 
+using System;
 
 namespace Node.Cs.CommandHandlers
 {
@@ -36,6 +37,21 @@ namespace Node.Cs.CommandHandlers
 		/// <param name="context"></param>
 		/// <param name="command"></param>
 		/// <param name="subcommand"></param>
-		void Help(NodeExecutionContext context, string command = null, string subcommand = null);
+		void Help(INodeExecutionContext context, string command = null, string subcommand = null);
+
+		/// <summary>
+		/// Unregister a command with the given parameter types and name
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="paramTypes"></param>
+		void UnregisterCommand(string name,params Type[] paramTypes);
+
+		/// <summary>
+		/// Verify if a command exists with the given parameters types and name
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="paramTypes"></param>
+		/// <returns></returns>
+		bool ContainsCommand(string name, params Type[] paramTypes);
 	}
 }

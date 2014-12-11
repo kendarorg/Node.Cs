@@ -15,56 +15,123 @@
 
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using Node.Cs.CommandHandlers;
 using Node.Cs.Consoles;
+using Node.Cs.Exceptions;
+using Node.Cs.Mocks;
 using Node.Cs.Test;
 using Castle.MicroKernel.Registration;
 
 namespace Node.Cs
 {
-    [TestClass]
-    public class UiCommandsHandlerTest : TestBase<UiCommandsHandler, IUiCommandsHandler>
-    {
-        [TestInitialize]
-        public override void TestInitialize()
-        {
-            base.TestInitialize();
-            InitializeMock<INodeConsole>();
-            Container.Register(
-                Component.For<ICommandParser>().
-                ImplementedBy<BasicCommandParser>());
-        }
+	[TestClass]
+	public class UiCommandsHandlerTest : TestBase<UiCommandsHandler, IUiCommandsHandler>
+	{
+		private Mock<IUiCommandsHandlerTestMock> _handlerMock;
+		private IUiCommandsHandlerTestMock _handler;
 
-        [Ignore]
-        [TestMethod]
-        public void RegisterCommand_ShouldInsertCommands()
-        {
+		[TestInitialize]
+		public override void TestInitialize()
+		{
+			base.TestInitialize();
+			InitializeMock<INodeConsole>();
+			Container.Register(
+					Component.For<ICommandParser>().
+					ImplementedBy<BasicCommandParser>());
+			_handlerMock = MockOf<IUiCommandsHandlerTestMock>();
+			_handler = Container.Resolve<IUiCommandsHandlerTestMock>();
+		}
 
-            /*var commands = new[]
-            {
-                Tuple("do","do",""),
-                Tuple(" do\r\n","do",""),
-                Tuple("\tdo\f","do",""),
-                Tuple("do test.cs","do","test.cs"),
-                Tuple("do multiple parameters","do","multiple#parameters"),
-                Tuple("do \"string with double commas\" other","do","\"string with double commas\"#other"),
-                Tuple("do \"string with \\\" stuff inside\" other","do","\"string with \\\" stuff inside\"#other"),
-            };
-            RunSeries(
-                (item1, item2, item3) =>
-                {
-                    //Setup
-                    SetupTarget();
+		[TestMethod]
+		public void RegisterCommand_ShouldBeAbleToRegisterAndUnregisterCommands()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
 
-                    //Act
-                    var result = Target.Parse(item1);
+			//Act
+			Target.RegisterCommand(cd);
 
-                    //Verify
-                    var pars = string.Join("#", result.Parameters);
-                    Assert.AreEqual(item2, result.Command);
-                    Assert.AreEqual(item3, pars);
-                },
-                commands);*/
-        }
-    }
+			//Verify
+			Assert.IsTrue(Target.ContainsCommand("test", new Type[0]));
+		}
+
+		[TestMethod]
+		public void UnRegisterCommand_ShouldBeAbleToUnregisterCommands()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
+			Target.RegisterCommand(cd);
+
+			//Act
+			Target.UnregisterCommand("test", new Type[0]);
+
+			//Verify
+			Assert.IsFalse(Target.ContainsCommand("test", new Type[0]));
+		}
+
+
+		[TestMethod]
+		public void RegisterCommand_ShouldBlockDuplicateCommands()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
+			Target.RegisterCommand(cd);
+			DuplicateCommandException result;
+
+			//Act
+			ExceptionAssert.Throws(() => Target.RegisterCommand(cd), out result);
+
+			//Verify
+			Assert.IsTrue(result.Message.Contains("test"));
+		}
+
+		[TestMethod]
+		public void Run_ShouldThrowOnMissingCommandId()
+		{
+			//Setup
+			SetupTarget();
+			MissingCommandException result;
+
+			//Act
+			ExceptionAssert.Throws(() => Target.Run("test"), out result);
+
+			//Verify
+			Assert.IsTrue(result.Message.Contains("test"));
+		}
+
+		[TestMethod]
+		public void Run_ShouldExecuteSimpleCommands()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
+			Target.RegisterCommand(cd);
+
+			//Act
+			Target.Run("test");
+
+			//Verify
+			_handlerMock.Verify(a => a.DoTest(It.IsAny<INodeExecutionContext>()), Times.Once);
+		}
+
+		[Ignore]
+		[TestMethod]
+		public void Help_ShouldShowHelp()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
+			Target.RegisterCommand(cd);
+
+			//Act
+			Target.Help(Object<INodeExecutionContext>(), "test");
+
+			//Verify
+			Assert.Fail("Should verify the help output");
+		}
+	}
 }

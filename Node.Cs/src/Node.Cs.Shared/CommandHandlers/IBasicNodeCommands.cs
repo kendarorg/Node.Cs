@@ -17,8 +17,8 @@ namespace Node.Cs.CommandHandlers
 {
 	public interface IBasicNodeCommands
 	{
-		void Run(NodeExecutionContext context, string path);
-		void Echo(NodeExecutionContext context, string message);
-		void Exit(NodeExecutionContext context, int errorCode);
+		void Run(INodeExecutionContext context, string path);
+		void Echo(INodeExecutionContext context, string message);
+		void Exit(INodeExecutionContext context, int errorCode);
 	}
 }

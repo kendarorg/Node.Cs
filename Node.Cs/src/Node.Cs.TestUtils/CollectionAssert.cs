@@ -16,7 +16,9 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Node.Cs.Test
@@ -25,7 +27,7 @@ namespace Node.Cs.Test
 	[DebuggerNonUserCode]
 	public static class SetsAssert
 	{
-		public static int Contains<T,TK>(ICollection collection, T contained, Func<TK,T> getValue, int position = -1)
+		public static int Contains<T, TK>(ICollection collection, T contained, Func<TK, T> getValue, int position = -1)
 		{
 			var enumerator = collection.GetEnumerator();
 			var currentPosition = 0;
@@ -106,6 +108,27 @@ namespace Node.Cs.Test
 			}
 			Assert.Fail("No value '{0}' found.", contained);
 			return default(T);
+		}
+
+		public static void AreEqual<TK>(IEnumerable<TK> expected, IEnumerable<TK> result)
+		{
+			// ReSharper disable once PossibleMultipleEnumeration
+			var e = expected.ToArray();
+			var r = result.ToArray();
+			if (e.Length != r.Length)
+			{
+				Assert.Fail("Expected length is '{0}' whilst result length is '{1}'.", e.Length, r.Length);
+			}
+			for (int i = 0; i < e.Length; i++)
+			{
+				var ed = e[i];
+				var rd = r[i];
+				if (ed.Equals(rd) || ed.ToString() == rd.ToString())
+				{
+					continue;
+				}
+				Assert.Fail("Item at index '{0}' differ. Expected is '{1}' whilst result is '{2}'.", i, ed, rd);
+			}
 		}
 	}
 }

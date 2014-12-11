@@ -13,39 +13,25 @@
 // ===========================================================
 
 
-
 using System;
-using Node.Cs.Consoles;
 
-namespace Node.Cs.CommandHandlers
+namespace Node.Cs.Exceptions
 {
-	public class BasicNodeCommands:IBasicNodeCommands
+	public class DuplicateCommandException:Exception
 	{
-		private readonly INodeConsole _console;
-
-		public BasicNodeCommands(INodeConsole console)
+		public DuplicateCommandException(string format,params object[] pars)
+			:base(string.Format(format,pars))
 		{
-			_console = console;
+			
 		}
+	}
 
-		/// <summary>
-		/// Runs a .cs file
-		/// </summary>
-		/// <param name="context"></param>
-		/// <param name="path"></param>
-		public void Run(INodeExecutionContext context, string path)
+	public class MissingCommandException:Exception
+	{
+		public MissingCommandException(string format, params object[] pars)
+			:base(string.Format(format,pars))
 		{
-			throw new NotImplementedException();
-		}
-
-		public void Echo(INodeExecutionContext context, string message)
-		{
-			_console.WriteLine(message);
-		}
-
-		public void Exit(INodeExecutionContext context, int errorCode)
-		{
-			Environment.Exit(errorCode);
+			
 		}
 	}
 }

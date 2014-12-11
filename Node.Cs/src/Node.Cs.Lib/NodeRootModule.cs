@@ -33,19 +33,19 @@ namespace Node.Cs
 		{
 			_commandsHandler.RegisterCommand(
 				new CommandDescriptor(
-					"run", new Action<NodeExecutionContext, string>(_nodeCommands.Run), "run [c# file]"));
+					"run", new Action<INodeExecutionContext, string>(_nodeCommands.Run), "run [c# file]"));
 
 			_commandsHandler.RegisterCommand(
 				new CommandDescriptor(
-					"echo", new Action<NodeExecutionContext, string>(_nodeCommands.Echo), "echo [Message]"));
+					"echo", new Action<INodeExecutionContext, string>(_nodeCommands.Echo), "echo [Message]"));
 
 			_commandsHandler.RegisterCommand(
 				new CommandDescriptor(
-					"exit", new Action<NodeExecutionContext,int>(_nodeCommands.Exit), "exit (errorCode)"));
+					"exit", new Action<INodeExecutionContext, int>(_nodeCommands.Exit), "exit (errorCode)"));
 
 			_commandsHandler.RegisterCommand(
 				new CommandDescriptor(
-					"help", new Action<NodeExecutionContext, string,string>(_commandsHandler.Help), "help [command] (subcommand)"));
+					"help", new Action<INodeExecutionContext, string, string>(_commandsHandler.Help), "help [command] (subcommand)"));
 		}
 	}
 }

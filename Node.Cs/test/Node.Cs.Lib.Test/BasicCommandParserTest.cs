@@ -13,7 +13,6 @@
 // ===========================================================
 
 
-using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Node.Cs.CommandHandlers;
 using Node.Cs.Consoles;
@@ -27,7 +26,7 @@ namespace Node.Cs
 		[TestInitialize]
 		public override void TestInitialize()
 		{
-            base.TestInitialize();
+			base.TestInitialize();
 			InitializeMock<INodeConsole>();
 			InitializeMock<IUiCommandsHandler>();
 		}
@@ -37,13 +36,12 @@ namespace Node.Cs
 		{
 			var commands = new[]
 			{
-				Tuple("do","do",""),
-				Tuple(" do\r\n","do",""),
-				Tuple("\tdo\f","do",""),
-				Tuple("do test.cs","do","test.cs"),
-				Tuple("do multiple parameters","do","multiple#parameters"),
-				Tuple("do \"string with double commas\" other","do","\"string with double commas\"#other"),
-				Tuple("do \"string with \\\" stuff inside\" other","do","\"string with \\\" stuff inside\"#other"),
+				Tuple("do","do",new string[0]),
+				Tuple(" do\r\n","do",new string[0]),
+				Tuple("\tdo\f","do",new string[0]),
+				Tuple("do test.cs","do",new []{"test.cs"}),
+				Tuple("do multiple parameters","do",new []{"multiple","parameters"}
+		)
 			};
 			RunSeries(
 				(item1, item2, item3) =>
@@ -55,9 +53,59 @@ namespace Node.Cs
 					var result = Target.Parse(item1);
 
 					//Verify
-					var pars = string.Join("#", result.Parameters);
 					Assert.AreEqual(item2, result.Command);
-					Assert.AreEqual(item3, pars);
+					SetsAssert.AreEqual(item3, result.Parameters);
+				},
+				commands);
+		}
+
+		[TestMethod]
+		public void Parse_ShouldCorrectlyWork_WithStringPatternsAndDoubleCommas()
+		{
+			var commands = new[]
+			{
+				Tuple("do \"string with double commas\" other","do",new []{"\"string with double commas\"","other"}),
+				Tuple("do \"has single'inside\" other","do",new []{"\"has single'inside\"","other"}),
+				Tuple("do \"string with \\\" stuff inside\" other","do",new []{"\"string with \\\" stuff inside\"","other"})
+			};
+			RunSeries(
+				(item1, item2, item3) =>
+				{
+					//Setup
+					SetupTarget();
+
+					//Act
+					var result = Target.Parse(item1);
+
+					//Verify
+					Assert.AreEqual(item2, result.Command);
+					SetsAssert.AreEqual(item3, result.Parameters);
+				},
+				commands);
+		}
+
+
+		[TestMethod]
+		public void Parse_ShouldCorrectlyWork_WithStringPatternsAndSingleCommas()
+		{
+			var commands = new[]
+			{
+				Tuple("do 'string with double commas' other","do",new []{"'string with double commas'","other"}),
+				Tuple("do 'has single\"inside' other","do",new []{"'has single\"inside'","other"}),
+				Tuple("do 'string with \\' stuff inside' other","do",new []{"'string with \\' stuff inside'","other"})
+			};
+			RunSeries(
+				(item1, item2, item3) =>
+				{
+					//Setup
+					SetupTarget();
+
+					//Act
+					var result = Target.Parse(item1);
+
+					//Verify
+					Assert.AreEqual(item2, result.Command);
+					SetsAssert.AreEqual(item3, result.Parameters);
 				},
 				commands);
 		}

@@ -45,6 +45,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="UniversalTypeConverter">
+      <HintPath>..\..\packages\UniversalTypeConverter.1.0.2\lib\net40\UniversalTypeConverter.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandHandlers\CommandDescriptor.cs" />
@@ -53,6 +56,7 @@
     <Compile Include="CommandHandlers\ICommandParser.cs" />
     <Compile Include="CommandHandlers\ParsedCommand.cs" />
     <Compile Include="Consoles\INodeConsole.cs" />
+    <Compile Include="Exceptions\DuplicateCommandException.cs" />
     <Compile Include="INodeCsEntryPoint.cs" />
     <Compile Include="INodeExecutionContext.cs" />
     <Compile Include="INodeModule.cs" />

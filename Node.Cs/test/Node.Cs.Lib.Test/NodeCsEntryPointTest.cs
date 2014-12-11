@@ -13,14 +13,13 @@
 // ===========================================================
 
 
+using GenericHelpers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
-using GenericHelpers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using Node.Cs.CommandHandlers;
 using Node.Cs.Consoles;
 using Node.Cs.Test;
@@ -33,7 +32,7 @@ namespace Node.Cs
 		[TestInitialize]
 		public override void TestInitialize()
 		{
-            base.TestInitialize();
+			base.TestInitialize();
 			InitializeMock<INodeConsole>();
 			InitializeMock<IUiCommandsHandler>();
 		}

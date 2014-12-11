@@ -76,6 +76,9 @@
       <HintPath>..\..\packages\Microsoft.Bcl.Metadata.1.0.11-alpha\lib\portable-net45+win8\System.Reflection.Metadata.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml" />
+    <Reference Include="UniversalTypeConverter">
+      <HintPath>..\..\packages\UniversalTypeConverter.1.0.2\lib\net40\UniversalTypeConverter.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -90,6 +93,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Mocks\IUiCommandsHandlerTestMock.cs" />
     <Compile Include="UiCommandsHandlerTest.cs" />
     <Compile Include="BasicCommandParserTest.cs" />
     <Compile Include="NodeCsEntryPointTest.cs" />
