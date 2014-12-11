@@ -45,7 +45,7 @@ namespace Node.Cs
 
 			_commandsHandler.RegisterCommand(
 				new CommandDescriptor(
-					"help", new Action<INodeExecutionContext, string, string>(_commandsHandler.Help), "help [command] (subcommand)"));
+					"help", new Action<INodeExecutionContext, string>(_commandsHandler.Help), "help (command)"));
 		}
 	}
 }

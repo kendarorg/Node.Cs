@@ -19,33 +19,33 @@ using Node.Cs.Consoles;
 
 namespace Node.Cs.CommandHandlers
 {
-	public class BasicNodeCommands:IBasicNodeCommands
-	{
-		private readonly INodeConsole _console;
+    public class BasicNodeCommands : IBasicNodeCommands
+    {
+        private readonly INodeConsole _console;
 
-		public BasicNodeCommands(INodeConsole console)
-		{
-			_console = console;
-		}
+        public BasicNodeCommands(INodeConsole console)
+        {
+            _console = console;
+        }
 
-		/// <summary>
-		/// Runs a .cs file
-		/// </summary>
-		/// <param name="context"></param>
-		/// <param name="path"></param>
-		public void Run(INodeExecutionContext context, string path)
-		{
-			throw new NotImplementedException();
-		}
+        /// <summary>
+        /// Runs a .cs file
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="path"></param>
+        public void Run(INodeExecutionContext context, string path)
+        {
+            throw new NotImplementedException();
+        }
 
-		public void Echo(INodeExecutionContext context, string message)
-		{
-			_console.WriteLine(message);
-		}
+        public void Echo(INodeExecutionContext context, string message)
+        {
+            _console.WriteLine(message);
+        }
 
-		public void Exit(INodeExecutionContext context, int errorCode)
-		{
-			Environment.Exit(errorCode);
-		}
-	}
+        public void Exit(INodeExecutionContext context, int errorCode)
+        {
+            Environment.Exit(errorCode);
+        }
+    }
 }

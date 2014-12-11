@@ -94,6 +94,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Mocks\IUiCommandsHandlerTestMock.cs" />
+    <Compile Include="Mocks\MockNodeConsole.cs" />
     <Compile Include="UiCommandsHandlerTest.cs" />
     <Compile Include="BasicCommandParserTest.cs" />
     <Compile Include="NodeCsEntryPointTest.cs" />

@@ -57,6 +57,7 @@
     <Compile Include="CommandHandlers\ParsedCommand.cs" />
     <Compile Include="Consoles\INodeConsole.cs" />
     <Compile Include="Exceptions\DuplicateCommandException.cs" />
+    <Compile Include="Exceptions\MissingCommandException.cs" />
     <Compile Include="INodeCsEntryPoint.cs" />
     <Compile Include="INodeExecutionContext.cs" />
     <Compile Include="INodeModule.cs" />

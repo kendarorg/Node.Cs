@@ -13,16 +13,45 @@
 // ===========================================================
 
 
+using Node.Cs.Consoles;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Node.Cs.Exceptions
+namespace Node.Cs.Mocks
 {
-	public class DuplicateCommandException:Exception
-	{
-		public DuplicateCommandException(string format,params object[] pars)
-			:base(string.Format(format,pars))
-		{
-			
-		}
-	}
+    public class MockNodeConsole : INodeConsole
+    {
+        public List<string> Data { get; private set; }
+        public int ErrorCode { get; private set; }
+        public string LineContent { get; set; }
+
+        public MockNodeConsole()
+        {
+            Data = new List<string> { string.Empty };
+        }
+
+        public void Write(string formatString, params object[] formatParameters)
+        {
+            Data[Data.Count - 1] += string.Format(formatString, formatParameters);
+        }
+
+        public void WriteLine(string formatString, params object[] formatParameters)
+        {
+            Data[Data.Count - 1] += string.Format(formatString, formatParameters);
+            Data.Add(string.Empty);
+        }
+
+        public string ReadLine()
+        {
+            return LineContent;
+        }
+
+        public void Exit(int errorCode)
+        {
+            ErrorCode = errorCode;
+        }
+    }
 }

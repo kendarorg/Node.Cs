@@ -37,7 +37,7 @@ namespace Node.Cs.CommandHandlers
 		/// <param name="context"></param>
 		/// <param name="command"></param>
 		/// <param name="subcommand"></param>
-		void Help(INodeExecutionContext context, string command = null, string subcommand = null);
+		void Help(INodeExecutionContext context, string command = null);
 
 		/// <summary>
 		/// Unregister a command with the given parameter types and name

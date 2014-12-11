@@ -18,6 +18,7 @@ using Castle.Windsor;
 using GenericHelpers;
 using Node.Cs.CommandHandlers;
 using Node.Cs.Consoles;
+using Node.Cs.Exceptions;
 using System;
 using System.Reflection;
 

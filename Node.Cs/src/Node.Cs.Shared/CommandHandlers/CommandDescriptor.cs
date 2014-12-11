@@ -19,14 +19,16 @@ namespace Node.Cs.CommandHandlers
 {
 	public class CommandDescriptor
 	{
-		public CommandDescriptor(string commandId, Delegate calledFunction, string shortHelp)
+		public CommandDescriptor(string commandId, Delegate calledFunction, string shortHelp, string longHelp = null)
 		{
 			CommandId = commandId;
 			CalledFunction = calledFunction;
 			ShortHelp = shortHelp;
+            LongHelp = longHelp ?? shortHelp;
 		}
 		public string CommandId { get; private set; }
 		public Delegate CalledFunction { get; private set; }
-		public string ShortHelp { get; private set; }
+        public string ShortHelp { get; private set; }
+        public string LongHelp { get; private set; }
 	}
 }

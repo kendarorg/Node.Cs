@@ -14,15 +14,19 @@
 
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Node.Cs.Exceptions
 {
-	public class DuplicateCommandException:Exception
-	{
-		public DuplicateCommandException(string format,params object[] pars)
-			:base(string.Format(format,pars))
-		{
-			
-		}
-	}
+    public class MissingCommandException : Exception
+    {
+        public MissingCommandException(string format, params object[] pars)
+            : base(string.Format(format, pars))
+        {
+
+        }
+    }
 }
