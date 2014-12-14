@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CoverageSession xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Summary numSequencePoints="0" visitedSequencePoints="0" numBranchPoints="0" visitedBranchPoints="0" sequenceCoverage="0" branchCoverage="0" maxCyclomaticComplexity="0" minCyclomaticComplexity="0" />
+  <Modules>
+    <Module skippedDueTo="Filter" hash="B5-D0-3C-D0-D3-0E-6D-9A-B0-27-ED-4B-C0-AC-D5-4F-18-84-56-AE">
+      <FullName>C:\Windows\Microsoft.Net\assembly\GAC_32\mscorlib\v4.0_4.0.0.0__b77a5c561934e089\mscorlib.dll</FullName>
+      <ModuleName>mscorlib</ModuleName>
+      <Classes />
+    </Module>
+    <Module skippedDueTo="MissingPdb" hash="66-71-3F-9B-CE-FA-0C-A8-74-D7-88-15-33-DF-6B-A8-10-FE-A3-68">
+      <FullName>D:\Development\Github\endaroza\Node.Cs.Alpha2\Node.Cs\build_utils\VisualStudioIdentifier.exe</FullName>
+      <ModuleName>VisualStudioIdentifier</ModuleName>
+      <Classes />
+    </Module>
+  </Modules>
+</CoverageSession>

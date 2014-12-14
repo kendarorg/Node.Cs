@@ -24,7 +24,7 @@ namespace Node.Cs
 		CommandLineParser Args { get; }
 		Version Version { get; }
 		string NodeCsExecutablePath { get; }
-		LockFreeItem<string> NodeCsExtraBinDirecotry { get; }
+		LockFreeItem<string> NodeCsExtraBinDirectory { get; }
 		LockFreeItem<string> CurrentDirectory { get; set; }
 	}
 }

@@ -12,6 +12,7 @@ TestResults
 *.suo
 *.user
 *.sln.docstates
+.opencover_bin
 
 # Build results
 [Dd]ebug/

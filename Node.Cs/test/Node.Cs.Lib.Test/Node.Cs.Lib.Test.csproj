@@ -93,6 +93,10 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="BasicNodeCommandsTest.cs" />
+    <Compile Include="BasicNodeCommandsTests\Test.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
     <Compile Include="Mocks\IUiCommandsHandlerTestMock.cs" />
     <Compile Include="Mocks\MockNodeConsole.cs" />
     <Compile Include="UiCommandsHandlerTest.cs" />

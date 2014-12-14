@@ -31,13 +31,13 @@ namespace Node.Cs
 			Args = args;
 			Version = version;
 			NodeCsExecutablePath = nodeCsExecutablePath;
-			NodeCsExtraBinDirecotry = new LockFreeItem<string>(nodeCsExtraBinDirecotry);
+			NodeCsExtraBinDirectory = new LockFreeItem<string>(nodeCsExtraBinDirecotry);
 			CurrentDirectory = new LockFreeItem<string>(currentDirectory);
 		}
-		public CommandLineParser Args { get; private set; }
-		public Version Version { get; private set; }
-		public string NodeCsExecutablePath { get; private set; }
-		public LockFreeItem<string> NodeCsExtraBinDirecotry { get; private set; }
+		public CommandLineParser Args { get; protected set; }
+        public Version Version { get; protected set; }
+        public string NodeCsExecutablePath { get; protected set; }
+		public LockFreeItem<string> NodeCsExtraBinDirectory { get; protected set; }
 		public LockFreeItem<string> CurrentDirectory { get; set; }
 	}
 }

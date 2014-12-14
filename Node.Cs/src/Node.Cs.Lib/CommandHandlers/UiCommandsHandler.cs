@@ -13,14 +13,13 @@
 // ===========================================================
 
 
-using System;
-using System.Linq;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Reflection;
-using Node.Cs.Exceptions;
-using TB.ComponentModel;
 using Node.Cs.Consoles;
+using Node.Cs.Exceptions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using TB.ComponentModel;
 
 namespace Node.Cs.CommandHandlers
 {
@@ -137,20 +136,6 @@ namespace Node.Cs.CommandHandlers
                 result.Add(par);
             }
             return result.ToArray();
-        }
-
-        private bool ShowHelpIfPresent(ParsedCommand parsedCommand, bool getHelpForSpecificCommand = false)
-        {
-            if (!getHelpForSpecificCommand)
-            {
-
-            }
-            if (ContainsCommand("help", new[] { typeof(string) }))
-            {
-                Run(string.Format("help \"{0}\"", parsedCommand.Command));
-                return true;
-            }
-            throw new MissingCommandException("Command '{0}' not registered with the required parameters.", parsedCommand.Command);
         }
 
         public void Run(string command)

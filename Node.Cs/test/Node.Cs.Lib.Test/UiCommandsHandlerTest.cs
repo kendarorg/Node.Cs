@@ -78,6 +78,20 @@ namespace Node.Cs
             Assert.IsFalse(Target.ContainsCommand("test", new Type[0]));
         }
 
+				[TestMethod]
+				public void UnRegisterCommand_ShouldBeAbleToUnregisterNonExistingCommand()
+				{
+					//Setup
+					SetupTarget();
+
+					//Act
+					Assert.IsFalse(Target.ContainsCommand("test", new Type[0]));
+					Target.UnregisterCommand("test", new Type[0]);
+
+					//Verify
+					Assert.IsFalse(Target.ContainsCommand("test", new Type[0]));
+				}
+
 
         [TestMethod]
         public void RegisterCommand_ShouldBlockDuplicateCommands()

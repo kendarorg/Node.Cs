@@ -7,6 +7,7 @@ echo Setting up environment variables
 echo ================================================================
 
 SET UTILS_ROOT=%CD%
+SET THIS_DRIVE=%CD:~0,2%
 
 SET VS_NAME=VSPATH
 
@@ -23,12 +24,17 @@ SET SOLUTION_DIR=%CD%
 SET NUGET_DIR=%CURRENT_DIR%\.nuget
 
 
+SET VS_DRIVE=%VSPATH:~1,2%
+
+%VS_DRIVE%
 cd %VSPATH%
 cd..
 SET VSPATH=%CD%
-CD %CURRENT_DIR%
 
 call "%VSPATH%\Tools\VsDevCmd.bat"
+
+%THIS_DRIVE%
+CD %CURRENT_DIR%
 
 echo @echo off ^>NUL 2^>NUL > %UTILS_ROOT%\cleanup.bat
 

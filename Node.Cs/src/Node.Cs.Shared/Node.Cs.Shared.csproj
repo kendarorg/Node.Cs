@@ -62,7 +62,9 @@
     <Compile Include="INodeExecutionContext.cs" />
     <Compile Include="INodeModule.cs" />
     <Compile Include="CommandHandlers\IUiCommandsHandler.cs" />
+    <Compile Include="IScript.cs" />
     <Compile Include="NodeExecutionContext.cs" />
+    <Compile Include="NodeUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
