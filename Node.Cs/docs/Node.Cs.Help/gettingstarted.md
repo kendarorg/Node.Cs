@@ -23,7 +23,8 @@ Several command are available (case insensitive)
 
 help: show the list of all available commands with its short descriptions
 help [cmd]: show the help for the [cmd] command
-run [script]: run a Node.cs script (.cs or .ncs)
+run [script]: run a Node.cs script (.cs or .ncs). Will run the 'void Execute()' method
+run [script] [function]: run a Node.cs script (.cs or .ncs). Will run the 'void [function]' method
 exit: exit from the prompt with errorcode 0
 exit [number]: exit with the error code [number]
 

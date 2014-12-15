@@ -52,10 +52,10 @@ namespace Node.Cs
             var context = Object<INodeExecutionContext>();
 
             //Act
-            Target.Run(context, "BasicNodeCommandsTest\\test.cs");
+            Target.Run(context, "BasicNodeCommandsTests\\test.cs");
 
             //Verify
-            MockOf<INodeConsole>().Verify(a => a.WriteLine("message"), Times.Once);
+						MockOf<INodeConsole>().Verify(a => a.WriteLine("Executing Test.cs"), Times.Once);
         }
 
         [TestMethod]
@@ -66,10 +66,10 @@ namespace Node.Cs
             var context = Object<INodeExecutionContext>();
 
             //Act
-            Target.Run(context, "BasicNodeCommandsTest/test.cs");
+            Target.Run(context, "BasicNodeCommandsTests/test.cs");
 
             //Verify
-            MockOf<INodeConsole>().Verify(a => a.WriteLine("message"), Times.Once);
+						MockOf<INodeConsole>().Verify(a => a.WriteLine("Executing Test.cs"), Times.Once);
         }
     }
 }

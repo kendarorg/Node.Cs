@@ -13,6 +13,7 @@
 // ===========================================================
 
 
+using System.IO;
 using ConcurrencyHelpers.Containers;
 using System;
 using GenericHelpers;
@@ -26,18 +27,31 @@ namespace Node.Cs
 			Version version,
 			string nodeCsExecutablePath,
 			string nodeCsExtraBinDirecotry,
-			string currentDirectory)
+			string currentDirectory,
+			string tempPath)
 		{
 			Args = args;
 			Version = version;
 			NodeCsExecutablePath = nodeCsExecutablePath;
-			NodeCsExtraBinDirectory = new LockFreeItem<string>(nodeCsExtraBinDirecotry);
-			CurrentDirectory = new LockFreeItem<string>(currentDirectory);
+			TempPath = CreateDirIfNotExists(tempPath);
+			NodeCsExtraBinDirectory = new LockFreeItem<string>(CreateDirIfNotExists(nodeCsExtraBinDirecotry));
+			CurrentDirectory = new LockFreeItem<string>(CreateDirIfNotExists(currentDirectory));
 		}
+
+		private string CreateDirIfNotExists(string dir)
+		{
+			if (!Directory.Exists(dir))
+			{
+				Directory.CreateDirectory(dir);
+			}
+			return dir;
+		}
+
 		public CommandLineParser Args { get; protected set; }
         public Version Version { get; protected set; }
         public string NodeCsExecutablePath { get; protected set; }
 		public LockFreeItem<string> NodeCsExtraBinDirectory { get; protected set; }
 		public LockFreeItem<string> CurrentDirectory { get; set; }
+		public string TempPath { get; protected set; }
 	}
 }

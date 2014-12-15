@@ -26,5 +26,6 @@ namespace Node.Cs
 		string NodeCsExecutablePath { get; }
 		LockFreeItem<string> NodeCsExtraBinDirectory { get; }
 		LockFreeItem<string> CurrentDirectory { get; set; }
+		string TempPath { get; }
 	}
 }

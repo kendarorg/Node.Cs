@@ -8,8 +8,13 @@ cd..
 set OUT_DIR=.report\bin
 set SLN_DIR=%CD%
 
-mkdir .report >NUL 2>NUL
-mkdir .report\bin >NUL 2>NUL
+if "%VERBOSITY%"=="TRUE" (
+	mkdir %SLN_DIR%\.report >NUL 2>NUL
+	mkdir %SLN_DIR%\.report\bin >NUL 2>NUL
+) ELSE (
+	mkdir %SLN_DIR%\.report
+	mkdir %SLN_DIR%\.report\bin
+)	
 
 echo Restore packages
 if "%VERBOSITY%"=="TRUE" (
@@ -48,7 +53,6 @@ echo cd ..  >> %TMP_BATCH%
 
 echo Starting OpenCover
 echo Result: %SLN_DIR%\.report\output.xml
-
 
 build_utils\opencover\OpenCover.Console.exe^
 	 -register:user^

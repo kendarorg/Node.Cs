@@ -1,22 +1,21 @@
-﻿using Node.Cs.Consoles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Node.Cs;
+using Node.Cs.Consoles;
 
-namespace Node.Cs.BasicNodeCommandsTests
+
+// ReSharper disable once CheckNamespace
+public class Test
 {
-    public class Test : IScript
-    {
-        private INodeConsole _console;
-        public Test(INodeConsole console, INodeExecutionContext context)
-        {
-            _console = console;
-        }
-        public void Execute()
-        {
-            _console.WriteLine("Executing Test.cs");
-        }
-    }
+	private readonly INodeConsole _console;
+	private readonly INodeExecutionContext _context;
+
+	public Test(INodeConsole console, INodeExecutionContext context)
+	{
+		_console = console;
+		_context = context;
+	}
+
+	public void Execute()
+	{
+		_console.WriteLine("Executing Test.cs");
+	}
 }

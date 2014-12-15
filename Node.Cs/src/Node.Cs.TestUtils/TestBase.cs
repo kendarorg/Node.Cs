@@ -68,6 +68,8 @@ namespace Node.Cs.Test
 		public virtual void TestInitialize()
 		{
 			Container = new WindsorContainer();
+			Container.Register(Component.For<IWindsorContainer>()
+				.Instance(Container));
 			Container.Register(Component.For<ILazyComponentLoader>()
 				.Instance(new LazyComponentAutoMocker(Container)));
 		}

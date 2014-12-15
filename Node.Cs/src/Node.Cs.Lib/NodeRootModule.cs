@@ -33,7 +33,7 @@ namespace Node.Cs
 		{
 			_commandsHandler.RegisterCommand(
 				new CommandDescriptor(
-					"run", new Action<INodeExecutionContext, string>(_nodeCommands.Run), "run [c# file]"));
+					"run", new Action<INodeExecutionContext, string,string>(_nodeCommands.Run), "run [c# file] (method) (command)"));
 
 			_commandsHandler.RegisterCommand(
 				new CommandDescriptor(
