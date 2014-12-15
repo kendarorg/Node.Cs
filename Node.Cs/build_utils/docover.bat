@@ -68,6 +68,12 @@ build_utils\report_generator\ReportGenerator.exe^
 	"-reporttypes:Html"^
 	"-reports:%SLN_DIR%\.report\output.xml"
 
+
+build_utils\report_generator\ReportGenerator.exe^
+	"-targetdir:%SLN_DIR%\docs\Node.Cs.Help\coverage"^
+	"-reporttypes:HtmlSummary"^
+	"-reports:%SLN_DIR%\.report\output.xml"
+	
 echo Report created
 if "%VERBOSITY%"=="TRUE" (
 	Echo Leaving report dir bin

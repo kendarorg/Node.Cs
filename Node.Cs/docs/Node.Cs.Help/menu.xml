@@ -1,6 +1,7 @@
 <main>
   <menu href="{RootMenu}gettingstarted" value="Getting Started"/>
   <menu href="{RootMenu}architecture" value="Architecture"/>
+  <menu href="{RootMenu}coverage" value="Code Coverage"/>
   
   <!--<menu href="{RootMenu}installation" value="Node.Cs Installation"/>
 	<menu href="{RootMenu}netdiffrences" value="Porting from Asp.NET MVC"/>
