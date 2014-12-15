@@ -23,7 +23,8 @@ namespace Node.Cs
 	{
 		CommandLineParser Args { get; }
 		Version Version { get; }
-		string NodeCsExecutablePath { get; }
+        string NodeCsExecutablePath { get; }
+        String ImageRuntimeVersion { get; }
 		LockFreeItem<string> NodeCsExtraBinDirectory { get; }
 		LockFreeItem<string> CurrentDirectory { get; set; }
 		string TempPath { get; }

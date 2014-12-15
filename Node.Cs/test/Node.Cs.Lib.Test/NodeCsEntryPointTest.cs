@@ -135,11 +135,12 @@ namespace Node.Cs
 			Assert.IsTrue(line.Contains(command));
 		}
 
-		[Ignore]
 		[TestMethod]
 		public void Run_ShouldBeAbleToRunAsService()
 		{
-			//Setup
+            Assert.Inconclusive("Run_ShouldBeAbleToRunAsService");
+			/*
+            //Setup
 			const bool runAsService = true;
 			InitializeMock<INodeConsole>();
 			SetupTarget(new NodeCsEntryPointForTest(new CommandLineParser(new string[0], ""), Container, NodeCsEntryPointForTest.Once));
@@ -148,7 +149,7 @@ namespace Node.Cs
 			Target.Run(runAsService);
 
 			//Verify
-			throw new NotImplementedException();
+			throw new NotImplementedException();*/
 		}
 	}
 }

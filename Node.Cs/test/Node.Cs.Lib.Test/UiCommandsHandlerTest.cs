@@ -117,8 +117,7 @@ namespace Node.Cs
 			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext, string>(_handler.CommantWithOverload), "test help");
 			Target.RegisterCommand(cd);
 			var cds = new CommandDescriptor("test", new Action<INodeExecutionContext, int>(_handler.CommantWithOverload), "test help");
-			DuplicateCommandException result;
-
+			
 			//Act
 			Target.RegisterCommand(cds);
 

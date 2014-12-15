@@ -21,5 +21,6 @@ namespace Node.Cs.CommandHandlers
 		void Echo(INodeExecutionContext context, string message);
 		void Exit(INodeExecutionContext context, int errorCode);
 		void LoadDll(INodeExecutionContext context, string dllPath);
-	}
+        void LoadNuget(INodeExecutionContext context, string packageName, string version=null, bool allowPreRelease=false);
+    }
 }

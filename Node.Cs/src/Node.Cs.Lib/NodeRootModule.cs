@@ -44,6 +44,11 @@ namespace Node.Cs
 				new CommandDescriptor(
 					"loadDll", new Action<INodeExecutionContext, string>(_nodeCommands.LoadDll), "loadDll [path]"));
 
+
+            _commandsHandler.RegisterCommand(
+                new CommandDescriptor(
+                    "loadnuget", new Action<INodeExecutionContext, string, string, bool>(_nodeCommands.LoadNuget), "loadnuget [package] (version) (boolUsePreRelease)"));
+
 			_commandsHandler.RegisterCommand(
 				new CommandDescriptor(
 					"exit", new Action<INodeExecutionContext, int>(_nodeCommands.Exit), "exit (errorCode)"));

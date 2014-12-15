@@ -49,6 +49,9 @@
     <Reference Include="GenericHelpers">
       <HintPath>..\..\packages\GenericHelpers.1.0.5\lib\net45\GenericHelpers.dll</HintPath>
     </Reference>
+    <Reference Include="Ionic.Zip.Reduced">
+      <HintPath>..\..\packages\DotNetZip.Reduced.1.9.1.8\lib\net20\Ionic.Zip.Reduced.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CodeAnalysis">
       <HintPath>..\..\packages\Microsoft.CodeAnalysis.Common.0.7.4052301-beta\lib\net45\Microsoft.CodeAnalysis.dll</HintPath>
     </Reference>
@@ -109,6 +112,7 @@
     <Compile Include="BasicNodeConsoleTest.cs" />
     <Compile Include="Mocks\IUiCommandsHandlerTestMock.cs" />
     <Compile Include="Mocks\MockNodeConsole.cs" />
+    <Compile Include="NugetPackagesDownloaderTest.cs" />
     <Compile Include="UiCommandsHandlerTest.cs" />
     <Compile Include="BasicCommandParserTest.cs" />
     <Compile Include="NodeCsEntryPointTest.cs" />
@@ -119,6 +123,9 @@
     <None Include="BasicNodeCommandsTests\SimpleScript.ncs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Content Include="Nuget\GenericHelpers.1.0.5.nupkg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

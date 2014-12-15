@@ -32,6 +32,7 @@ Several command are available (case insensitive)
 	* Bin directory
 	* Temp directory
 	* Node.Cs.exe directory
+* loadnuget [nugetPackage] [version]: download the package from nuget.org and install it into the bin folder
 
 
 ### Node.Cs Scripts

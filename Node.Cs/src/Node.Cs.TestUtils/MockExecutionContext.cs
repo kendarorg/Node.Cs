@@ -17,13 +17,15 @@ namespace Node.Cs.Test
 				string nodeCsExecutablePath = null,
 				string nodeCsExtraBinDirecotry = null,
 				string currentDirectory = null,
-			string tempPath = null,
+			    string tempPath = null,
+                string imageRuntimeMessage = "net45",
 				Assembly caller = null)
 			: base(args, version,
 					nodeCsExecutablePath ?? RelativeToTest("node.cs.exe", caller ?? Assembly.GetExecutingAssembly()),
 					nodeCsExtraBinDirecotry ?? RelativeToTest("bin", caller ?? Assembly.GetExecutingAssembly()),
 					currentDirectory ?? RelativeToTest("", caller ?? Assembly.GetExecutingAssembly()),
-					tempPath ?? RelativeToTest("tmp", caller ?? Assembly.GetExecutingAssembly()))
+					tempPath ?? RelativeToTest("tmp", caller ?? Assembly.GetExecutingAssembly()),
+                    imageRuntimeMessage)
 		{
 
 		}

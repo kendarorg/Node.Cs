@@ -56,6 +56,7 @@
     <Compile Include="CommandHandlers\ICommandParser.cs" />
     <Compile Include="CommandHandlers\ParsedCommand.cs" />
     <Compile Include="Consoles\INodeConsole.cs" />
+    <Compile Include="Exceptions\NugetDownloadException.cs" />
     <Compile Include="Exceptions\CompilationException.cs" />
     <Compile Include="Exceptions\DuplicateCommandException.cs" />
     <Compile Include="Exceptions\MissingCommandException.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="INodeExecutionContext.cs" />
     <Compile Include="INodeModule.cs" />
     <Compile Include="CommandHandlers\IUiCommandsHandler.cs" />
+    <Compile Include="INugetPackagesDownloader.cs" />
     <Compile Include="NodeExecutionContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
