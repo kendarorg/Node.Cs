@@ -68,7 +68,7 @@ if "%VERBOSITY%"=="TRUE" (
 
 	echo Generate the syntethic report
 
-	build_utils\report_generator\ReportGenerator.exe "-targetdir:docs\Node.Cs.Help\coverage" "-reporttypes:HtmlSummary" "-reports:.report\bin\.report\output.xml"
+	build_utils\report_generator\ReportGenerator.exe "-targetdir:docs\Node.Cs.Help\coverage" "-reporttypes:HtmlSummary" "-reports:.report\bin\output.xml"
 		
 ) ELSE (
 
@@ -80,7 +80,7 @@ if "%VERBOSITY%"=="TRUE" (
 
 	echo Generate the syntethic report
 
-	build_utils\report_generator\ReportGenerator.exe "-targetdir:docs\Node.Cs.Help\coverage" "-reporttypes:HtmlSummary" "-reports:.report\bin\.report\output.xml"  >NUL 2>NUL
+	build_utils\report_generator\ReportGenerator.exe "-targetdir:docs\Node.Cs.Help\coverage" "-reporttypes:HtmlSummary" "-reports:.report\bin\output.xml"  >NUL 2>NUL
 		
 )	
 echo Report created
