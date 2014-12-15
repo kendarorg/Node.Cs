@@ -1,0 +1,2 @@
+﻿echo Test
+run BasicNodeCommandsTests\Test.cs

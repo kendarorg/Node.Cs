@@ -25,199 +25,217 @@ using Castle.MicroKernel.Registration;
 
 namespace Node.Cs
 {
-    [TestClass]
-    public class UiCommandsHandlerTest : TestBase<UiCommandsHandler, IUiCommandsHandler>
-    {
-        private Mock<IUiCommandsHandlerTestMock> _handlerMock;
-        private IUiCommandsHandlerTestMock _handler;
-        private MockNodeConsole _mockConsole;
+	[TestClass]
+	public class UiCommandsHandlerTest : TestBase<UiCommandsHandler, IUiCommandsHandler>
+	{
+		private Mock<IUiCommandsHandlerTestMock> _handlerMock;
+		private IUiCommandsHandlerTestMock _handler;
+		private MockNodeConsole _mockConsole;
 
-        [TestInitialize]
-        public override void TestInitialize()
-        {
-            base.TestInitialize();
-            _mockConsole = new MockNodeConsole();
+		[TestInitialize]
+		public override void TestInitialize()
+		{
+			base.TestInitialize();
+			_mockConsole = new MockNodeConsole();
 
-            Container.Register(
-                    Component.For<INodeConsole>().Instance(_mockConsole));
+			Container.Register(
+							Component.For<INodeConsole>().Instance(_mockConsole));
 
-            Container.Register(
-                    Component.For<ICommandParser>().
-                    ImplementedBy<BasicCommandParser>());
+			Container.Register(
+							Component.For<ICommandParser>().
+							ImplementedBy<BasicCommandParser>());
 
-            _handlerMock = MockOf<IUiCommandsHandlerTestMock>();
-            _handler = Container.Resolve<IUiCommandsHandlerTestMock>();
-        }
+			_handlerMock = MockOf<IUiCommandsHandlerTestMock>();
+			_handler = Container.Resolve<IUiCommandsHandlerTestMock>();
+		}
 
-        [TestMethod]
-        public void RegisterCommand_ShouldBeAbleToRegisterAndUnregisterCommands()
-        {
-            //Setup
-            SetupTarget();
-            var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
+		[TestMethod]
+		public void RegisterCommand_ShouldBeAbleToRegisterAndUnregisterCommands()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
 
-            //Act
-            Target.RegisterCommand(cd);
+			//Act
+			Target.RegisterCommand(cd);
 
-            //Verify
-            Assert.IsTrue(Target.ContainsCommand("test", new Type[0]));
-        }
+			//Verify
+			Assert.IsTrue(Target.ContainsCommand("test", new Type[0]));
+		}
 
-        [TestMethod]
-        public void UnRegisterCommand_ShouldBeAbleToUnregisterCommands()
-        {
-            //Setup
-            SetupTarget();
-            var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
-            Target.RegisterCommand(cd);
+		[TestMethod]
+		public void UnRegisterCommand_ShouldBeAbleToUnregisterCommands()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
+			Target.RegisterCommand(cd);
 
-            //Act
-            Target.UnregisterCommand("test", new Type[0]);
+			//Act
+			Target.UnregisterCommand("test", new Type[0]);
 
-            //Verify
-            Assert.IsFalse(Target.ContainsCommand("test", new Type[0]));
-        }
+			//Verify
+			Assert.IsFalse(Target.ContainsCommand("test", new Type[0]));
+		}
 
-				[TestMethod]
-				public void UnRegisterCommand_ShouldBeAbleToUnregisterNonExistingCommand()
-				{
-					//Setup
-					SetupTarget();
+		[TestMethod]
+		public void UnRegisterCommand_ShouldBeAbleToUnregisterNonExistingCommand()
+		{
+			//Setup
+			SetupTarget();
 
-					//Act
-					Assert.IsFalse(Target.ContainsCommand("test", new Type[0]));
-					Target.UnregisterCommand("test", new Type[0]);
+			//Act
+			Assert.IsFalse(Target.ContainsCommand("test", new Type[0]));
+			Target.UnregisterCommand("test", new Type[0]);
 
-					//Verify
-					Assert.IsFalse(Target.ContainsCommand("test", new Type[0]));
-				}
-
-
-        [TestMethod]
-        public void RegisterCommand_ShouldBlockDuplicateCommands()
-        {
-            //Setup
-            SetupTarget();
-            var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
-            Target.RegisterCommand(cd);
-            DuplicateCommandException result;
-
-            //Act
-            ExceptionAssert.Throws(() => Target.RegisterCommand(cd), out result);
-
-            //Verify
-            Assert.IsTrue(result.Message.Contains("test"));
-        }
-
-        [TestMethod]
-        public void Run_ShouldThrowOnMissingCommandId()
-        {
-            //Setup
-            SetupTarget();
-            MissingCommandException result;
-
-            //Act
-            ExceptionAssert.Throws(() => Target.Run("test"), out result);
-
-            //Verify
-            Assert.IsTrue(result.Message.Contains("test"));
-        }
-
-        [TestMethod]
-        public void Run_ShouldExecuteSimpleCommands()
-        {
-            //Setup
-            SetupTarget();
-            var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
-            Target.RegisterCommand(cd);
-
-            //Act
-            Target.Run("test");
-
-            //Verify
-            _handlerMock.Verify(a => a.DoTest(It.IsAny<INodeExecutionContext>()), Times.Once);
-        }
-
-        [TestMethod]
-        public void Run_ShouldShowHelpWhenNoMatchingParamIsShown()
-        {
-            //Setup
-            SetupTarget();
-            var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
-            Target.RegisterCommand(cd);
-
-            //Act
-            Target.Run("test wrongParam");
-
-            //Verify
-            SetsAssert.Contains(_mockConsole.Data, string.Format("Node.Cs Help for command '{0}':", "test"));
-            SetsAssert.Contains(_mockConsole.Data, "test help");
-        }
-
-        [TestMethod]
-        public void Run_ShouldShowListOfCommandsNameWhenNoMatchingCommandIsFound()
-        {
-            //Setup
-            SetupTarget();
-            var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "the help");
-            Target.RegisterCommand(cd);
-            cd = new CommandDescriptor("prova", new Action<INodeExecutionContext>(_handler.DoTest), "the other help");
-            Target.RegisterCommand(cd);
-            cd = new CommandDescriptor("help", new Action<INodeExecutionContext,string>(Target.Help), "helping help");
-            Target.RegisterCommand(cd);
-
-            //Act
-            Target.Run("notpresent wrongParam");
-
-            //Verify
-            SetsAssert.Contains(_mockConsole.Data, "Node.Cs AvailableCommands:");
-            SetsAssert.Contains(_mockConsole.Data, "* test");
-            SetsAssert.Contains(_mockConsole.Data, "* prova");
-            SetsAssert.Contains(_mockConsole.Data, "* help");
-        }
+			//Verify
+			Assert.IsFalse(Target.ContainsCommand("test", new Type[0]));
+		}
 
 
+		[TestMethod]
+		public void RegisterCommand_ShouldBlockDuplicateCommands()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
+			Target.RegisterCommand(cd);
+			DuplicateCommandException result;
 
-        [TestMethod]
-        public void Run_Help_ShouldShowListOfCommandsNameWhenNoMatchingCommandIsFound()
-        {
-            //Setup
-            SetupTarget();
-            var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "the help");
-            Target.RegisterCommand(cd);
-            cd = new CommandDescriptor("prova", new Action<INodeExecutionContext>(_handler.DoTest), "the other help");
-            Target.RegisterCommand(cd);
-            cd = new CommandDescriptor("help", new Action<INodeExecutionContext, string>(Target.Help), "helping help");
-            Target.RegisterCommand(cd);
+			//Act
+			ExceptionAssert.Throws(() => Target.RegisterCommand(cd), out result);
 
-            //Act
-            Target.Run("help");
+			//Verify
+			Assert.IsTrue(result.Message.Contains("test"));
+		}
 
-            //Verify
-            SetsAssert.Contains(_mockConsole.Data, "Node.Cs AvailableCommands:");
-            SetsAssert.Contains(_mockConsole.Data, "* test");
-            SetsAssert.Contains(_mockConsole.Data, "* prova");
-            SetsAssert.Contains(_mockConsole.Data, "* help");
-        }
+		[TestMethod]
+		public void RegisterCommand_ShouldNotBlockDuplicateCommandsWithDifferentParameters()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext, string>(_handler.CommantWithOverload), "test help");
+			Target.RegisterCommand(cd);
+			var cds = new CommandDescriptor("test", new Action<INodeExecutionContext, int>(_handler.CommantWithOverload), "test help");
+			DuplicateCommandException result;
 
-        [TestMethod]
-        public void Run_Help_Command_ShouldShowHelpWhenNoMatchingParamIsShown()
-        {
-            //Setup
-            SetupTarget();
-            var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
-            Target.RegisterCommand(cd);
-            cd = new CommandDescriptor("help", new Action<INodeExecutionContext, string>(Target.Help), "helping help");
-            Target.RegisterCommand(cd);
+			//Act
+			Target.RegisterCommand(cds);
 
-            //Act
-            Target.Run("help test");
+			//Verify
+			Assert.IsTrue(Target.ContainsCommand("test", new[] { typeof(string) }));
+			Assert.IsTrue(Target.ContainsCommand("test", new[] { typeof(int) }));
+		}
 
-            //Verify
-            SetsAssert.Contains(_mockConsole.Data, string.Format("Node.Cs Help for command '{0}':", "test"));
-            SetsAssert.Contains(_mockConsole.Data, "test help");
-            CollectionAssert.DoesNotContain(_mockConsole.Data, "helping help");
-        }
+		[TestMethod]
+		public void Run_ShouldThrowOnMissingCommandId()
+		{
+			//Setup
+			SetupTarget();
+			MissingCommandException result;
 
-    }
+			//Act
+			ExceptionAssert.Throws(() => Target.Run("test"), out result);
+
+			//Verify
+			Assert.IsTrue(result.Message.Contains("test"));
+		}
+
+		[TestMethod]
+		public void Run_ShouldExecuteSimpleCommands()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
+			Target.RegisterCommand(cd);
+
+			//Act
+			Target.Run("test");
+
+			//Verify
+			_handlerMock.Verify(a => a.DoTest(It.IsAny<INodeExecutionContext>()), Times.Once);
+		}
+
+		[TestMethod]
+		public void Run_ShouldShowHelpWhenNoMatchingParamIsShown()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
+			Target.RegisterCommand(cd);
+
+			//Act
+			Target.Run("test wrongParam");
+
+			//Verify
+			SetsAssert.Contains(_mockConsole.Data, string.Format("Node.Cs Help for command '{0}':\r\n", "test"));
+			SetsAssert.Contains(_mockConsole.Data, "test help\r\n");
+		}
+
+		[TestMethod]
+		public void Run_ShouldShowListOfCommandsNameWhenNoMatchingCommandIsFound()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "the help");
+			Target.RegisterCommand(cd);
+			cd = new CommandDescriptor("prova", new Action<INodeExecutionContext>(_handler.DoTest), "the other help");
+			Target.RegisterCommand(cd);
+			cd = new CommandDescriptor("help", new Action<INodeExecutionContext, string>(Target.Help), "helping help");
+			Target.RegisterCommand(cd);
+
+			//Act
+			Target.Run("notpresent wrongParam");
+
+			//Verify
+			SetsAssert.Contains(_mockConsole.Data, "Node.Cs AvailableCommands:\r\n");
+			SetsAssert.Contains(_mockConsole.Data, "* test\r\n");
+			SetsAssert.Contains(_mockConsole.Data, "* prova\r\n");
+			SetsAssert.Contains(_mockConsole.Data, "* help\r\n");
+		}
+
+
+
+		[TestMethod]
+		public void Run_Help_ShouldShowListOfCommandsNameWhenNoMatchingCommandIsFound()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "the help");
+			Target.RegisterCommand(cd);
+			cd = new CommandDescriptor("prova", new Action<INodeExecutionContext>(_handler.DoTest), "the other help");
+			Target.RegisterCommand(cd);
+			cd = new CommandDescriptor("help", new Action<INodeExecutionContext, string>(Target.Help), "helping help");
+			Target.RegisterCommand(cd);
+
+			//Act
+			Target.Run("help");
+
+			//Verify
+			SetsAssert.Contains(_mockConsole.Data, "Node.Cs AvailableCommands:\r\n");
+			SetsAssert.Contains(_mockConsole.Data, "* test\r\n");
+			SetsAssert.Contains(_mockConsole.Data, "* prova\r\n");
+			SetsAssert.Contains(_mockConsole.Data, "* help\r\n");
+		}
+
+		[TestMethod]
+		public void Run_Help_Command_ShouldShowHelpWhenNoMatchingParamIsShown()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
+			Target.RegisterCommand(cd);
+			cd = new CommandDescriptor("help", new Action<INodeExecutionContext, string>(Target.Help), "helping help");
+			Target.RegisterCommand(cd);
+
+			//Act
+			Target.Run("help test");
+
+			//Verify
+			SetsAssert.Contains(_mockConsole.Data, string.Format("Node.Cs Help for command '{0}':\r\n", "test"));
+			SetsAssert.Contains(_mockConsole.Data, "test help\r\n");
+			CollectionAssert.DoesNotContain(_mockConsole.Data, "helping help\r\n");
+		}
+
+	}
 }

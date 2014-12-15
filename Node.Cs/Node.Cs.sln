@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.31010.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{05B9533D-FE3B-4D74-AE2D-C8A90173C859}"
 	ProjectSection(SolutionItems) = preProject
@@ -26,6 +26,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Node.Cs.Help", "docs\Node.Cs.Help\Node.Cs.Help.csproj", "{20546D7C-2EE7-46F9-A3F3-269FB26DC795}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{FBDB9F7A-6443-4C16-96FB-FC9DA44FA6D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicDllFor.Test", "test\BasicDllFor.Test\BasicDllFor.Test.csproj", "{0924001C-7FAF-4128-97AC-A3A3C02413F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +59,10 @@ Global
 		{20546D7C-2EE7-46F9-A3F3-269FB26DC795}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20546D7C-2EE7-46F9-A3F3-269FB26DC795}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20546D7C-2EE7-46F9-A3F3-269FB26DC795}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0924001C-7FAF-4128-97AC-A3A3C02413F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0924001C-7FAF-4128-97AC-A3A3C02413F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0924001C-7FAF-4128-97AC-A3A3C02413F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0924001C-7FAF-4128-97AC-A3A3C02413F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -68,5 +74,6 @@ Global
 		{0E122DAF-29EE-4D25-9EE8-D4A3D06E23A2} = {96ED293B-84CF-43FB-8532-741D840B16AD}
 		{53F344B1-C1F5-4E0D-8C1A-9CF6150E8BFD} = {96ED293B-84CF-43FB-8532-741D840B16AD}
 		{20546D7C-2EE7-46F9-A3F3-269FB26DC795} = {FBDB9F7A-6443-4C16-96FB-FC9DA44FA6D9}
+		{0924001C-7FAF-4128-97AC-A3A3C02413F5} = {EEB9AFE7-2065-4418-A9C5-110133E29E27}
 	EndGlobalSection
 EndGlobal

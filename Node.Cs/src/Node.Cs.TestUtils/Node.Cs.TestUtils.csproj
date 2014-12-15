@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CollectionAssert.cs" />
+    <Compile Include="ConsoleRedirectore.cs" />
     <Compile Include="ExceptionAssert.cs" />
     <Compile Include="LazyComponentAutoMocker.cs" />
     <Compile Include="MockExecutionContext.cs" />

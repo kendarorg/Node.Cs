@@ -23,6 +23,7 @@ namespace Node.Cs.CommandHandlers
 		{
 			Parameters = new List<string>();
 		}
+
 		public string Command { get; set; }
 		public List<string> Parameters { get; private set; }
 	}

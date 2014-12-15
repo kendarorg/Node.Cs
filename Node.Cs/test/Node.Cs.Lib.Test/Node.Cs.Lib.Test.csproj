@@ -94,9 +94,19 @@
   </Choose>
   <ItemGroup>
     <Compile Include="BasicNodeCommandsTest.cs" />
+    <Content Include="BasicNodeCommandsTests\TestWithCompilationErrors.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="BasicNodeCommandsTests\FileWithWrong.extension">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <Compile Include="BasicNodeCommandsTests\TestWrongNamespace.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
     <Compile Include="BasicNodeCommandsTests\Test.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
+    <Compile Include="BasicNodeConsoleTest.cs" />
     <Compile Include="Mocks\IUiCommandsHandlerTestMock.cs" />
     <Compile Include="Mocks\MockNodeConsole.cs" />
     <Compile Include="UiCommandsHandlerTest.cs" />
@@ -106,6 +116,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="BasicNodeCommandsTests\SimpleScript.ncs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -120,6 +133,14 @@
     <ProjectReference Include="..\..\src\Node.Cs.TestUtils\Node.Cs.TestUtils.csproj">
       <Project>{53F344B1-C1F5-4E0D-8C1A-9CF6150E8BFD}</Project>
       <Name>Node.Cs.TestUtils</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Node.Cs\Node.Cs.csproj">
+      <Project>{fea3774b-6f7a-459b-ab21-95e4b2d5db6d}</Project>
+      <Name>Node.Cs</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BasicDllFor.Test\BasicDllFor.Test.csproj">
+      <Project>{0924001c-7faf-4128-97ac-a3a3c02413f5}</Project>
+      <Name>BasicDllFor.Test</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

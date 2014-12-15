@@ -22,22 +22,17 @@ using System.IO;
 using System.Reflection;
 using Castle.Windsor;
 using Castle.MicroKernel.Registration;
+using Node.Cs.Exceptions;
 using SharpTemplate.Compilers;
 
 namespace Node.Cs.CommandHandlers
 {
-	internal class RunnableDefinition
-	{
-		public DateTime Timestamp { get; set; }
-		public Type Type { get; set; }
-	}
-
 	public class BasicNodeCommands : IBasicNodeCommands
 	{
 		private readonly INodeConsole _console;
 		private readonly IWindsorContainer _container;
 		private readonly Dictionary<string, RunnableDefinition> _runnables =
-new Dictionary<string, RunnableDefinition>(StringComparer.InvariantCultureIgnoreCase);
+			new Dictionary<string, RunnableDefinition>(StringComparer.InvariantCultureIgnoreCase);
 
 		public BasicNodeCommands(INodeConsole console, IWindsorContainer container)
 		{
@@ -62,17 +57,18 @@ new Dictionary<string, RunnableDefinition>(StringComparer.InvariantCultureIgnore
 			{
 				throw new FileNotFoundException("File not found.", path);
 			}
-			if (Path.GetExtension(absolutePath).ToLowerInvariant() == ".cs")
+			var extension = Path.GetExtension(absolutePath);
+			if (extension.ToLowerInvariant() == ".cs")
 			{
 				RunAndBuild(absolutePath, context, function);
 			}
-			else if (Path.GetExtension(absolutePath).ToLowerInvariant() == ".ncs")
+			else if (extension.ToLowerInvariant() == ".ncs")
 			{
-				throw new NotImplementedException();
+				RunNcs(absolutePath, context);
 			}
 			else
 			{
-				throw new NotSupportedException();
+				throw new NotSupportedException(string.Format("Extension '{0}' is not supported.", extension));
 			}
 		}
 
@@ -86,11 +82,42 @@ new Dictionary<string, RunnableDefinition>(StringComparer.InvariantCultureIgnore
 			Environment.Exit(errorCode);
 		}
 
+		public void LoadDll(INodeExecutionContext context, string dllPath)
+		{
+			var path = dllPath.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
+			var testPath = path;
+			if (!Path.IsPathRooted(path))
+			{
+				testPath = Path.Combine(context.CurrentDirectory.Data, path);
+				if (!File.Exists(testPath))
+				{
+					testPath = Path.Combine(context.NodeCsExtraBinDirectory.Data, path);
+					if (!File.Exists(testPath))
+					{
+						testPath = Path.Combine(context.TempPath, path);
+						if (!File.Exists(testPath))
+						{
+							var nodeDir = Path.GetDirectoryName(context.NodeCsExecutablePath);
+							// ReSharper disable once AssignNullToNotNullAttribute
+							testPath = Path.Combine(nodeDir, path);
+							if (!File.Exists(testPath))
+							{
+								throw new DllNotFoundException();
+							}
+						}
+					}
+				}
+			}
+			var content = File.ReadAllBytes(testPath);
+			Assembly.Load(content);
+		}
+
+		#region Private functions
 		private void RunAndBuild(string path, INodeExecutionContext context, string function)
 		{
 			var loadedAssembly = string.Empty;
-			var dllName = "dll_" + NodeUtils.CalculateMD5Hash(path.ToLowerInvariant());
-			var className = "class_"+dllName;
+			var dllName = "dll_" + Guid.NewGuid().ToString("N");
+			var className = "class_" + dllName;
 			var namespaceName = "ns_" + dllName;
 			try
 			{
@@ -105,38 +132,25 @@ new Dictionary<string, RunnableDefinition>(StringComparer.InvariantCultureIgnore
 				}
 				if (!_runnables.ContainsKey(path))
 				{
-					var source = "namespace " + namespaceName + " {\r\n" + File.ReadAllText(path) + "\r\n}";
+					var originalSource = File.ReadAllText(path);
+					var source = "namespace " + namespaceName + " {" + originalSource + "}";
 
-					var sc = new SourceCompiler(dllName, context.TempPath)
-					{
-						UseAppdomain = true
-					};
-					sc.AddFile(namespaceName, className, source);
-					sc.LoadCurrentAssemblies();
+					var sc = SetupSourceCompiler(context, dllName, namespaceName, className, source);
 					loadedAssembly = sc.Compile(0);
 					if (sc.HasErrors)
 					{
-						var errs = new HashSet<string>();
-						var compilationErrors = "Error compiling " + path;
-						foreach (var errorList in sc.Errors)
-						{
-							var singleErrorList = errorList;
-							foreach (var error in singleErrorList)
-							{
-								if (!errs.Contains(error))
-								{
-									compilationErrors += "\r\n" + error;
-									errs.Add(error);
-								}
-							}
-						}
-						throw new Exception(compilationErrors.Replace("\t", " "));
+						ThrowCompilationErrors(path, sc, originalSource);
 					}
 					var content = File.ReadAllBytes(loadedAssembly);
 					var compileSimpleObjectAsm = Assembly.Load(content);
 					type =
 					compileSimpleObjectAsm.GetTypes()
-					.FirstOrDefault(a => a.GetMethods().Any(m => String.Equals(m.Name, function, StringComparison.InvariantCultureIgnoreCase)));
+						.FirstOrDefault(a =>
+							a.GetMethods().
+							Any(m => String.Equals(m.Name, function, StringComparison.InvariantCultureIgnoreCase)));
+
+					ThrowIfFindsErrors(type, function, namespaceName, originalSource);
+
 					_runnables.Add(path, new RunnableDefinition
 					{
 						Type = type,
@@ -162,5 +176,72 @@ new Dictionary<string, RunnableDefinition>(StringComparer.InvariantCultureIgnore
 				}
 			}
 		}
+
+		private void ThrowIfFindsErrors(Type type, string function, string namespaceName, string originalSource)
+		{
+			if (type == null)
+			{
+				throw new MissingFunctionException("Missing function '{0}'.", function);
+			}
+
+			if (type.Namespace != namespaceName)
+			{
+				throw new CompilationException("Must not set the namespace for scripts!!.", originalSource);
+			}
+		}
+
+		private static SourceCompiler SetupSourceCompiler(INodeExecutionContext context, string dllName, string namespaceName,
+			string className, string source)
+		{
+			var sc = new SourceCompiler(dllName, context.TempPath)
+			{
+				UseAppdomain = true
+			};
+			sc.AddFile(namespaceName, className, source);
+			sc.LoadCurrentAssemblies();
+			return sc;
+		}
+
+		private static void ThrowCompilationErrors(string path, SourceCompiler sc, string originalSource)
+		{
+			var errs = new HashSet<string>();
+			var compilationErrors = "Error compiling " + path;
+			foreach (var errorList in sc.Errors)
+			{
+				var singleErrorList = errorList;
+				foreach (var error in singleErrorList)
+				{
+					if (!errs.Contains(error))
+					{
+						// ReSharper disable once AssignNullToNotNullAttribute
+						var where = error.IndexOf(".cs\t", StringComparison.InvariantCultureIgnoreCase);
+						if (@where > 0)
+						{
+							// ReSharper disable once PossibleNullReferenceException
+							var newError = error.Substring(@where + ".cs\t".Length).TrimStart();
+							compilationErrors += "\r\n" + newError;
+						}
+						else
+						{
+							compilationErrors += "\r\n" + error;
+						}
+
+						errs.Add(error);
+					}
+				}
+			}
+			throw new CompilationException(compilationErrors, originalSource);
+		}
+
+		private void RunNcs(string absolutePath, INodeExecutionContext context)
+		{
+			var cmdHandler = _container.Resolve<IUiCommandsHandler>();
+			var src = File.ReadAllLines(absolutePath);
+			foreach (var line in src)
+			{
+				cmdHandler.Run(line);
+			}
+		}
+		#endregion
 	}
 }

@@ -38,6 +38,16 @@ namespace Node.Cs
 		}
 
 		[TestMethod]
+		public void Run_AsService_ShouldThrowNotImplemented()
+		{
+			//Setup
+			SetupTarget(new NodeCsEntryPointForTest(new CommandLineParser(new string[0], ""), Container, NodeCsEntryPointForTest.Once));
+
+			//Act
+			ExceptionAssert.Throws<NotImplementedException>(()=>Target.Run(true));
+		}
+
+		[TestMethod]
 		public void Run_ShouldAskForUserInput()
 		{
 			//Setup

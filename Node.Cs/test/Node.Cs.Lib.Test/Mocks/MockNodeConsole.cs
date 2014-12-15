@@ -14,11 +14,7 @@
 
 
 using Node.Cs.Consoles;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Node.Cs.Mocks
 {
@@ -35,23 +31,29 @@ namespace Node.Cs.Mocks
 
         public void Write(string formatString, params object[] formatParameters)
         {
-            Data[Data.Count - 1] += string.Format(formatString, formatParameters);
+	        var value = string.Format(formatString, formatParameters);
+					if (Data.Count == 0)
+					{
+						Data.Add(string.Empty);
+					}
+					if (Data[Data.Count - 1].EndsWith("\r\n"))
+					{
+						Data.Add(value);
+					}
+					else
+					{
+						Data[Data.Count - 1] += value;
+					}
         }
 
         public void WriteLine(string formatString, params object[] formatParameters)
         {
-            Data[Data.Count - 1] += string.Format(formatString, formatParameters);
-            Data.Add(string.Empty);
+						Data.Add(string.Format(formatString, formatParameters)+"\r\n");
         }
 
         public string ReadLine()
         {
             return LineContent;
-        }
-
-        public void Exit(int errorCode)
-        {
-            ErrorCode = errorCode;
         }
     }
 }

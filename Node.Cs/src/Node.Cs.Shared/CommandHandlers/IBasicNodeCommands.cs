@@ -20,5 +20,6 @@ namespace Node.Cs.CommandHandlers
 		void Run(INodeExecutionContext context, string path, string function = null);
 		void Echo(INodeExecutionContext context, string message);
 		void Exit(INodeExecutionContext context, int errorCode);
+		void LoadDll(INodeExecutionContext context, string dllPath);
 	}
 }

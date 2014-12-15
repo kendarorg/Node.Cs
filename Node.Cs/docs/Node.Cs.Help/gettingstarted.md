@@ -21,12 +21,17 @@ The Node.cs command line will show then up
 
 Several command are available (case insensitive)
 
-help: show the list of all available commands with its short descriptions
-help [cmd]: show the help for the [cmd] command
-run [script]: run a Node.cs script (.cs or .ncs). Will run the 'void Execute()' method
-run [script] [function]: run a Node.cs script (.cs or .ncs). Will run the 'void [function]' method
-exit: exit from the prompt with errorcode 0
-exit [number]: exit with the error code [number]
+* help: show the list of all available commands with its short descriptions
+* help [cmd]: show the help for the [cmd] command
+* run [script]: run a Node.cs script (.cs or .ncs). Will run the 'void Execute()' method
+* run [script] [function]: run a Node.cs script (.cs or .ncs). Will run the 'void [function]' method
+* exit: exit from the prompt with errorcode 0
+* exit [number]: exit with the error code [number]
+* loaddll [dllPath]: load a dll in memory. If it has not an absolute path it's searched on
+	* CurrentDirectory
+	* Bin directory
+	* Temp directory
+	* Node.Cs.exe directory
 
 
 ### Node.Cs Scripts

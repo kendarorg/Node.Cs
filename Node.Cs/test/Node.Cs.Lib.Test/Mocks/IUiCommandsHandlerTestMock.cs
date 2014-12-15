@@ -19,5 +19,8 @@ namespace Node.Cs.Mocks
 	public interface IUiCommandsHandlerTestMock
 	{
 		void DoTest(INodeExecutionContext context);
+
+		void CommantWithOverload(INodeExecutionContext context,string par);
+		void CommantWithOverload(INodeExecutionContext context, int par);
 	}
 }

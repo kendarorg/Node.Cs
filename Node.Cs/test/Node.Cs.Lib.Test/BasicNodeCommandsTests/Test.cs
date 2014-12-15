@@ -18,4 +18,9 @@ public class Test
 	{
 		_console.WriteLine("Executing Test.cs");
 	}
+
+	public void Do()
+	{
+		_console.WriteLine("Executing Test.cs::Do");
+	}
 }

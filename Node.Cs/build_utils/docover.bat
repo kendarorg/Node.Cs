@@ -16,6 +16,9 @@ if "%VERBOSITY%"=="TRUE" (
 	mkdir %SLN_DIR%\.report\bin
 )	
 
+rd /s /q "%SLN_DIR%\.report\bin\*"  >NUL 2>NUL
+
+
 echo Restore packages
 if "%VERBOSITY%"=="TRUE" (
 	msbuild .nuget\NuGet.targets /target:RestorePackages
@@ -54,31 +57,38 @@ echo cd ..  >> %TMP_BATCH%
 echo Starting OpenCover
 echo Result: %SLN_DIR%\.report\output.xml
 
-build_utils\opencover\OpenCover.Console.exe^
-	 -register:user^
-	 "-target:%TMP_BATCH%"^
-	 -mergebyhash^
-	 -filter:"+[*]* -[*.Test]* -[*.TestUtils]*"^
-	 "-output:%SLN_DIR%\.report\output.xml"
 
-echo Generate the report
-
-build_utils\report_generator\ReportGenerator.exe^
-	"-targetdir:%SLN_DIR%\.report"^
-	"-reporttypes:Html"^
-	"-reports:%SLN_DIR%\.report\output.xml"
-
-
-build_utils\report_generator\ReportGenerator.exe^
-	"-targetdir:%SLN_DIR%\docs\Node.Cs.Help\coverage"^
-	"-reporttypes:HtmlSummary"^
-	"-reports:%SLN_DIR%\.report\output.xml"
+if "%VERBOSITY%"=="TRUE" (
 	
+	build_utils\opencover\OpenCover.Console.exe -register:user "-target:%OUT_DIR%\tmptest.bat" -mergebyhash "-filter:+[*]* -[*.Test]* -[*.TestUtils]*" "-output:.report\bin\output.xml"
+	
+	echo Generate the report
+
+	build_utils\report_generator\ReportGenerator.exe "-targetdir:.report" "-reporttypes:Html" "-reports:.report\bin\output.xml"
+
+	echo Generate the syntethic report
+
+	build_utils\report_generator\ReportGenerator.exe "-targetdir:docs\Node.Cs.Help\coverage" "-reporttypes:HtmlSummary" "-reports:.report\bin\.report\output.xml"
+		
+) ELSE (
+
+	build_utils\opencover\OpenCover.Console.exe -register:user "-target:%OUT_DIR%\tmptest.bat" -mergebyhash "-filter:+[*]* -[*.Test]* -[*.TestUtils]*" "-output:.report\bin\output.xml"  >NUL 2>NUL
+
+	echo Generate the report
+
+	build_utils\report_generator\ReportGenerator.exe "-targetdir:.report" "-reporttypes:Html" "-reports:.report\bin\output.xml"  >NUL 2>NUL
+
+	echo Generate the syntethic report
+
+	build_utils\report_generator\ReportGenerator.exe "-targetdir:docs\Node.Cs.Help\coverage" "-reporttypes:HtmlSummary" "-reports:.report\bin\.report\output.xml"  >NUL 2>NUL
+		
+)	
 echo Report created
 if "%VERBOSITY%"=="TRUE" (
 	Echo Leaving report dir bin
 ) ELSE (
-	rd /s /q "%SLN_DIR%\.report\bin"  
+	rd /s /q "%SLN_DIR%\.report\bin"  >NUL 2>NUL
+	rd /s /q "%SLN_DIR%\TestResults"  >NUL 2>NUL
 )	
 
 REM Open the report

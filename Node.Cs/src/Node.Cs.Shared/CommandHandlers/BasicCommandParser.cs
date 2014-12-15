@@ -59,6 +59,12 @@ namespace Node.Cs.CommandHandlers
 			return result;
 		}
 
+		/// <summary>
+		/// Tokenize the whole block. I have not found a way to reduce the cyclomatic complexity
+		/// below this point keeping the function readable
+		/// </summary>
+		/// <param name="item"></param>
+		/// <returns></returns>
 		private static List<string> Tokenize(string item)
 		{
 			var preParsedBlocks = new List<string>();

@@ -39,6 +39,11 @@ namespace Node.Cs
 				new CommandDescriptor(
 					"echo", new Action<INodeExecutionContext, string>(_nodeCommands.Echo), "echo [Message]"));
 
+
+			_commandsHandler.RegisterCommand(
+				new CommandDescriptor(
+					"loadDll", new Action<INodeExecutionContext, string>(_nodeCommands.LoadDll), "loadDll [path]"));
+
 			_commandsHandler.RegisterCommand(
 				new CommandDescriptor(
 					"exit", new Action<INodeExecutionContext, int>(_nodeCommands.Exit), "exit (errorCode)"));

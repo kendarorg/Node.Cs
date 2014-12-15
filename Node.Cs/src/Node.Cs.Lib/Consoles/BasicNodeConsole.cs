@@ -33,10 +33,5 @@ namespace Node.Cs.Consoles
         {
             return Console.ReadLine();
         }
-
-        public void Exit(int errorCode)
-        {
-            Environment.Exit(errorCode);
-        }
     }
 }

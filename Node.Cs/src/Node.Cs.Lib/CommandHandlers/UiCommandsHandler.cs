@@ -69,7 +69,7 @@ namespace Node.Cs.CommandHandlers
                 var command = possibleCommands[i];
                 if (HasSameParameters(command, cd))
                 {
-                    throw new DuplicateCommandException("Duplicate command '{0}'.", cd.CommandId);
+                    throw new DuplicateCommandException("Duplicate command '{0}' with same parameters.", cd.CommandId);
                 }
             }
             possibleCommands.Add(cd);

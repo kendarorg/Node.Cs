@@ -13,6 +13,7 @@
 // ===========================================================
 
 
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Node.Cs.CommandHandlers;
 using Node.Cs.Consoles;
