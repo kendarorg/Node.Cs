@@ -56,9 +56,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyVerifier.cs" />
     <Compile Include="CollectionAssert.cs" />
     <Compile Include="ConsoleRedirectore.cs" />
+    <Compile Include="CustomDomain.cs" />
     <Compile Include="ExceptionAssert.cs" />
+    <Compile Include="FakeHttpServer.cs" />
     <Compile Include="LazyComponentAutoMocker.cs" />
     <Compile Include="MockExecutionContext.cs" />
     <Compile Include="MockStream.cs" />

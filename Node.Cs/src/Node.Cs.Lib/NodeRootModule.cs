@@ -23,7 +23,7 @@ namespace Node.Cs
 		private readonly IUiCommandsHandler _commandsHandler;
 		private readonly IBasicNodeCommands _nodeCommands;
 
-		public NodeRootModule(IUiCommandsHandler commandsHandler,IBasicNodeCommands basicNodeCommands)
+		public NodeRootModule(IUiCommandsHandler commandsHandler, IBasicNodeCommands basicNodeCommands)
 		{
 			_commandsHandler = commandsHandler;
 			_nodeCommands = basicNodeCommands;
@@ -33,7 +33,7 @@ namespace Node.Cs
 		{
 			_commandsHandler.RegisterCommand(
 				new CommandDescriptor(
-					"run", new Action<INodeExecutionContext, string,string>(_nodeCommands.Run), "run [c# file] (method) (command)"));
+					"run", new Action<INodeExecutionContext, string, string>(_nodeCommands.Run), "run [c# file] (method) (command)"));
 
 			_commandsHandler.RegisterCommand(
 				new CommandDescriptor(
@@ -45,9 +45,9 @@ namespace Node.Cs
 					"loadDll", new Action<INodeExecutionContext, string>(_nodeCommands.LoadDll), "loadDll [path]"));
 
 
-            _commandsHandler.RegisterCommand(
-                new CommandDescriptor(
-                    "loadnuget", new Action<INodeExecutionContext, string, string, bool>(_nodeCommands.LoadNuget), "loadnuget [package] (version) (boolUsePreRelease)"));
+			_commandsHandler.RegisterCommand(
+					new CommandDescriptor(
+							"loadnuget", new Action<INodeExecutionContext, string, string, bool>(_nodeCommands.LoadNuget), "loadnuget [package] (version) (boolUsePreRelease)"));
 
 			_commandsHandler.RegisterCommand(
 				new CommandDescriptor(
