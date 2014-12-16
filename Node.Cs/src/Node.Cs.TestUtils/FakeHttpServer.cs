@@ -50,26 +50,39 @@ namespace Node.Cs.Test
 
 		public void Dispose()
 		{
-			_listener.Abort();
-			_thread.Abort();
+			try
+			{
+				_listener.Abort();
+				_thread.Abort();
+			}
+			catch
+			{
+				
+			}
 		}
 
 		private void Listen()
 		{
-
-			while (true)
+			try
 			{
-				var context = _listener.GetContext();
-				var requestUrl = context.Request.Url.ToString();
-				if (Responses.ContainsKey(requestUrl))
+				while (true)
 				{
-					Responses[requestUrl](context, this);
+					var context = _listener.GetContext();
+					var requestUrl = context.Request.Url.ToString();
+					if (Responses.ContainsKey(requestUrl))
+					{
+						Responses[requestUrl](context, this);
+					}
+					else
+					{
+						context.Response.StatusCode = 404;
+						context.Response.Close();
+					}
 				}
-				else
-				{
-					context.Response.StatusCode = 404;
-					context.Response.Close();
-				}
+			}
+			catch
+			{
+				
 			}
 		}
 
