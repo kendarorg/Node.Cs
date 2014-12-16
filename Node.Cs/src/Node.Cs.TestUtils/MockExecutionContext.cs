@@ -33,6 +33,7 @@ namespace Node.Cs.Test
 				string nodeCsExtraBinDirecotry = null,
 				string currentDirectory = null,
 			    string tempPath = null,
+                string nodeCsPackagesDirectory = null,
                 string imageRuntimeMessage = "net45",
 				Assembly caller = null)
 			: base(args, version,
@@ -40,6 +41,7 @@ namespace Node.Cs.Test
 					nodeCsExtraBinDirecotry ?? RelativeToTest("bin", caller ?? Assembly.GetExecutingAssembly()),
 					currentDirectory ?? RelativeToTest("", caller ?? Assembly.GetExecutingAssembly()),
 					tempPath ?? RelativeToTest("tmp", caller ?? Assembly.GetExecutingAssembly()),
+                    nodeCsPackagesDirectory ?? RelativeToTest("packages", caller ?? Assembly.GetExecutingAssembly()),
                     imageRuntimeMessage)
 		{
 

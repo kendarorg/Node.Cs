@@ -38,7 +38,9 @@ namespace Node.Cs
         {
             base.TestInitialize();
             InitializeMock<INodeConsole>();
+
             Container.Register(Component.For<INodeExecutionContext>().Instance(new MockExecutionContext()));
+            Container.Register(Component.For<IAssemblySeeker>().ImplementedBy<AssemblySeeker>());
         }
 
         #region CS scripts
@@ -337,7 +339,7 @@ namespace Node.Cs
             downloader.Verify(a => a.DownloadPackage("net45", packageName, version, allowPreRelease), Times.Once);
             Assert.IsTrue(File.Exists(result));
             var resultContent = File.ReadAllBytes(result);
-            CollectionAssert.AreEqual(dllContent, resultContent);
+            Assert.AreEqual(dllContent.Length, resultContent.Length);
         }
 
         #region Utility methods

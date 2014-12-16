@@ -33,14 +33,16 @@ namespace Node.Cs.CommandHandlers
         private readonly INodeConsole _console;
         private readonly IWindsorContainer _container;
         private INugetPackagesDownloader _nugetDownloader;
+        private IAssemblySeeker _asmSeeker;
         private readonly Dictionary<string, RunnableDefinition> _runnables =
             new Dictionary<string, RunnableDefinition>(StringComparer.InvariantCultureIgnoreCase);
 
-        public BasicNodeCommands(INodeConsole console, IWindsorContainer container, INugetPackagesDownloader nugetDownloader)
+        public BasicNodeCommands(INodeConsole console, IWindsorContainer container, INugetPackagesDownloader nugetDownloader,IAssemblySeeker asmSeeker)
         {
             _console = console;
             _container = container;
             _nugetDownloader = nugetDownloader;
+            _asmSeeker = asmSeeker;
         }
 
         /// <summary>
@@ -87,32 +89,16 @@ namespace Node.Cs.CommandHandlers
 
         public void LoadDll(INodeExecutionContext context, string dllPath)
         {
-            var path = dllPath.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
-            var testPath = path;
-            if (!Path.IsPathRooted(path))
+            var foundedPath = _asmSeeker.FindAssembly(dllPath);
+            if (foundedPath != null)
             {
-                testPath = Path.Combine(context.CurrentDirectory.Data, path);
-                if (!File.Exists(testPath))
-                {
-                    testPath = Path.Combine(context.NodeCsExtraBinDirectory.Data, path);
-                    if (!File.Exists(testPath))
-                    {
-                        testPath = Path.Combine(context.TempPath, path);
-                        if (!File.Exists(testPath))
-                        {
-                            var nodeDir = Path.GetDirectoryName(context.NodeCsExecutablePath);
-                            // ReSharper disable once AssignNullToNotNullAttribute
-                            testPath = Path.Combine(nodeDir, path);
-                            if (!File.Exists(testPath))
-                            {
-                                throw new DllNotFoundException();
-                            }
-                        }
-                    }
-                }
+                var content = File.ReadAllBytes(foundedPath);
+                Assembly.Load(content);
             }
-            var content = File.ReadAllBytes(testPath);
-            Assembly.Load(content);
+            else
+            {
+                throw new DllNotFoundException(dllPath);
+            }
         }
 
         #region Private functions
@@ -252,7 +238,7 @@ namespace Node.Cs.CommandHandlers
             var dlls = new List<string>();
             foreach (var dll in _nugetDownloader.DownloadPackage(context.ImageRuntimeVersion, packageName, version, allowPreRelease))
             {
-                var path = Path.Combine(context.TempPath,dll.Name);
+                var path = Path.Combine(context.NodeCsPackagesDirectory,dll.Name);
                 File.WriteAllBytes(path, dll.Data);
                 dlls.Add(path);
             }

@@ -29,15 +29,17 @@ namespace Node.Cs
 			string nodeCsExtraBinDirecotry,
 			string currentDirectory,
 			string tempPath,
+            string nodeCsPackagesDirectory,
             string imageRuntimeVersion)
 		{
 			Args = args;
 			Version = version;
 			NodeCsExecutablePath = nodeCsExecutablePath;
 			TempPath = CreateDirIfNotExists(tempPath);
-			NodeCsExtraBinDirectory = new LockFreeItem<string>(CreateDirIfNotExists(nodeCsExtraBinDirecotry));
+			NodeCsExtraBinDirectory = CreateDirIfNotExists(nodeCsExtraBinDirecotry);
 			CurrentDirectory = new LockFreeItem<string>(CreateDirIfNotExists(currentDirectory));
             ImageRuntimeVersion = imageRuntimeVersion;
+            NodeCsPackagesDirectory = CreateDirIfNotExists(nodeCsPackagesDirectory);
 		}
 
 		private string CreateDirIfNotExists(string dir)
@@ -49,11 +51,12 @@ namespace Node.Cs
 			return dir;
 		}
 
+        public string NodeCsPackagesDirectory { get; protected set; }
         public CommandLineParser Args { get; protected set; }
         public String ImageRuntimeVersion { get; protected set; }
         public Version Version { get; protected set; }
         public string NodeCsExecutablePath { get; protected set; }
-		public LockFreeItem<string> NodeCsExtraBinDirectory { get; protected set; }
+		public string NodeCsExtraBinDirectory { get; protected set; }
 		public LockFreeItem<string> CurrentDirectory { get; set; }
 		public string TempPath { get; protected set; }
 	}

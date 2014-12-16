@@ -24,6 +24,7 @@ namespace Node.Cs
 	public class NugetPackagesDownloader : INugetPackagesDownloader
 	{
 		public const string NUGET_ORG = "https://www.nuget.org/api/v2/package/{0}/{1}";
+
 		private readonly IWebClient _client;
 
 		public NugetPackagesDownloader(IWebClient client = null)
@@ -46,10 +47,10 @@ namespace Node.Cs
 			{
 				allServers.Add(NUGET_ORG);
 			}
-			
-			for (var i = 0; i < _servers.Count; i++)
+
+            for (var i = 0; i < allServers.Count; i++)
 			{
-				byte[] result = DownloadSingleItem(_servers[i], packageName, version, allowPreRelease);
+                byte[] result = DownloadSingleItem(allServers[i], packageName, version, allowPreRelease);
 				if (result != null && result.Length > 0)
 				{
 					return ExtractDlls(result, framework);
@@ -87,6 +88,8 @@ namespace Node.Cs
 			}
 		}
 
+        private static string DOUBLE_SEPARATOR = Path.DirectorySeparatorChar.ToString() + Path.DirectorySeparatorChar.ToString();
+
 		private IEnumerable<NugetDll> ExtractDllsBase(byte[] bytes, string framework)
 		{
 			using (var stream = new MemoryStream(bytes))
@@ -101,13 +104,9 @@ namespace Node.Cs
 						var path = e.FileName.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
 
 
-						path = path.Replace(
-								Path.DirectorySeparatorChar.ToString() + Path.DirectorySeparatorChar.ToString(),
-								Path.DirectorySeparatorChar.ToString());
+						path = path.Replace(DOUBLE_SEPARATOR,Path.DirectorySeparatorChar.ToString());
 						var pointer = "lib" + Path.DirectorySeparatorChar + framework + Path.DirectorySeparatorChar;
-						pointer = pointer.Replace(
-							Path.DirectorySeparatorChar.ToString() + Path.DirectorySeparatorChar.ToString(),
-							Path.DirectorySeparatorChar.ToString());
+                        pointer = pointer.Replace(DOUBLE_SEPARATOR,Path.DirectorySeparatorChar.ToString());
 						var ext = Path.GetExtension(path);
 						var isRealPath = path
 							.StartsWith(pointer) && !string.IsNullOrWhiteSpace(ext) && ext.ToLowerInvariant() == ".dll";

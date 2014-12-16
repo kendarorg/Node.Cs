@@ -37,8 +37,9 @@ namespace Node.Cs
 		{
 			var asm = Assembly.GetCallingAssembly();
 			var uri = new UriBuilder(asm.CodeBase);
-			var binDir = Path.Combine(Environment.CurrentDirectory, "bin");
-			var tmpDir = Path.Combine(Environment.CurrentDirectory, "tmp");
+            var binDir = Path.Combine(Environment.CurrentDirectory, "bin");
+            var tmpDir = Path.Combine(Environment.CurrentDirectory, "tmp");
+            var packagesDir = Path.Combine(Environment.CurrentDirectory, "packages");
 			_container = container;
 
 			var tar = (TargetFrameworkAttribute)Assembly.GetCallingAssembly()
@@ -52,6 +53,7 @@ namespace Node.Cs
 							uri.Path, binDir,
 							Environment.CurrentDirectory,
 							tmpDir,
+                            packagesDir,
 							"net" + name);
 			AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
 		}
@@ -121,6 +123,12 @@ namespace Node.Cs
 											.OnlyNewServices());
 
 
+            _container.Register(
+                            Component.For<IAssemblySeeker>()
+                                            .ImplementedBy<AssemblySeeker>()
+                                            .LifestyleSingleton()
+                                            .OnlyNewServices());
+
 			_container.Register(
 							Component.For<INugetPackagesDownloader>()
 											.ImplementedBy<NugetPackagesDownloader>()
@@ -179,26 +187,15 @@ namespace Node.Cs
 			}
 			var an = new AssemblyName(args.Name);
 			var path = an.Name.Split(',').Skip(1).First().Trim('/').Trim('\\').Trim() + ".dll";
-			var testPath = Path.Combine(_executionContext.NodeCsExtraBinDirectory.Data, path);
-			if (File.Exists(testPath))
-			{
-				return Assembly.LoadFrom(testPath);
-			}
-			testPath = Path.Combine(_executionContext.CurrentDirectory.Data, path);
-			if (File.Exists(testPath))
-			{
-				File.Copy(testPath, Path.Combine(_executionContext.TempPath, path), true);
-			}
-			testPath = Path.Combine(_executionContext.TempPath, path);
-			if (File.Exists(testPath))
-			{
-				return Assembly.LoadFrom(testPath);
-			}
-			testPath = Path.Combine(_executionContext.NodeCsExecutablePath, path);
-			if (File.Exists(testPath))
-			{
-				return Assembly.LoadFrom(testPath);
-			}
+
+            var seeker = _container.Resolve<IAssemblySeeker>();
+
+            var foundedPath = seeker.FindAssembly(path);
+            if (foundedPath != null)
+            {
+                return Assembly.LoadFrom(foundedPath);
+            }
+			
 			var console = _container.Resolve<INodeConsole>();
 			console.WriteLine("Dll '{0}' not found.", path);
 			return null;

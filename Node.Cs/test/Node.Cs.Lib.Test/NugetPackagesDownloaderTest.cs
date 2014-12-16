@@ -69,8 +69,9 @@ namespace Node.Cs
 				{
 					ll.AddSearchPath(Path.GetDirectoryName(context.NodeCsExecutablePath));
 					ll.AddSearchPath(context.TempPath);
+                    ll.AddSearchPath(context.NodeCsPackagesDirectory);
 					ll.AddSearchPath(context.CurrentDirectory.Data);
-					ll.AddSearchPath(context.NodeCsExtraBinDirectory.Data);
+					ll.AddSearchPath(context.NodeCsExtraBinDirectory);
 
 					ll.LoadDll(result.Data);
 
@@ -110,9 +111,10 @@ namespace Node.Cs
 			using (var ll = new AssemblyVerifier())
 			{
 				ll.AddSearchPath(Path.GetDirectoryName(context.NodeCsExecutablePath));
-				ll.AddSearchPath(context.TempPath);
+                ll.AddSearchPath(context.TempPath);
+                ll.AddSearchPath(context.NodeCsPackagesDirectory);
 				ll.AddSearchPath(context.CurrentDirectory.Data);
-				ll.AddSearchPath(context.NodeCsExtraBinDirectory.Data);
+				ll.AddSearchPath(context.NodeCsExtraBinDirectory);
 
 				ll.LoadDll(result.Data);
 
@@ -152,9 +154,10 @@ namespace Node.Cs
 			using (var ll = new AssemblyVerifier())
 			{
 				ll.AddSearchPath(Path.GetDirectoryName(context.NodeCsExecutablePath));
-				ll.AddSearchPath(context.TempPath);
+                ll.AddSearchPath(context.TempPath);
+                ll.AddSearchPath(context.NodeCsPackagesDirectory);
 				ll.AddSearchPath(context.CurrentDirectory.Data);
-				ll.AddSearchPath(context.NodeCsExtraBinDirectory.Data);
+				ll.AddSearchPath(context.NodeCsExtraBinDirectory);
 
 				ll.LoadDll(result.Data);
 

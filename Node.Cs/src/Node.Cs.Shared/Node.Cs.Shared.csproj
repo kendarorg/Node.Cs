@@ -50,6 +50,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblySeeker.cs" />
     <Compile Include="CommandHandlers\CommandDescriptor.cs" />
     <Compile Include="CommandHandlers\BasicCommandParser.cs" />
     <Compile Include="CommandHandlers\IBasicNodeCommands.cs" />
