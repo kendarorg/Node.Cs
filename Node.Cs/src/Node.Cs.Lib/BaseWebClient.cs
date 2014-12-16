@@ -13,13 +13,18 @@
 // ===========================================================
 
 
-using System;
+using System.Net;
 
-namespace Node.Cs.CommandHandlers
+namespace Node.Cs
 {
-	internal class RunnableDefinition
+	public class BaseWebClient : IWebClient
 	{
-		public DateTime Timestamp { get; set; }
-		public Type Type { get; set; }
+		public byte[] DownloadData(string address)
+		{
+			using (var cli = new WebClient())
+			{
+				return cli.DownloadData(address);
+			}
+		}
 	}
 }

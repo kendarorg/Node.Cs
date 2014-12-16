@@ -13,13 +13,17 @@
 // ===========================================================
 
 
-using System;
-
-namespace Node.Cs.CommandHandlers
+namespace Node.Cs
 {
-	internal class RunnableDefinition
+	public class NugetDll
 	{
-		public DateTime Timestamp { get; set; }
-		public Type Type { get; set; }
+		public NugetDll(string name, byte[] data)
+		{
+			Name = name;
+			Data = data;
+		}
+
+		public string Name { get; private set; }
+		public byte[] Data { get; private set; }
 	}
 }

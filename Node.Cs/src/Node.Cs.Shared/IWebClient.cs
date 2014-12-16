@@ -13,13 +13,10 @@
 // ===========================================================
 
 
-using System;
-
-namespace Node.Cs.CommandHandlers
+namespace Node.Cs
 {
-	internal class RunnableDefinition
+	public interface IWebClient
 	{
-		public DateTime Timestamp { get; set; }
-		public Type Type { get; set; }
+		byte[] DownloadData(string address);
 	}
 }

@@ -66,7 +66,9 @@
     <Compile Include="INodeModule.cs" />
     <Compile Include="CommandHandlers\IUiCommandsHandler.cs" />
     <Compile Include="INugetPackagesDownloader.cs" />
+    <Compile Include="IWebClient.cs" />
     <Compile Include="NodeExecutionContext.cs" />
+    <Compile Include="NugetDll.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

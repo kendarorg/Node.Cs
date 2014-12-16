@@ -1,31 +1,26 @@
-﻿using Ionic.Zip;
+﻿// ===========================================================
+// Copyright (C) 2014-2015 Kendar.org
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+// files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+// modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software 
+// is furnished to do so, subject to the following conditions:
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS 
+// BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF 
+// OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// ===========================================================
+
+
+using Ionic.Zip;
 using Node.Cs.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Node.Cs
 {
-	public class BaseWebClient : IWebClient
-	{
-		public byte[] DownloadData(string address)
-		{
-			using (var cli = new WebClient())
-			{
-				return cli.DownloadData(address);
-			}
-		}
-
-		public void Dispose()
-		{
-
-		}
-	}
-
 	public class NugetPackagesDownloader : INugetPackagesDownloader
 	{
 		public const string NUGET_ORG = "https://www.nuget.org/api/v2/package/{0}/{1}";
@@ -46,18 +41,16 @@ namespace Node.Cs
 		public IEnumerable<NugetDll> DownloadPackage(string framework, string packageName, string version, bool allowPreRelease)
 		{
 			version = version ?? string.Empty;
-			if (_servers.Count == 0)
+			var allServers = new List<string>(_servers);
+			if (allServers.Count == 0)
 			{
-				byte[] result = DownloadSingleItem(NUGET_ORG, packageName, version, allowPreRelease);
-				if (result != null)
-				{
-					return ExtractDlls(result, framework);
-				}
+				allServers.Add(NUGET_ORG);
 			}
+			
 			for (var i = 0; i < _servers.Count; i++)
 			{
 				byte[] result = DownloadSingleItem(_servers[i], packageName, version, allowPreRelease);
-				if (result != null)
+				if (result != null && result.Length > 0)
 				{
 					return ExtractDlls(result, framework);
 				}
@@ -115,15 +108,15 @@ namespace Node.Cs
 						pointer = pointer.Replace(
 							Path.DirectorySeparatorChar.ToString() + Path.DirectorySeparatorChar.ToString(),
 							Path.DirectorySeparatorChar.ToString());
+						var ext = Path.GetExtension(path);
 						var isRealPath = path
-							.StartsWith(pointer);
+							.StartsWith(pointer) && !string.IsNullOrWhiteSpace(ext) && ext.ToLowerInvariant() == ".dll";
 
 						if (isRealPath)
 						{
 							var ms = new MemoryStream();
 							e.Extract(ms);
 							yield return new NugetDll(Path.GetFileName(path), ms.ToArray());
-
 						}
 					}
 				}

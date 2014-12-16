@@ -84,6 +84,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseWebClient.cs" />
     <Compile Include="CommandHandlers\BasicNodeCommands.cs" />
     <Compile Include="CommandHandlers\RunnableDefinition.cs" />
     <Compile Include="Consoles\BasicNodeConsole.cs" />

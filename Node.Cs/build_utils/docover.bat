@@ -27,8 +27,10 @@ if "%VERBOSITY%"=="TRUE" (
 )
 echo Ensure build is up to date
 if "%VERBOSITY%"=="TRUE" (
+	msbuild "Node.Cs.sln" /target:Clean  "/property:Configuration=Release;OutDir=%SLN_DIR%\%OUT_DIR%"
 	msbuild "Node.Cs.sln" /target:Rebuild  "/property:Configuration=Release;OutDir=%SLN_DIR%\%OUT_DIR%"
 ) ELSE (	
+	msbuild "Node.Cs.sln" /target:Clean  "/property:Configuration=Release;OutDir=%SLN_DIR%\%OUT_DIR%" >NUL 2>NUL
 	msbuild "Node.Cs.sln" /target:Rebuild  "/property:Configuration=Release;OutDir=%SLN_DIR%\%OUT_DIR%" >NUL 2>NUL
 )
 

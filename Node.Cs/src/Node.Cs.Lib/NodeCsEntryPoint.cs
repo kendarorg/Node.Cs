@@ -14,6 +14,8 @@
 
 
 using System.IO;
+using System.Linq;
+using System.Runtime.Versioning;
 using Castle.MicroKernel.Registration;
 using Castle.Windsor;
 using GenericHelpers;
@@ -24,173 +26,182 @@ using System.Reflection;
 
 namespace Node.Cs
 {
-    public class NodeCsEntryPoint : INodeCsEntryPoint
-    {
-        public const string COMMAND_ERROR_FORMAT = "Error executing command '{0}'. Error was: '{1}'";
+	public class NodeCsEntryPoint : INodeCsEntryPoint
+	{
+		public const string COMMAND_ERROR_FORMAT = "Error executing command '{0}'. Error was: '{1}'";
 
-        private readonly WindsorContainer _container;
-        private readonly NodeExecutionContext _executionContext;
+		private readonly WindsorContainer _container;
+		private readonly NodeExecutionContext _executionContext;
 
-        public NodeCsEntryPoint(CommandLineParser args, WindsorContainer container)
-        {
-            var asm = Assembly.GetCallingAssembly();
-            var uri = new UriBuilder(asm.CodeBase);
-            var binDir = Path.Combine(Environment.CurrentDirectory, "bin");
-            var tmpDir = Path.Combine(Environment.CurrentDirectory, "tmp");
-            _container = container;
-            _executionContext = new NodeExecutionContext(
-                    args,
-                    Assembly.GetExecutingAssembly().GetName().Version,
-                    uri.Path, binDir,
-                    Environment.CurrentDirectory,
-                    tmpDir,
-                    IsNet45OrNewer()?"net45":"net40");
-            AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
-        }
+		public NodeCsEntryPoint(CommandLineParser args, WindsorContainer container)
+		{
+			var asm = Assembly.GetCallingAssembly();
+			var uri = new UriBuilder(asm.CodeBase);
+			var binDir = Path.Combine(Environment.CurrentDirectory, "bin");
+			var tmpDir = Path.Combine(Environment.CurrentDirectory, "tmp");
+			_container = container;
 
-        public static bool IsNet45OrNewer()
-        {
-            // Class "ReflectionContext" exists from .NET 4.5 onwards.
-            return Type.GetType("System.Reflection.ReflectionContext", false) != null;
-        }
+			var tar = (TargetFrameworkAttribute)Assembly.GetCallingAssembly()
+					.GetCustomAttributes(typeof(TargetFrameworkAttribute)).First();
+			var las = tar.FrameworkName.LastIndexOf("v", StringComparison.Ordinal);
+			var name = tar.FrameworkName.Substring(las + 1).Replace(".","");
 
-        public void Run(bool asService = false)
-        {
-            Initialize();
+			_executionContext = new NodeExecutionContext(
+							args,
+							Assembly.GetExecutingAssembly().GetName().Version,
+							uri.Path, binDir,
+							Environment.CurrentDirectory,
+							tmpDir,
+							"net" + name);
+			AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
+		}
 
-            if (asService)
-            {
-                RunAsService();
-            }
-            else
-            {
-                RunAsInteractive();
-            }
-        }
+		public void Run(bool asService = false)
+		{
+			Initialize();
 
-        protected virtual bool ShouldContinueRunning()
-        {
-            return true;
-        }
+			if (asService)
+			{
+				RunAsService();
+			}
+			else
+			{
+				RunAsInteractive();
+			}
+		}
 
-        private static void RunAsService()
-        {
-            throw new NotImplementedException("Cannot run Node.Cs as a service");
-        }
+		protected virtual bool ShouldContinueRunning()
+		{
+			return true;
+		}
 
-        private void RunAsInteractive()
-        {
-            var commandsHandler = _container.Resolve<IUiCommandsHandler>();
-            var console = _container.Resolve<INodeConsole>();
-            while (ShouldContinueRunning())
-            {
-                var command = console.ReadLine();
-                if (!string.IsNullOrWhiteSpace(command))
-                {
-                    try
-                    {
-                        commandsHandler.Run(command);
-                    }
-                    catch (Exception ex)
-                    {
-                        console.WriteLine(COMMAND_ERROR_FORMAT, command, ex.Message);
-                    }
-                }
-            }
-        }
+		private static void RunAsService()
+		{
+			throw new NotImplementedException("Cannot run Node.Cs as a service");
+		}
 
-        private void Initialize()
-        {
-            _container.Register(
-                    Component.For<INodeExecutionContext>()
-                            .Instance(_executionContext)
-                            .LifestyleSingleton());
+		private void RunAsInteractive()
+		{
+			var commandsHandler = _container.Resolve<IUiCommandsHandler>();
+			var console = _container.Resolve<INodeConsole>();
+			while (ShouldContinueRunning())
+			{
+				var command = console.ReadLine();
+				if (!string.IsNullOrWhiteSpace(command))
+				{
+					try
+					{
+						commandsHandler.Run(command);
+					}
+					catch (Exception ex)
+					{
+						console.WriteLine(COMMAND_ERROR_FORMAT, command, ex.Message);
+					}
+				}
+			}
+		}
 
-            SetupMainDependencies();
-            PreInitializeBasicModules();
-        }
+		private void Initialize()
+		{
+			_container.Register(
+							Component.For<INodeExecutionContext>()
+											.Instance(_executionContext)
+											.LifestyleSingleton());
 
-        private void SetupMainDependencies()
-        {
-            _container.Register(
-                    Component.For<IBasicNodeCommands>()
-                            .ImplementedBy<BasicNodeCommands>()
-                            .LifestyleSingleton()
-                            .OnlyNewServices());
+			SetupMainDependencies();
+			PreInitializeBasicModules();
+		}
 
-            
-            _container.Register(
-                    Component.For<INugetPackagesDownloader>()
-                            .ImplementedBy<NugetPackagesDownloader>()
-                            .LifestyleSingleton()
-                            .OnlyNewServices());
-            
+		private void SetupMainDependencies()
+		{
+			_container.Register(
+							Component.For<IBasicNodeCommands>()
+											.ImplementedBy<BasicNodeCommands>()
+											.LifestyleSingleton()
+											.OnlyNewServices());
 
-            _container.Register(
-                    Component.For<ICommandParser>()
-                            .ImplementedBy<BasicCommandParser>()
-                            .LifestyleSingleton()
-                            .OnlyNewServices());
 
-            _container.Register(
-                    Component.For<INodeConsole>()
-                            .ImplementedBy<BasicNodeConsole>()
-                            .LifestyleSingleton()
-                            .OnlyNewServices());
+			_container.Register(
+							Component.For<INugetPackagesDownloader>()
+											.ImplementedBy<NugetPackagesDownloader>()
+											.LifestyleSingleton()
+											.OnlyNewServices());
 
-            _container.Register(
-                    Component.For<IUiCommandsHandler>()
-                            .ImplementedBy<UiCommandsHandler>()
-                            .LifestyleSingleton()
-                            .OnlyNewServices());
 
-            _container.Register(
-                    Component.For<INodeCsEntryPoint>()
-                            .Instance(this)
-                            .LifestyleSingleton());
+			_container.Register(
+							Component.For<ICommandParser>()
+											.ImplementedBy<BasicCommandParser>()
+											.LifestyleSingleton()
+											.OnlyNewServices());
 
-            _container.Register(
-                    Classes.FromThisAssembly()
-                            .BasedOn<INodeModule>()
-                            .LifestyleSingleton()
-                    );
-        }
+			_container.Register(
+							Component.For<INodeConsole>()
+											.ImplementedBy<BasicNodeConsole>()
+											.LifestyleSingleton()
+											.OnlyNewServices());
 
-        private void PreInitializeBasicModules()
-        {
-            foreach (var basicModule in _container.ResolveAll<INodeModule>())
-            {
-                basicModule.PreInitialize();
-            }
-        }
+			_container.Register(
+							Component.For<IUiCommandsHandler>()
+											.ImplementedBy<UiCommandsHandler>()
+											.LifestyleSingleton()
+											.OnlyNewServices());
 
-        private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            var path = new AssemblyName(args.Name).Name + ".dll";
+			_container.Register(
+							Component.For<INodeCsEntryPoint>()
+											.Instance(this)
+											.LifestyleSingleton());
 
-            var testPath  = Path.Combine(_executionContext.NodeCsExtraBinDirectory.Data, path);
-            if (File.Exists(testPath))
-            {
-                return Assembly.LoadFrom(testPath);
-            }
-            testPath = Path.Combine(_executionContext.CurrentDirectory.Data, path);
-            if (File.Exists(testPath))
-            {
-                File.Copy(testPath, Path.Combine(_executionContext.TempPath, path), true);
-            }
-            testPath = Path.Combine(_executionContext.TempPath, path);
-            if (File.Exists(testPath))
-            {
-                return Assembly.LoadFrom(testPath);
-            }
-            testPath = Path.Combine(_executionContext.NodeCsExecutablePath, path);
-            if (File.Exists(testPath))
-            {
-                return Assembly.LoadFrom(testPath);
-            }
-            var console = _container.Resolve<INodeConsole>();
-            console.WriteLine("Dll '{0}' not found.", path);
-            return null;
-        }
-    }
+			_container.Register(
+							Classes.FromThisAssembly()
+											.BasedOn<INodeModule>()
+											.LifestyleSingleton()
+							);
+		}
+
+		private void PreInitializeBasicModules()
+		{
+			foreach (var basicModule in _container.ResolveAll<INodeModule>())
+			{
+				basicModule.PreInitialize();
+			}
+		}
+
+		private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
+		{
+			var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+			foreach (var assembly in loadedAssemblies)
+			{
+				if (assembly.FullName == args.Name)
+				{
+					return assembly;
+				}
+			}
+			var an = new AssemblyName(args.Name);
+			var path = an.Name.Split(',').Skip(1).First().Trim('/').Trim('\\').Trim() + ".dll";
+			var testPath = Path.Combine(_executionContext.NodeCsExtraBinDirectory.Data, path);
+			if (File.Exists(testPath))
+			{
+				return Assembly.LoadFrom(testPath);
+			}
+			testPath = Path.Combine(_executionContext.CurrentDirectory.Data, path);
+			if (File.Exists(testPath))
+			{
+				File.Copy(testPath, Path.Combine(_executionContext.TempPath, path), true);
+			}
+			testPath = Path.Combine(_executionContext.TempPath, path);
+			if (File.Exists(testPath))
+			{
+				return Assembly.LoadFrom(testPath);
+			}
+			testPath = Path.Combine(_executionContext.NodeCsExecutablePath, path);
+			if (File.Exists(testPath))
+			{
+				return Assembly.LoadFrom(testPath);
+			}
+			var console = _container.Resolve<INodeConsole>();
+			console.WriteLine("Dll '{0}' not found.", path);
+			return null;
+		}
+	}
 }
