@@ -96,6 +96,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AssemblySeekerTest.cs" />
     <Compile Include="BasicNodeCommandsTest.cs" />
     <Content Include="BasicNodeCommandsTests\TestWithCompilationErrors.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

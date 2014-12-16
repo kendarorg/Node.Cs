@@ -185,5 +185,17 @@ namespace Node.Cs
 			//Act
 			ExceptionAssert.Throws<NugetDownloadException>(()=>Target.DownloadPackage("net45", packageName, version, allowPreRelease));
 		}
+
+        [TestMethod]
+        public void DownloadPackage_ShouldNotFailIfNoDllHadBeenFounded()
+        {
+            Assert.Inconclusive("DownloadPackage_ShouldNotFailIfNoDllHadBeenFounded");
+        }
+
+        [TestMethod]
+        public void DownloadPackage_ShouldNotFailIfWebClientWouldThrowExceptions()
+        {
+            Assert.Inconclusive("DownloadPackage_ShouldNotFailIfWebClientWouldThrowExceptions");
+        }
 	}
 }

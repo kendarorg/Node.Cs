@@ -10,8 +10,10 @@ description=Node.Cs Code Coverage
 
 The code coverage for Node.Cs.
 
+<pre>
+
 ﻿Summary
-  Generated on: 16/12/2014 - 22:12:46
+  Generated on: 16/12/2014 - 22:29:13
   Parser: OpenCoverParser
   Assemblies: 2
   Classes: 20
@@ -45,3 +47,5 @@ Node.Cs.Shared                                   96.3%
   Node.Cs.Exceptions.NugetDownloadException     100.0%
   Node.Cs.NodeExecutionContext                  100.0%
   Node.Cs.NugetDll                              100.0%
+ 
+</pre> 

@@ -89,6 +89,8 @@ echo Report created
 
 type docs\Node.Cs.Help\_coverage.template >docs\Node.Cs.Help\coverage.md
 type docs\Node.Cs.Help\Summary.txt >>docs\Node.Cs.Help\coverage.md
+echo. >>docs\Node.Cs.Help\coverage.md
+echo ^</pre^> >>docs\Node.Cs.Help\coverage.md
 
 if "%VERBOSITY%"=="TRUE" (
 	Echo Leaving report dir bin
