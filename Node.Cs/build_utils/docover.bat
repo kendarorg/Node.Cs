@@ -70,7 +70,7 @@ if "%VERBOSITY%"=="TRUE" (
 
 	echo Generate the syntethic report
 
-	build_utils\report_generator\ReportGenerator.exe "-targetdir:docs\Node.Cs.Help\coverage" "-reporttypes:HtmlSummary" "-reports:.report\bin\output.xml"
+	build_utils\report_generator\ReportGenerator.exe "-targetdir:docs\Node.Cs.Help" "-reporttypes:TextSummary" "-reports:.report\bin\output.xml"
 		
 ) ELSE (
 
@@ -82,15 +82,20 @@ if "%VERBOSITY%"=="TRUE" (
 
 	echo Generate the syntethic report
 
-	build_utils\report_generator\ReportGenerator.exe "-targetdir:docs\Node.Cs.Help\coverage" "-reporttypes:HtmlSummary" "-reports:.report\bin\output.xml"  >NUL 2>NUL
+	build_utils\report_generator\ReportGenerator.exe "-targetdir:docs\Node.Cs.Help" "-reporttypes:TextSummary" "-reports:.report\bin\output.xml"  >NUL 2>NUL
 		
 )	
 echo Report created
+
+type docs\Node.Cs.Help\_coverage.template >docs\Node.Cs.Help\coverage.md
+type docs\Node.Cs.Help\Summary.txt >>docs\Node.Cs.Help\coverage.md
+
 if "%VERBOSITY%"=="TRUE" (
 	Echo Leaving report dir bin
 ) ELSE (
 	rd /s /q "%SLN_DIR%\.report\bin"  >NUL 2>NUL
 	rd /s /q "%SLN_DIR%\TestResults"  >NUL 2>NUL
+	del /y docs\Node.Cs.Help\Summary.txt
 )	
 
 REM Open the report

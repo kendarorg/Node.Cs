@@ -37,10 +37,12 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="components.md" />
+    <None Include="_coverage.template" />
     <None Include="gettingstarted.md" />
     <None Include="architecture.md" />
     <None Include="todo.md" />
     <None Include="index.md" />
+    <None Include="coverage.md" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
