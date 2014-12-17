@@ -52,7 +52,13 @@ namespace Node.Cs
 			_servers.Add(packageSourceFormat);
 		}
 
-		public IEnumerable<NugetDll> DownloadPackage(string framework, string packageName, string version, bool allowPreRelease)
+		public IEnumerable<NugetDll> DownloadPackage(string framework, string packageName, string version,
+			bool allowPreRelease)
+		{
+			var duplicateDetector = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+			return DownloadPackageInternal(framework, packageName, version, allowPreRelease, duplicateDetector);
+		}
+		public IEnumerable<NugetDll> DownloadPackageInternal(string framework, string packageName, string version, bool allowPreRelease,HashSet<string> duplicateDetector)
 		{
 			version = version ?? string.Empty;
 			var allServers = new List<string>(_servers);
@@ -74,17 +80,17 @@ namespace Node.Cs
 						Framework = framework,
 						Pre = allowPreRelease
 					};
-					return ExtractDlls(package);
+					return ExtractDlls(package, duplicateDetector);
 				}
 			}
 			throw new NugetDownloadException("Unable to find package '{0}'.", packageName);
 		}
 
-		private IEnumerable<NugetDll> ExtractDlls(NugetDescriptor package)
+		private IEnumerable<NugetDll> ExtractDlls(NugetDescriptor package, HashSet<string> duplicateDetector)
 		{
 
 			var nuspec = ExtractNuspec(package);
-			XNamespace ns = "http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd";
+			
 			foreach (var xNode in nuspec.DescendantNodes().Where(el =>
 			{
 				var xe = el as XElement;
@@ -94,8 +100,10 @@ namespace Node.Cs
 			{
 				var depDll = (XElement) xNode;
 				var depId = depDll.Attribute("id").Value;
+				if (duplicateDetector.Contains(depId)) continue;
+				duplicateDetector.Add(depId);
 				var depVersion = depDll.Attribute("version") != null ? depDll.Attribute("version").Value : null;
-				foreach (var depItem in DownloadPackage(package.Framework, depId, depVersion, package.Pre))
+				foreach (var depItem in DownloadPackageInternal(package.Framework, depId, depVersion, package.Pre, duplicateDetector))
 				{
 					yield return depItem;
 				}

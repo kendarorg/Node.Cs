@@ -62,12 +62,14 @@
     <Compile Include="Exceptions\DuplicateCommandException.cs" />
     <Compile Include="Exceptions\MissingCommandException.cs" />
     <Compile Include="Exceptions\MissingFunctionException.cs" />
+    <Compile Include="IModulesCollection.cs" />
     <Compile Include="INodeCsEntryPoint.cs" />
     <Compile Include="INodeExecutionContext.cs" />
     <Compile Include="INodeModule.cs" />
     <Compile Include="CommandHandlers\IUiCommandsHandler.cs" />
     <Compile Include="INugetPackagesDownloader.cs" />
     <Compile Include="IWebClient.cs" />
+    <Compile Include="ModulesCollection.cs" />
     <Compile Include="NodeExecutionContext.cs" />
     <Compile Include="NugetDll.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -268,5 +268,53 @@ namespace Node.Cs
 				Assert.AreEqual("45", ll.FrameworkVersion);
 			}
 		}
+
+
+		[TestMethod]
+		public void DownloadPackage_ShouldHandleCircularReferences()
+		{
+			//Setup 
+			SetupTarget();
+
+			const string packageName1 = "NugetCircularReference.Test";
+			const string version1 = "1.0.0";
+			const bool allowPreRelease1 = true;
+			var address1 = string.Format("https://www.nuget.org/api/v2/package/{0}/{1}", packageName1, version1);
+
+
+			var context = Object<INodeExecutionContext>();
+			var client = MockOf<IWebClient>();
+
+
+			var dllContent1 =
+				File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "Nuget\\NugetCircularReference.Test.1.0.0.nupkg"));
+			client.Setup(a => a.DownloadData(address1))
+				.Returns(dllContent1);
+			var count = 0;
+
+			//Act
+			foreach (var result in Target.DownloadPackage("net45", packageName1, version1, allowPreRelease1))
+			{
+				Assert.IsTrue(count<=1);
+				//Verify
+				Assert.AreEqual("NugetCircularReference.Test.dll", result.Name);
+				Assert.IsNotNull(result);
+				using (var ll = new AssemblyVerifier())
+				{
+					ll.AddSearchPath(Path.GetDirectoryName(context.NodeCsExecutablePath));
+					ll.AddSearchPath(context.TempPath);
+					ll.AddSearchPath(context.NodeCsPackagesDirectory);
+					ll.AddSearchPath(context.CurrentDirectory.Data);
+					ll.AddSearchPath(context.NodeCsExtraBinDirectory);
+
+					ll.LoadDll(result.Data);
+
+					Assert.IsTrue(ll.DllLoaded);
+					Assert.AreEqual("NugetCircularReference.Test", ll.Name.Name);
+					Assert.AreEqual("45", ll.FrameworkVersion);
+				}
+				count++;
+			}
+		}
 	}
 }

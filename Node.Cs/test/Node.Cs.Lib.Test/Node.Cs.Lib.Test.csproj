@@ -130,6 +130,9 @@
     <None Include="Nuget\NoFrameworkPackageFor.Test.1.0.0.nupkg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Nuget\NugetCircularReference.Test.1.0.0.nupkg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Nuget\NugetPackageWithDependencies.Test.1.0.0.nupkg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
