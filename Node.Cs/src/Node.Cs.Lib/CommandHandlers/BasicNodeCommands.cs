@@ -56,7 +56,7 @@ namespace Node.Cs.CommandHandlers
             {
                 function = "Execute";
             }
-            path = path.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
+						path = path.ToPath();
             var absolutePath = Path.Combine(context.CurrentDirectory.Data.Trim(Path.DirectorySeparatorChar), path.Trim(Path.DirectorySeparatorChar));
             if (!File.Exists(absolutePath))
             {

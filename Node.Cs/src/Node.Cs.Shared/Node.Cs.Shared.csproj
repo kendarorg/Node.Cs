@@ -71,6 +71,7 @@
     <Compile Include="NodeExecutionContext.cs" />
     <Compile Include="NugetDll.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StringPathExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

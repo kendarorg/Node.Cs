@@ -97,7 +97,9 @@ if "%VERBOSITY%"=="TRUE" (
 ) ELSE (
 	rd /s /q "%SLN_DIR%\.report\bin"  >NUL 2>NUL
 	rd /s /q "%SLN_DIR%\TestResults"  >NUL 2>NUL
-	del /y docs\Node.Cs.Help\Summary.txt
+	build_utils\cleanup.bat  >NUL 2>NUL
+	del /y docs\Node.Cs.Help\Summary.txt  >NUL 2>NUL
+	del /y build_utils\cleanup.bat   >NUL 2>NUL
 )	
 
 REM Open the report

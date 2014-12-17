@@ -33,9 +33,7 @@ namespace Node.Cs
 
         public string FindAssembly(string dllPath)
         {
-            var path = dllPath.
-                Replace('/', Path.DirectorySeparatorChar).
-                Replace('\\', Path.DirectorySeparatorChar).
+            var path = dllPath.ToPath().
                 Trim(Path.DirectorySeparatorChar);
 
             if (Path.IsPathRooted(path))

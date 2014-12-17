@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.31010.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{05B9533D-FE3B-4D74-AE2D-C8A90173C859}"
 	ProjectSection(SolutionItems) = preProject
@@ -34,6 +34,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoFrameworkPackageFor.Test", "test\NoFrameworkPackageFor.Test\NoFrameworkPackageFor.Test.csproj", "{8E643764-3E9B-4012-BC25-3FCEC4351233}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mockProjects", "mockProjects", "{6E830AB1-F147-4D30-B50E-698828482CF9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NugetPackageWithDependencies.Test", "test\NugetPackageWithDependencies.Test\NugetPackageWithDependencies.Test.csproj", "{76841D3F-53E1-4656-9605-DEE90CB16B25}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,6 +79,10 @@ Global
 		{8E643764-3E9B-4012-BC25-3FCEC4351233}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E643764-3E9B-4012-BC25-3FCEC4351233}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E643764-3E9B-4012-BC25-3FCEC4351233}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76841D3F-53E1-4656-9605-DEE90CB16B25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76841D3F-53E1-4656-9605-DEE90CB16B25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76841D3F-53E1-4656-9605-DEE90CB16B25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76841D3F-53E1-4656-9605-DEE90CB16B25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -92,5 +98,6 @@ Global
 		{9C143118-5FF0-47E1-B158-573202E15648} = {6E830AB1-F147-4D30-B50E-698828482CF9}
 		{8E643764-3E9B-4012-BC25-3FCEC4351233} = {6E830AB1-F147-4D30-B50E-698828482CF9}
 		{6E830AB1-F147-4D30-B50E-698828482CF9} = {EEB9AFE7-2065-4418-A9C5-110133E29E27}
+		{76841D3F-53E1-4656-9605-DEE90CB16B25} = {6E830AB1-F147-4D30-B50E-698828482CF9}
 	EndGlobalSection
 EndGlobal

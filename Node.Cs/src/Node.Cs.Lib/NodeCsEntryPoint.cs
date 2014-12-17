@@ -17,6 +17,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.Resolvers.SpecializedResolvers;
 using Castle.Windsor;
 using GenericHelpers;
 using Node.Cs.CommandHandlers;
@@ -41,6 +42,7 @@ namespace Node.Cs
             var tmpDir = Path.Combine(Environment.CurrentDirectory, "tmp");
             var packagesDir = Path.Combine(Environment.CurrentDirectory, "packages");
 			_container = container;
+			_container.Kernel.Resolver.AddSubResolver(new CollectionResolver(_container.Kernel));
 
 			var tar = (TargetFrameworkAttribute)Assembly.GetCallingAssembly()
 					.GetCustomAttributes(typeof(TargetFrameworkAttribute)).First();

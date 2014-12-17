@@ -53,7 +53,7 @@ namespace Node.Cs
 				server.Start();
 
 				var dllContent = File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "Nuget\\BasicNugetPackageFor.Test.1.0.0.nupkg"));
-				
+
 				var address = server.CreateAddress("{0}/{1}");
 				var expectedCall = string.Format(address, packageName, version);
 				server.Responses.Add(expectedCall, (c, s) => s.Respond(c, dllContent));
@@ -69,7 +69,7 @@ namespace Node.Cs
 				{
 					ll.AddSearchPath(Path.GetDirectoryName(context.NodeCsExecutablePath));
 					ll.AddSearchPath(context.TempPath);
-                    ll.AddSearchPath(context.NodeCsPackagesDirectory);
+					ll.AddSearchPath(context.NodeCsPackagesDirectory);
 					ll.AddSearchPath(context.CurrentDirectory.Data);
 					ll.AddSearchPath(context.NodeCsExtraBinDirectory);
 
@@ -79,7 +79,7 @@ namespace Node.Cs
 					Assert.AreEqual("BasicNugetPackageFor.Test", ll.Name.Name);
 					Assert.AreEqual("45", ll.FrameworkVersion);
 				}
-				
+
 			}
 		}
 
@@ -105,14 +105,14 @@ namespace Node.Cs
 					.FirstOrDefault();
 
 			//Verify
-			Assert.IsNotNull( result);
+			Assert.IsNotNull(result);
 
 			Assert.AreEqual("BasicNugetPackageFor.Test.dll", result.Name);
 			using (var ll = new AssemblyVerifier())
 			{
 				ll.AddSearchPath(Path.GetDirectoryName(context.NodeCsExecutablePath));
-                ll.AddSearchPath(context.TempPath);
-                ll.AddSearchPath(context.NodeCsPackagesDirectory);
+				ll.AddSearchPath(context.TempPath);
+				ll.AddSearchPath(context.NodeCsPackagesDirectory);
 				ll.AddSearchPath(context.CurrentDirectory.Data);
 				ll.AddSearchPath(context.NodeCsExtraBinDirectory);
 
@@ -154,8 +154,8 @@ namespace Node.Cs
 			using (var ll = new AssemblyVerifier())
 			{
 				ll.AddSearchPath(Path.GetDirectoryName(context.NodeCsExecutablePath));
-                ll.AddSearchPath(context.TempPath);
-                ll.AddSearchPath(context.NodeCsPackagesDirectory);
+				ll.AddSearchPath(context.TempPath);
+				ll.AddSearchPath(context.NodeCsPackagesDirectory);
 				ll.AddSearchPath(context.CurrentDirectory.Data);
 				ll.AddSearchPath(context.NodeCsExtraBinDirectory);
 
@@ -181,21 +181,92 @@ namespace Node.Cs
 			var context = Object<INodeExecutionContext>();
 			var client = MockOf<IWebClient>();
 			client.Setup(a => a.DownloadData(It.IsAny<string>())).Returns(new byte[0]);
-			
+
 			//Act
-			ExceptionAssert.Throws<NugetDownloadException>(()=>Target.DownloadPackage("net45", packageName, version, allowPreRelease));
+			ExceptionAssert.Throws<NugetDownloadException>(() => Target.DownloadPackage("net45", packageName, version, allowPreRelease));
 		}
 
-        [TestMethod]
-        public void DownloadPackage_ShouldNotFailIfNoDllHadBeenFounded()
-        {
-            Assert.Inconclusive("DownloadPackage_ShouldNotFailIfNoDllHadBeenFounded");
-        }
+		[TestMethod]
+		public void DownloadPackage_ShouldNotFailIfNoDllHadBeenFounded()
+		{
+			Assert.Inconclusive("DownloadPackage_ShouldNotFailIfNoDllHadBeenFounded");
+		}
 
-        [TestMethod]
-        public void DownloadPackage_ShouldNotFailIfWebClientWouldThrowExceptions()
-        {
-            Assert.Inconclusive("DownloadPackage_ShouldNotFailIfWebClientWouldThrowExceptions");
-        }
+		[TestMethod]
+		public void DownloadPackage_ShouldNotFailIfWebClientWouldThrowExceptions()
+		{
+			Assert.Inconclusive("DownloadPackage_ShouldNotFailIfWebClientWouldThrowExceptions");
+		}
+
+		[TestMethod]
+		public void DownloadPackage_ShouldDownloadDependenciesToo()
+		{
+			//Setup 
+			SetupTarget();
+
+			const string packageName1 = "NugetPackageWithDependencies.Test";
+			const string version1 = "1.0.0";
+			const bool allowPreRelease1 = true;
+			var address1 = string.Format("https://www.nuget.org/api/v2/package/{0}/{1}", packageName1, version1);
+
+
+			const string packageName2 = "NoFrameworkPackageFor.Test";
+			const string version2 = "1.0.0";
+			var address2 = string.Format("https://www.nuget.org/api/v2/package/{0}/{1}", packageName2, version2);
+
+			var context = Object<INodeExecutionContext>();
+			var client = MockOf<IWebClient>();
+
+
+			var dllContent1 =
+				File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "Nuget\\NugetPackageWithDependencies.Test.1.0.0.nupkg"));
+			client.Setup(a => a.DownloadData(address1))
+				.Returns(dllContent1);
+
+			var dllContent2 =
+				File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "Nuget\\NoFrameworkPackageFor.Test.1.0.0.nupkg"));
+			client.Setup(a => a.DownloadData(address2))
+				.Returns(dllContent2);
+
+			//Act
+			var results = Target.DownloadPackage("net45", packageName1, version1, allowPreRelease1).ToArray();
+
+			//Verify
+			Assert.AreEqual(2,results.Length);
+
+			var result = results.FirstOrDefault(a => a.Name == "NoFrameworkPackageFor.Test.dll");
+			Assert.IsNotNull(result);
+			using (var ll = new AssemblyVerifier())
+			{
+				ll.AddSearchPath(Path.GetDirectoryName(context.NodeCsExecutablePath));
+				ll.AddSearchPath(context.TempPath);
+				ll.AddSearchPath(context.NodeCsPackagesDirectory);
+				ll.AddSearchPath(context.CurrentDirectory.Data);
+				ll.AddSearchPath(context.NodeCsExtraBinDirectory);
+
+				ll.LoadDll(result.Data);
+
+				Assert.IsTrue(ll.DllLoaded);
+				Assert.AreEqual("NoFrameworkPackageFor.Test", ll.Name.Name);
+				Assert.AreEqual("40", ll.FrameworkVersion);
+			}
+
+			result = results.FirstOrDefault(a => a.Name == "NugetPackageWithDependencies.Test.dll");
+			Assert.IsNotNull(result);
+			using (var ll = new AssemblyVerifier())
+			{
+				ll.AddSearchPath(Path.GetDirectoryName(context.NodeCsExecutablePath));
+				ll.AddSearchPath(context.TempPath);
+				ll.AddSearchPath(context.NodeCsPackagesDirectory);
+				ll.AddSearchPath(context.CurrentDirectory.Data);
+				ll.AddSearchPath(context.NodeCsExtraBinDirectory);
+
+				ll.LoadDll(result.Data);
+
+				Assert.IsTrue(ll.DllLoaded);
+				Assert.AreEqual("NugetPackageWithDependencies.Test", ll.Name.Name);
+				Assert.AreEqual("45", ll.FrameworkVersion);
+			}
+		}
 	}
 }
