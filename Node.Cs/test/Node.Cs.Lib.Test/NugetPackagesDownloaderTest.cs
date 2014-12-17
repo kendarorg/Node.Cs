@@ -176,9 +176,6 @@ namespace Node.Cs
 			const string packageName = "NoFrameworkPackageFor.Test";
 			const string version = "1.0.0";
 			const bool allowPreRelease = true;
-			var address = string.Format("https://www.nuget.org/api/v2/package/{0}/{1}", packageName, version);
-
-			var context = Object<INodeExecutionContext>();
 			var client = MockOf<IWebClient>();
 			client.Setup(a => a.DownloadData(It.IsAny<string>())).Returns(new byte[0]);
 
@@ -187,15 +184,21 @@ namespace Node.Cs
 		}
 
 		[TestMethod]
-		public void DownloadPackage_ShouldNotFailIfNoDllHadBeenFounded()
+		public void DownloadPackage_ShouldThrowConnectionException()
 		{
-			Assert.Inconclusive("DownloadPackage_ShouldNotFailIfNoDllHadBeenFounded");
-		}
+			//Setup 
+			SetupTarget();
 
-		[TestMethod]
-		public void DownloadPackage_ShouldNotFailIfWebClientWouldThrowExceptions()
-		{
-			Assert.Inconclusive("DownloadPackage_ShouldNotFailIfWebClientWouldThrowExceptions");
+			const string packageName = "NoFrameworkPackageFor.Test";
+			const string version = "1.0.0";
+			const bool allowPreRelease = true;
+
+			var client = MockOf<IWebClient>();
+			client.Setup(a => a.DownloadData(It.IsAny<string>())).Throws(new OutOfMemoryException());
+
+			//Act
+			ExceptionAssert.Throws<OutOfMemoryException>(
+				() => Target.DownloadPackage("net45", packageName, version, allowPreRelease));
 		}
 
 		[TestMethod]
@@ -232,7 +235,7 @@ namespace Node.Cs
 			var results = Target.DownloadPackage("net45", packageName1, version1, allowPreRelease1).ToArray();
 
 			//Verify
-			Assert.AreEqual(2,results.Length);
+			Assert.AreEqual(2, results.Length);
 
 			var result = results.FirstOrDefault(a => a.Name == "NoFrameworkPackageFor.Test.dll");
 			Assert.IsNotNull(result);
@@ -295,7 +298,7 @@ namespace Node.Cs
 			//Act
 			foreach (var result in Target.DownloadPackage("net45", packageName1, version1, allowPreRelease1))
 			{
-				Assert.IsTrue(count<=1);
+				Assert.IsTrue(count <= 1);
 				//Verify
 				Assert.AreEqual("NugetCircularReference.Test.dll", result.Name);
 				Assert.IsNotNull(result);

@@ -58,7 +58,7 @@ namespace Node.Cs
 			var duplicateDetector = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
 			return DownloadPackageInternal(framework, packageName, version, allowPreRelease, duplicateDetector);
 		}
-		public IEnumerable<NugetDll> DownloadPackageInternal(string framework, string packageName, string version, bool allowPreRelease,HashSet<string> duplicateDetector)
+		public IEnumerable<NugetDll> DownloadPackageInternal(string framework, string packageName, string version, bool allowPreRelease, HashSet<string> duplicateDetector)
 		{
 			version = version ?? string.Empty;
 			var allServers = new List<string>(_servers);
@@ -90,7 +90,7 @@ namespace Node.Cs
 		{
 
 			var nuspec = ExtractNuspec(package);
-			
+
 			foreach (var xNode in nuspec.DescendantNodes().Where(el =>
 			{
 				var xe = el as XElement;
@@ -98,7 +98,7 @@ namespace Node.Cs
 				return String.Compare(xe.Name.LocalName, "dependency", StringComparison.OrdinalIgnoreCase) == 0;
 			}))
 			{
-				var depDll = (XElement) xNode;
+				var depDll = (XElement)xNode;
 				var depId = depDll.Attribute("id").Value;
 				if (duplicateDetector.Contains(depId)) continue;
 				duplicateDetector.Add(depId);
@@ -117,7 +117,7 @@ namespace Node.Cs
 		private IEnumerable<NugetDll> LoadDlls(NugetDescriptor package)
 		{
 			package.Data.Seek(0, SeekOrigin.Begin);
-			var items = new SortedDictionary<string,List<string>>();
+			var items = new SortedDictionary<string, List<string>>();
 			using (var zip = ZipFile.Read(package.Data))
 			{
 				foreach (ZipEntry e in zip)
@@ -126,7 +126,7 @@ namespace Node.Cs
 				}
 				foreach (var itemKey in items.Keys.Reverse())
 				{
-					if(String.Compare(itemKey, package.Framework, StringComparison.OrdinalIgnoreCase)>0) continue;
+					if (String.Compare(itemKey, package.Framework, StringComparison.OrdinalIgnoreCase) > 0) continue;
 					return ExtractDllsForFramework(zip, items[itemKey]);
 				}
 				if (items.ContainsKey("net00"))
@@ -134,7 +134,7 @@ namespace Node.Cs
 					return ExtractDllsForFramework(zip, items["net00"]);
 				}
 				throw new DllNotFoundException(
-					string.Format("Unable to find a suitable framework version for package '{0}.{1}'.",package.Id,package.Version));
+					string.Format("Unable to find a suitable framework version for package '{0}.{1}'.", package.Id, package.Version));
 			}
 		}
 
@@ -147,7 +147,7 @@ namespace Node.Cs
 				var result = new MemoryStream();
 				var zipItem = zip[dll];
 				zipItem.Extract(result);
-				yield return new NugetDll(fileName,result.ToArray());
+				yield return new NugetDll(fileName, result.ToArray());
 			}
 		}
 
@@ -173,7 +173,7 @@ namespace Node.Cs
 			using (var zip = ZipFile.Read(package.Data))
 			{
 				////var e = zip.First(r => r.FileName.Equals(package.Id + ".nuspec",StringComparison.OrdinalIgnoreCase));
-				var e = zip[package.Id+".nuspec"];
+				var e = zip[package.Id + ".nuspec"];
 				var outStream = new MemoryStream();
 				e.Extract(outStream);
 				outStream.Seek(0, SeekOrigin.Begin);
@@ -259,15 +259,9 @@ namespace Node.Cs
 		private byte[] DownloadSingleItem(string format, string packageName, string version, bool allowPreRelease)
 		{
 			var remoteUri = string.Format(format, packageName, version).Trim('/');
-			try
-			{
-				var client = _client ?? new BaseWebClient();
-				return client.DownloadData(remoteUri);
-			}
-			catch (Exception)
-			{
-				return null;
-			}
+
+			var client = _client ?? new BaseWebClient();
+			return client.DownloadData(remoteUri);
 
 		}
 	}
