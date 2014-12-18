@@ -14,6 +14,7 @@
 
 
 using System;
+using Node.Cs.Modules;
 
 namespace Node.Cs.Mocks
 {

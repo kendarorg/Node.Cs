@@ -23,6 +23,7 @@ using System.Linq;
 using Node.Cs.CommandHandlers;
 using Node.Cs.Consoles;
 using Node.Cs.Test;
+using Node.Cs.Utils;
 
 namespace Node.Cs
 {

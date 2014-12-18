@@ -22,6 +22,7 @@ using Node.Cs.Exceptions;
 using Node.Cs.Mocks;
 using Node.Cs.Test;
 using Castle.MicroKernel.Registration;
+using Node.Cs.Utils;
 
 namespace Node.Cs
 {

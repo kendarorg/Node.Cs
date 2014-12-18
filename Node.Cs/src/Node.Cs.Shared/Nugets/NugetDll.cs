@@ -13,13 +13,17 @@
 // ===========================================================
 
 
-using System.Collections.Generic;
-
-namespace Node.Cs
+namespace Node.Cs.Nugets
 {
-	public interface INugetPackagesDownloader
+	public class NugetDll
 	{
-		void AddPackageSource(string packageSourceFormat);
-		IEnumerable<NugetDll> DownloadPackage(string framework, string packageName, string version, bool allowPreRelease);
+		public NugetDll(string name, byte[] data)
+		{
+			Name = name;
+			Data = data;
+		}
+
+		public string Name { get; private set; }
+		public byte[] Data { get; private set; }
 	}
 }

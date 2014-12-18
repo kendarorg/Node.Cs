@@ -16,6 +16,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Node.Cs.CommandHandlers;
+using Node.Cs.Modules;
 using Node.Cs.Test;
 
 namespace Node.Cs

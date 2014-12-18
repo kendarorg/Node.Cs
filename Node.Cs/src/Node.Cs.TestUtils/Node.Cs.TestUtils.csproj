@@ -72,6 +72,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Node.Cs.Lib\Node.Cs.Lib.csproj">
+      <Project>{1E1C8C29-0B0F-4598-AC91-F2E43E8B33EB}</Project>
+      <Name>Node.Cs.Lib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Node.Cs.Shared\Node.Cs.Shared.csproj">
       <Project>{0e122daf-29ee-4d25-9ee8-d4a3d06e23a2}</Project>
       <Name>Node.Cs.Shared</Name>

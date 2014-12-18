@@ -13,13 +13,10 @@
 // ===========================================================
 
 
-
-namespace Node.Cs
+namespace Node.Cs.Utils
 {
-	public interface IModulesCollection
+	public interface IWebClient
 	{
-		void Register(params INodeModule[] modules);
-		T GetModule<T>(string name = null) where T : class, INodeModule;
-		INodeModule GetModule(string name = null);
+		byte[] DownloadData(string address);
 	}
 }

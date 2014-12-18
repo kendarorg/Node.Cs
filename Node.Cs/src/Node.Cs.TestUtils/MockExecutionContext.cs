@@ -17,6 +17,7 @@ using GenericHelpers;
 using System;
 using System.IO;
 using System.Reflection;
+using Node.Cs.Utils;
 
 namespace Node.Cs.Test
 {

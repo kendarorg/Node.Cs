@@ -13,25 +13,13 @@
 // ===========================================================
 
 
-using System;
 
-namespace Node.Cs
+namespace Node.Cs.Modules
 {
-	/// <summary>
-	/// This class must stay into the INodeModule Namespace and file!!
-	/// </summary>
-	public static class NodeModuleExtension
+	public interface IModulesCollection
 	{
-		public static string Print(this INodeModule module)
-		{
-			return string.Format("{0},{1}", module.Name, module.Version);
-		}
-	}
-
-	public interface INodeModule
-	{
-		string Name { get; }
-		Version Version { get; }
-		void Initialize();
+		void Register(params INodeModule[] modules);
+		T GetModule<T>(string name = null) where T : class, INodeModule;
+		INodeModule GetModule(string name = null);
 	}
 }

@@ -13,11 +13,11 @@
 // ===========================================================
 
 
-using Node.Cs.Exceptions;
 using System;
 using System.Collections.Concurrent;
+using Node.Cs.Exceptions;
 
-namespace Node.Cs
+namespace Node.Cs.Modules
 {
 	public class ModulesCollection : IModulesCollection
 	{

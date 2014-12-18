@@ -50,7 +50,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblySeeker.cs" />
+    <Compile Include="Utils\AssemblySeeker.cs" />
     <Compile Include="CommandHandlers\CommandDescriptor.cs" />
     <Compile Include="CommandHandlers\BasicCommandParser.cs" />
     <Compile Include="CommandHandlers\IBasicNodeCommands.cs" />
@@ -65,22 +65,22 @@
     <Compile Include="Exceptions\DuplicateCommandException.cs" />
     <Compile Include="Exceptions\MissingCommandException.cs" />
     <Compile Include="Exceptions\MissingFunctionException.cs" />
-    <Compile Include="IModulesCollection.cs" />
+    <Compile Include="Modules\IModulesCollection.cs" />
     <Compile Include="INodeCsEntryPoint.cs" />
-    <Compile Include="INodeExecutionContext.cs" />
-    <Compile Include="INodeModule.cs" />
+    <Compile Include="Utils\INodeExecutionContext.cs" />
+    <Compile Include="Modules\INodeModule.cs" />
     <Compile Include="CommandHandlers\IUiCommandsHandler.cs" />
-    <Compile Include="INugetPackagesDownloader.cs" />
-    <Compile Include="IWebClient.cs" />
-    <Compile Include="ModulesCollection.cs" />
-    <Compile Include="NodeExecutionContext.cs" />
-    <Compile Include="NugetDll.cs" />
+    <Compile Include="Nugets\INugetPackagesDownloader.cs" />
+    <Compile Include="Utils\IWebClient.cs" />
+    <Compile Include="Modules\ModulesCollection.cs" />
+    <Compile Include="Nugets\NugetDll.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StringPathExtension.cs" />
+    <Compile Include="Utils\StringPathExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

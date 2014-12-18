@@ -16,7 +16,7 @@
 using Castle.Windsor;
 using GenericHelpers;
 
-namespace Node.Cs
+namespace Node.Cs.Utils
 {
 	public class NodeCsEntryPointForTest : NodeCsEntryPoint
 	{

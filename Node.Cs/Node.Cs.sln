@@ -43,6 +43,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DllWithModule.Test", "test\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NugetWithoutSuitableFramework.Test", "test\NugetWithoutSuitableFramework.Test\NugetWithoutSuitableFramework.Test.csproj", "{D5C50874-F4F8-4A50-830D-6B5E527C8FE9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleNameDll", "test\SimpleNameDll\SimpleNameDll.csproj", "{D01D226E-E89F-4945-9A2E-1A745A45A5B2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -101,6 +103,10 @@ Global
 		{D5C50874-F4F8-4A50-830D-6B5E527C8FE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5C50874-F4F8-4A50-830D-6B5E527C8FE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5C50874-F4F8-4A50-830D-6B5E527C8FE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D01D226E-E89F-4945-9A2E-1A745A45A5B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D01D226E-E89F-4945-9A2E-1A745A45A5B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D01D226E-E89F-4945-9A2E-1A745A45A5B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D01D226E-E89F-4945-9A2E-1A745A45A5B2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -120,5 +126,6 @@ Global
 		{A0873F58-4949-459C-B58A-24B0871B694D} = {6E830AB1-F147-4D30-B50E-698828482CF9}
 		{CB245070-79B5-4AAA-B439-5F02497322BC} = {6E830AB1-F147-4D30-B50E-698828482CF9}
 		{D5C50874-F4F8-4A50-830D-6B5E527C8FE9} = {6E830AB1-F147-4D30-B50E-698828482CF9}
+		{D01D226E-E89F-4945-9A2E-1A745A45A5B2} = {6E830AB1-F147-4D30-B50E-698828482CF9}
 	EndGlobalSection
 EndGlobal

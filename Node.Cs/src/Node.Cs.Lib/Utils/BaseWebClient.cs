@@ -13,17 +13,18 @@
 // ===========================================================
 
 
-namespace Node.Cs
-{
-	public class NugetDll
-	{
-		public NugetDll(string name, byte[] data)
-		{
-			Name = name;
-			Data = data;
-		}
+using System.Net;
 
-		public string Name { get; private set; }
-		public byte[] Data { get; private set; }
+namespace Node.Cs.Utils
+{
+	public class BaseWebClient : IWebClient
+	{
+		public byte[] DownloadData(string address)
+		{
+			using (var cli = new WebClient())
+			{
+				return cli.DownloadData(address);
+			}
+		}
 	}
 }

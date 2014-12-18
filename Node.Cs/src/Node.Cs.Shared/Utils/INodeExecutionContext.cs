@@ -13,18 +13,21 @@
 // ===========================================================
 
 
-using System.Net;
+using System;
+using ConcurrencyHelpers.Containers;
+using GenericHelpers;
 
-namespace Node.Cs
+namespace Node.Cs.Utils
 {
-	public class BaseWebClient : IWebClient
+	public interface INodeExecutionContext
 	{
-		public byte[] DownloadData(string address)
-		{
-			using (var cli = new WebClient())
-			{
-				return cli.DownloadData(address);
-			}
-		}
+		CommandLineParser Args { get; }
+        Version Version { get; }
+        string NodeCsExecutablePath { get; }
+        string NodeCsPackagesDirectory { get; }
+        String ImageRuntimeVersion { get; }
+        string NodeCsExtraBinDirectory { get; }
+		LockFreeItem<string> CurrentDirectory { get; set; }
+		string TempPath { get; }
 	}
 }

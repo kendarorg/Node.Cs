@@ -19,11 +19,13 @@ using Moq;
 using Node.Cs.CommandHandlers;
 using Node.Cs.Consoles;
 using Node.Cs.Exceptions;
+using Node.Cs.Nugets;
 using Node.Cs.Test;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Node.Cs.Utils;
 
 namespace Node.Cs
 {

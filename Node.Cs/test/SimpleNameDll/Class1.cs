@@ -13,21 +13,10 @@
 // ===========================================================
 
 
-using System;
-using ConcurrencyHelpers.Containers;
-using GenericHelpers;
 
-namespace Node.Cs
+namespace SimpleNameDll
 {
-	public interface INodeExecutionContext
-	{
-		CommandLineParser Args { get; }
-        Version Version { get; }
-        string NodeCsExecutablePath { get; }
-        string NodeCsPackagesDirectory { get; }
-        String ImageRuntimeVersion { get; }
-        string NodeCsExtraBinDirectory { get; }
-		LockFreeItem<string> CurrentDirectory { get; set; }
-		string TempPath { get; }
-	}
+    public class Class1
+    {
+    }
 }

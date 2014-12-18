@@ -118,6 +118,7 @@
     <Compile Include="Mocks\IUiCommandsHandlerTestMock.cs" />
     <Compile Include="Mocks\MockNodeConsole.cs" />
     <Compile Include="ModulesCollectionTest.cs" />
+    <Compile Include="NodeModuleExtensionTest.cs" />
     <Compile Include="NugetPackagesDownloaderTest.cs" />
     <Compile Include="StringPathExtensionTest.cs" />
     <Compile Include="UiCommandsHandlerTest.cs" />
@@ -167,6 +168,10 @@
     <ProjectReference Include="..\BasicDllFor.Test\BasicDllFor.Test.csproj">
       <Project>{0924001c-7faf-4128-97ac-a3a3c02413f5}</Project>
       <Name>BasicDllFor.Test</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SimpleNameDll\SimpleNameDll.csproj">
+      <Project>{d01d226e-e89f-4945-9a2e-1a745a45a5b2}</Project>
+      <Name>SimpleNameDll</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

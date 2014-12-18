@@ -36,6 +36,7 @@ At this point only the build of ConcurrencyHelpers with framework 4.0 will be sh
 * license.cs: The copyright notice to prepend on all .cs files
 * dobuild_env.bat: The Visual Studio environment variables
 * dobuild_*.bat: Utilities to build the project (not intented for direct usage)
+* docover.bat: Generate code coverage for the tests into the .report directory
 * VisualStudioIdentifier.exe: Utility to find the location of devenv.exe
 * BuildCleaner.exe: Utility to find the solution files and zip them
 * CommentsHeader.exe: Utility to find add comments on all files

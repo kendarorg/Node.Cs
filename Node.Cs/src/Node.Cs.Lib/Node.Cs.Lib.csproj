@@ -84,16 +84,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseWebClient.cs" />
+    <Compile Include="Utils\BaseWebClient.cs" />
     <Compile Include="CommandHandlers\BasicNodeCommands.cs" />
     <Compile Include="CommandHandlers\RunnableDefinition.cs" />
     <Compile Include="Consoles\BasicNodeConsole.cs" />
-    <Compile Include="NodeCsEntryPointForTest.cs" />
-    <Compile Include="NodeRootModule.cs" />
+    <Compile Include="Utils\NodeCsEntryPointForTest.cs" />
+    <Compile Include="Modules\NodeRootModule.cs" />
     <Compile Include="CommandHandlers\UiCommandsHandler.cs" />
     <Compile Include="NodeCsEntryPoint.cs" />
-    <Compile Include="NugetPackagesDownloader.cs" />
+    <Compile Include="Nugets\NugetPackagesDownloader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\NodeExecutionContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

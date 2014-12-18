@@ -23,6 +23,9 @@ using Castle.MicroKernel.Registration;
 using Castle.Windsor;
 using Node.Cs.Consoles;
 using Node.Cs.Exceptions;
+using Node.Cs.Modules;
+using Node.Cs.Nugets;
+using Node.Cs.Utils;
 using SharpTemplate.Compilers;
 
 namespace Node.Cs.CommandHandlers

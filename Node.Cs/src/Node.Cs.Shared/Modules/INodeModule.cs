@@ -13,15 +13,25 @@
 // ===========================================================
 
 
-using Node.Cs.Utils;
+using System;
 
-namespace Node.Cs.Mocks
+namespace Node.Cs.Modules
 {
-	public interface IUiCommandsHandlerTestMock
+	/// <summary>
+	/// This class must stay into the INodeModule Namespace and file!!
+	/// </summary>
+	public static class NodeModuleExtension
 	{
-		void DoTest(INodeExecutionContext context);
+		public static string Print(this INodeModule module)
+		{
+			return string.Format("{0},{1}", module.Name, module.Version);
+		}
+	}
 
-		void CommantWithOverload(INodeExecutionContext context,string par);
-		void CommantWithOverload(INodeExecutionContext context, int par);
+	public interface INodeModule
+	{
+		string Name { get; }
+		Version Version { get; }
+		void Initialize();
 	}
 }

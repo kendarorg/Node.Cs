@@ -13,15 +13,21 @@
 // ===========================================================
 
 
-using Node.Cs.Utils;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Node.Cs.Mocks;
+using Node.Cs.Modules;
 
-namespace Node.Cs.Mocks
+namespace Node.Cs
 {
-	public interface IUiCommandsHandlerTestMock
+	[TestClass]
+	public class NodeModuleExtensionTest
 	{
-		void DoTest(INodeExecutionContext context);
-
-		void CommantWithOverload(INodeExecutionContext context,string par);
-		void CommantWithOverload(INodeExecutionContext context, int par);
+		[TestMethod]
+		public void Extension_ShouldPrintTheCorrectData()
+		{
+			var target = new FakeModuleFirst();
+			Assert.IsTrue(target.Print().StartsWith(target.Name));
+			Assert.IsTrue(target.Print().EndsWith(target.Version.ToString()));
+		}
 	}
 }

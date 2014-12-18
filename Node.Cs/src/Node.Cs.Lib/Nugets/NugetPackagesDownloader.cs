@@ -13,15 +13,16 @@
 // ===========================================================
 
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Ionic.Zip;
 using Node.Cs.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.IO;
+using Node.Cs.Utils;
 
-namespace Node.Cs
+namespace Node.Cs.Nugets
 {
 	public class NugetPackagesDownloader : INugetPackagesDownloader
 	{

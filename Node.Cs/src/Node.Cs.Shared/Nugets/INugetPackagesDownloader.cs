@@ -13,10 +13,13 @@
 // ===========================================================
 
 
-namespace Node.Cs
+using System.Collections.Generic;
+
+namespace Node.Cs.Nugets
 {
-	public interface IWebClient
+	public interface INugetPackagesDownloader
 	{
-		byte[] DownloadData(string address);
+		void AddPackageSource(string packageSourceFormat);
+		IEnumerable<NugetDll> DownloadPackage(string framework, string packageName, string version, bool allowPreRelease);
 	}
 }

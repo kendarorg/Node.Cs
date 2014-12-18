@@ -13,10 +13,12 @@
 // ===========================================================
 
 
+using System.IO;
 using Castle.MicroKernel.Registration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Node.Cs.Consoles;
 using Node.Cs.Test;
+using Node.Cs.Utils;
 
 namespace Node.Cs
 {
@@ -32,32 +34,68 @@ namespace Node.Cs
 		}
 
 		[TestMethod]
+		public void FindAssembly_ShouldFindWithoutPathSpecified()
+		{
+			SetupTarget();
+			var path = Container.Resolve<INodeExecutionContext>();
+			var expected = Path.Combine(path.CurrentDirectory.Data, "Node.cs.lib.test.dll");
+			var result = Target.FindAssembly("Node.cs.lib.test.dll");
+			Assert.AreEqual(expected, result);
+			Assert.IsTrue(File.Exists(result));
+		}
+
+		[TestMethod]
 		public void FindAssembly_ShouldFindAbsoultePaths()
 		{
 			SetupTarget();
-			Assert.Inconclusive("FindAssembly_ShouldFindAbsoultePaths");
+			var path = Container.Resolve<INodeExecutionContext>();
+			var expected = Path.Combine(path.CurrentDirectory.Data, "Node.cs.lib.test.dll");
+			var result = Target.FindAssembly(expected);
+			Assert.AreEqual(expected,result);
+			Assert.IsTrue(File.Exists(result));
 		}
-
 
 		[TestMethod]
 		public void FindAssembly_ShouldFindThroughDllNameIfRootedAndNotFound()
 		{
 			SetupTarget();
-			Assert.Inconclusive("FindAssembly_ShouldFindThroughDllNameIfRootedAndNotFound");
+			var path = Container.Resolve<INodeExecutionContext>();
+			var expected = Path.Combine(path.CurrentDirectory.Data, "Node.cs.lib.test.dll");
+			var fake = Path.Combine("C:\\not_existing", "Node.cs.lib.test.dll");
+			var result = Target.FindAssembly(fake);
+			Assert.AreEqual(expected, result);
+			Assert.IsTrue(File.Exists(result));
 		}
 
 		[TestMethod]
 		public void FindAssembly_ShouldReturnNullIfSearchingForFileNotDll()
 		{
 			SetupTarget();
-			Assert.Inconclusive("FindAssembly_ShouldReturnNullIfSearchingForFileNotDll");
+			const string path = "C:\\not_existing\\dll.dll";
+			var result = Target.FindAssembly(path);
+			Assert.IsNull(result);
 		}
 
 		[TestMethod]
-		public void FindAssembly_IfExtensionIsMissingShouldBeAdded()
+		public void FindAssembly_IfExtensionIsMissingShouldBeAdded_WithDottedDlls()
 		{
 			SetupTarget();
-			Assert.Inconclusive("FindAssembly_IfExtensionIsMissingShouldBeAdded");
+			var path = Container.Resolve<INodeExecutionContext>();
+			var expected = Path.Combine(path.CurrentDirectory.Data, "Node.cs.lib.test.dll");
+			var result = Target.FindAssembly("Node.cs.lib.test");
+			Assert.AreEqual(expected, result);
+			Assert.IsTrue(File.Exists(result));
+		}
+
+		[TestMethod]
+		public void FindAssembly_IfExtensionIsMissingShouldBeAdded_WithNotDottedDlls()
+		{
+			SetupTarget();
+			var path = Container.Resolve<INodeExecutionContext>();
+			var expected = Path.Combine(path.CurrentDirectory.Data, "SimpleNameDll.dll");
+			var result = Target.FindAssembly("SimpleNameDll");
+			Assert.AreEqual(expected, result);
+			Assert.IsTrue(File.Exists(result));
 		}
 	}
 }

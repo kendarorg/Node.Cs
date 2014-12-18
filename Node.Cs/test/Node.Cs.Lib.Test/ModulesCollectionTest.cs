@@ -18,7 +18,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Node.Cs.Consoles;
 using Node.Cs.Exceptions;
 using Node.Cs.Mocks;
+using Node.Cs.Modules;
 using Node.Cs.Test;
+using Node.Cs.Utils;
 
 namespace Node.Cs
 {

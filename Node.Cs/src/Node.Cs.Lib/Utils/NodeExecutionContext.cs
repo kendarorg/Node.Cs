@@ -13,12 +13,12 @@
 // ===========================================================
 
 
+using System;
 using System.IO;
 using ConcurrencyHelpers.Containers;
-using System;
 using GenericHelpers;
 
-namespace Node.Cs
+namespace Node.Cs.Utils
 {
 	public class NodeExecutionContext : INodeExecutionContext
 	{

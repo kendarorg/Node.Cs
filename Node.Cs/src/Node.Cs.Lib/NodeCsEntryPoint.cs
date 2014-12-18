@@ -24,6 +24,9 @@ using Node.Cs.CommandHandlers;
 using Node.Cs.Consoles;
 using System;
 using System.Reflection;
+using Node.Cs.Modules;
+using Node.Cs.Nugets;
+using Node.Cs.Utils;
 
 namespace Node.Cs
 {

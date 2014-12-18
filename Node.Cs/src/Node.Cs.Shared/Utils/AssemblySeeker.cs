@@ -17,7 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Node.Cs
+namespace Node.Cs.Utils
 {
 	public interface IAssemblySeeker
 	{
@@ -59,10 +59,6 @@ namespace Node.Cs
 
 			var ext = Path.GetExtension(path);
 			if (ext.ToLowerInvariant() != ".dll")
-			{
-				return null;
-			}
-			if (ext.Length == 0)
 			{
 				path += ".dll";
 			}

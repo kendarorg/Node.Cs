@@ -15,8 +15,9 @@
 
 using System;
 using Node.Cs.CommandHandlers;
+using Node.Cs.Utils;
 
-namespace Node.Cs
+namespace Node.Cs.Modules
 {
 	public class NodeRootModule : INodeModule
 	{
