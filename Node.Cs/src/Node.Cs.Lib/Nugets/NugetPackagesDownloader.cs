@@ -36,10 +36,14 @@ namespace Node.Cs.Nugets
 		}
 		public const string NUGET_ORG = "https://www.nuget.org/api/v2/package/{0}/{1}";
 
+		private readonly INugetArchiveList _archiveList;
+		private readonly INodeExecutionContext _context;
 		private readonly IWebClient _client;
 
-		public NugetPackagesDownloader(IWebClient client = null)
+		public NugetPackagesDownloader(INugetArchiveList archiveList,INodeExecutionContext context, IWebClient client = null)
 		{
+			_archiveList = archiveList;
+			_context = context;
 			_client = client;
 		}
 
@@ -54,7 +58,19 @@ namespace Node.Cs.Nugets
 			bool allowPreRelease)
 		{
 			var duplicateDetector = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-			return DownloadPackageInternal(framework, packageName, version, allowPreRelease, duplicateDetector);
+			if (_archiveList.Check(packageName, version))
+			{
+				var packageDescriptor = _archiveList.Get(packageName, version);
+				foreach (var dll in packageDescriptor.Dlls)
+				{
+					var dllPath = Path.Combine(_context.NodeCsPackagesDirectory, dll);
+					yield return new NugetDll(dll, File.ReadAllBytes(dllPath));
+				}
+			}
+			foreach (var dll in DownloadPackageInternal(framework, packageName, version, allowPreRelease, duplicateDetector))
+			{
+				yield return dll;
+			}
 		}
 		public IEnumerable<NugetDll> DownloadPackageInternal(string framework, string packageName, string version, bool allowPreRelease, HashSet<string> duplicateDetector)
 		{
@@ -107,6 +123,7 @@ namespace Node.Cs.Nugets
 					yield return depItem;
 				}
 			}
+			_archiveList.Add(package.Id, package.Version, new List<string>());
 			foreach (var locDll in LoadDlls(package))
 			{
 				yield return locDll;

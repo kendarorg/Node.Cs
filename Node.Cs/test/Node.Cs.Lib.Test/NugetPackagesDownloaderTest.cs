@@ -13,6 +13,7 @@
 // ===========================================================
 
 
+using System.Collections.Generic;
 using Castle.MicroKernel.Registration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -35,7 +36,14 @@ namespace Node.Cs
 		{
 			base.TestInitialize();
 			InitializeMock<INodeConsole>();
+			InitializeMock<INugetArchiveList>();
 			Container.Register(Component.For<INodeExecutionContext>().Instance(new MockExecutionContext()));
+			var path = Path.Combine(Container.Resolve<INodeExecutionContext>().NodeCsPackagesDirectory, "BasicNugetPackageFor.Test.dll");
+			if (File.Exists(path))
+			{
+				File.Delete(path);
+			}
+
 		}
 
 		[TestMethod]
@@ -182,11 +190,12 @@ namespace Node.Cs
 			client.Setup(a => a.DownloadData(It.IsAny<string>())).Returns(new byte[0]);
 
 			//Act
-			ExceptionAssert.Throws<NugetDownloadException>(() => Target.DownloadPackage("net45", packageName, version, allowPreRelease));
+			// ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+			ExceptionAssert.Throws<NugetDownloadException>(() => Target.DownloadPackage("net45", packageName, version, allowPreRelease).ToArray());
 		}
 
 		[TestMethod]
-		public void DownloadPackage_ShouldThrowConnectionException()
+		public void DownloadPackage_ShouldThrowTheException()
 		{
 			//Setup 
 			SetupTarget();
@@ -200,7 +209,8 @@ namespace Node.Cs
 
 			//Act
 			ExceptionAssert.Throws<OutOfMemoryException>(
-				() => Target.DownloadPackage("net45", packageName, version, allowPreRelease));
+				// ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+				() => Target.DownloadPackage("net45", packageName, version, allowPreRelease).ToArray());
 		}
 
 		[TestMethod]
@@ -343,8 +353,76 @@ namespace Node.Cs
 
 			//Act
 			// ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-			ExceptionAssert.Throws<DllNotFoundException>(()=>
+			ExceptionAssert.Throws<DllNotFoundException>(() =>
 				Target.DownloadPackage("net45", packageName, version, allowPreRelease).ToArray());
+		}
+
+		[TestMethod]
+		public void DownloadPackage_ShouldStoreThePackageDataVerifyingItIsNotPresent()
+		{
+			//Setup 
+			SetupTarget();
+
+			const string packageName = "BasicNugetPackageFor.Test";
+			const string version = "1.0.0";
+			const bool allowPreRelease = true;
+			var address = string.Format("https://www.nuget.org/api/v2/package/{0}/{1}", packageName, version);
+
+			var context = Object<INodeExecutionContext>();
+			var client = MockOf<IWebClient>();
+			var archive = MockOf<INugetArchiveList>();
+
+			var dllContent = File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "Nuget\\BasicNugetPackageFor.Test.1.0.0.nupkg"));
+			client.Setup(a => a.DownloadData(address))
+					.Returns(dllContent);
+
+
+			//Act
+			var result = Target.DownloadPackage("net45", packageName, version, allowPreRelease)
+					.FirstOrDefault();
+
+			//Verify
+			Assert.IsNotNull(result);
+			archive.Verify(a => a.Add(packageName, version, It.IsAny<List<string>>()), Times.Once);
+			archive.Verify(a => a.Check(packageName, version), Times.Once);
+			client.Verify(a => a.DownloadData(It.IsAny<string>()), Times.Once);
+		}
+
+		[TestMethod]
+		public void DownloadPackage_ShouldNotDownloadAnythingButLoadDataIfCheckFindsSomething()
+		{
+			//Setup 
+			SetupTarget();
+			var context = Object<INodeExecutionContext>();
+			var path = Path.Combine(context.NodeCsPackagesDirectory, "BasicNugetPackageFor.Test.dll");
+			File.WriteAllText(path, "thisisadll");
+
+			const string packageName = "BasicNugetPackageFor.Test";
+			const string version = "1.0.0";
+			const bool allowPreRelease = true;
+			var address = string.Format("https://www.nuget.org/api/v2/package/{0}/{1}", packageName, version);
+
+			var client = MockOf<IWebClient>();
+			var archive = MockOf<INugetArchiveList>();
+			archive.Setup(a => a.Check(packageName, version)).Returns(true);
+			archive.Setup(a => a.Get(packageName, version))
+				.Returns(new NugetPackage(packageName, version, new[] { "BasicNugetPackageFor.Test.dll" }));
+
+			var dllContent = File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "Nuget\\BasicNugetPackageFor.Test.1.0.0.nupkg"));
+			client.Setup(a => a.DownloadData(address))
+					.Returns(dllContent);
+
+
+			//Act
+			var result = Target.DownloadPackage("net45", packageName, version, allowPreRelease)
+					.FirstOrDefault();
+
+			//Verify
+			archive.Verify(a => a.Check(packageName, version), Times.Once);
+			archive.Verify(a => a.Get(packageName, version), Times.Once);
+			archive.Verify(a => a.Add(packageName, version, It.IsAny<List<string>>()), Times.Never);
+			client.Verify(a => a.DownloadData(It.IsAny<string>()), Times.Never);
+			Assert.IsNotNull(result);
 		}
 	}
 }

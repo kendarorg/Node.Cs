@@ -17,6 +17,15 @@ The project to start will be "src\Node.cs"
 
 The Node.cs command line will show then up
 
+### Node.Cs Directories
+
+The main directories are:
+
+* CurrentDirectory: The directory from which Node had been started
+* Tmp: The Node temporary directory
+* Packages: The storage for nuget packages
+* Bin: Extra binary files
+
 ### Node.Cs Prompt
 
 Several command are available (case insensitive)
@@ -43,3 +52,4 @@ Two kind of scripts are available:
 
 * .cs: C# source files
 * .ncs: File containing Node.Cs Prompt commands
+
