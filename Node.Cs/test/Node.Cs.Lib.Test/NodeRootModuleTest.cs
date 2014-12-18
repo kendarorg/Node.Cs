@@ -13,7 +13,6 @@
 // ===========================================================
 
 
-using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Node.Cs.CommandHandlers;
@@ -35,14 +34,26 @@ namespace Node.Cs
 			"run", 
 			"exit", 
 			"echo", 
-			"help"
+			"help",
+			"loadDll",
+			"loadnuget"
 		};
+
+
+		[TestMethod]
+		public void VersionAndNameShouldMatch()
+		{
+			SetupTarget();
+			var res = new NodeRootModule(null, null);
+			Assert.AreEqual(res.Version, Target.Version);
+			Assert.AreEqual(res.Name, Target.Name);
+		}
 
 		[TestMethod]
 		public void PreInitialize_ShouldRegisterRequiredCommands()
 		{
 			RunSeries(
-				(item) =>
+				item =>
 				{
 					//Setup
 					CommandDescriptor registeredCommand = null;
@@ -52,7 +63,7 @@ namespace Node.Cs
 						.Callback((CommandDescriptor cd) => registeredCommand = cd);
 
 					//Act
-					Target.PreInitialize();
+					Target.Initialize();
 
 					//Verify
 					Assert.IsNotNull(registeredCommand);

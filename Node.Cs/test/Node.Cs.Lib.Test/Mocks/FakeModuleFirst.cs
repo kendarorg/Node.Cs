@@ -15,13 +15,23 @@
 
 using System;
 
-namespace Node.Cs.Exceptions
+namespace Node.Cs.Mocks
 {
-	[Serializable]
-	public class DuplicateCommandException:Exception
+	public class FakeModuleFirst : INodeModule
 	{
-		public DuplicateCommandException(string format,params object[] pars)
-			:base(string.Format(format,pars))
+		private const string NAME = "FakeModuleFirst";
+		private static readonly Version _version = new Version("2.0.0.0");
+
+
+		public string Name
+		{
+			get { return NAME; }
+		}
+		public virtual Version Version
+		{
+			get { return _version; }
+		}
+		public void Initialize()
 		{
 			
 		}

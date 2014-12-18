@@ -13,17 +13,9 @@
 // ===========================================================
 
 
-using System;
-
-namespace Node.Cs.Exceptions
+namespace NugetWithoutSuitableFramework.Test
 {
-	[Serializable]
-	public class DuplicateCommandException:Exception
+	public class Class1
 	{
-		public DuplicateCommandException(string format,params object[] pars)
-			:base(string.Format(format,pars))
-		{
-			
-		}
 	}
 }

@@ -17,6 +17,7 @@ using System;
 
 namespace Node.Cs.Exceptions
 {
+	[Serializable]
 	public class NugetDownloadException : Exception
 	{
         public NugetDownloadException(string format, params object[] pars)

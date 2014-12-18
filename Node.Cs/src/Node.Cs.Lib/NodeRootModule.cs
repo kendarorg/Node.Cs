@@ -20,6 +20,9 @@ namespace Node.Cs
 {
 	public class NodeRootModule : INodeModule
 	{
+		private const string NAME = "Node.Cs.RootModule";
+		private static readonly Version _version = new Version("2.0.0.0");
+
 		private readonly IUiCommandsHandler _commandsHandler;
 		private readonly IBasicNodeCommands _nodeCommands;
 
@@ -29,7 +32,16 @@ namespace Node.Cs
 			_nodeCommands = basicNodeCommands;
 		}
 
-		public void PreInitialize()
+		public string Name
+		{
+			get { return NAME; }
+		}
+		public Version Version
+		{
+			get { return _version; }
+		}
+
+		public void Initialize()
 		{
 			_commandsHandler.RegisterCommand(
 				new CommandDescriptor(

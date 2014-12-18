@@ -319,5 +319,30 @@ namespace Node.Cs
 				count++;
 			}
 		}
+
+
+		[TestMethod]
+		public void DownloadPackage_ShouldThrowIfNoSuitableFrameworkIsFound()
+		{
+			//Setup 
+			SetupTarget();
+
+			const string packageName = "NugetWithoutSuitableFramework.Test";
+			const string version = "1.0.0";
+			const bool allowPreRelease = true;
+			var address = string.Format("https://www.nuget.org/api/v2/package/{0}/{1}", packageName, version);
+
+			var context = Object<INodeExecutionContext>();
+			var client = MockOf<IWebClient>();
+			var dllContent =
+				File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "Nuget\\NugetWithoutSuitableFramework.Test.1.0.0.nupkg"));
+			client.Setup(a => a.DownloadData(address))
+				.Returns(dllContent);
+
+			//Act
+			// ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+			ExceptionAssert.Throws<DllNotFoundException>(()=>
+				Target.DownloadPackage("net45", packageName, version, allowPreRelease).ToArray());
+		}
 	}
 }

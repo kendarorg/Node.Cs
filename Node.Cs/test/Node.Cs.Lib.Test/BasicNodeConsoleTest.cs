@@ -13,15 +13,16 @@
 // ===========================================================
 
 
-using System;
-using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Node.Cs.Consoles;
 using Node.Cs.Test;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 
 namespace Node.Cs
 {
-	[TestClass]
+	[SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification = "Used only for testing"), TestClass]
 	public class BasicNodeConsoleTest
 	{
 		private TextWriter _realOut;

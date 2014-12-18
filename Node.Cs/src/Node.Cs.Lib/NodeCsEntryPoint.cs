@@ -38,16 +38,16 @@ namespace Node.Cs
 		{
 			var asm = Assembly.GetCallingAssembly();
 			var uri = new UriBuilder(asm.CodeBase);
-            var binDir = Path.Combine(Environment.CurrentDirectory, "bin");
-            var tmpDir = Path.Combine(Environment.CurrentDirectory, "tmp");
-            var packagesDir = Path.Combine(Environment.CurrentDirectory, "packages");
+			var binDir = Path.Combine(Environment.CurrentDirectory, "bin");
+			var tmpDir = Path.Combine(Environment.CurrentDirectory, "tmp");
+			var packagesDir = Path.Combine(Environment.CurrentDirectory, "packages");
 			_container = container;
 			_container.Kernel.Resolver.AddSubResolver(new CollectionResolver(_container.Kernel));
 
 			var tar = (TargetFrameworkAttribute)Assembly.GetCallingAssembly()
 					.GetCustomAttributes(typeof(TargetFrameworkAttribute)).First();
 			var las = tar.FrameworkName.LastIndexOf("v", StringComparison.Ordinal);
-			var name = tar.FrameworkName.Substring(las + 1).Replace(".","");
+			var name = tar.FrameworkName.Substring(las + 1).Replace(".", "");
 
 			_executionContext = new NodeExecutionContext(
 							args,
@@ -55,7 +55,7 @@ namespace Node.Cs
 							uri.Path, binDir,
 							Environment.CurrentDirectory,
 							tmpDir,
-                            packagesDir,
+														packagesDir,
 							"net" + name);
 			AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
 		}
@@ -125,11 +125,11 @@ namespace Node.Cs
 											.OnlyNewServices());
 
 
-            _container.Register(
-                            Component.For<IAssemblySeeker>()
-                                            .ImplementedBy<AssemblySeeker>()
-                                            .LifestyleSingleton()
-                                            .OnlyNewServices());
+			_container.Register(
+											Component.For<IAssemblySeeker>()
+																			.ImplementedBy<AssemblySeeker>()
+																			.LifestyleSingleton()
+																			.OnlyNewServices());
 
 			_container.Register(
 							Component.For<INugetPackagesDownloader>()
@@ -172,7 +172,7 @@ namespace Node.Cs
 		{
 			foreach (var basicModule in _container.ResolveAll<INodeModule>())
 			{
-				basicModule.PreInitialize();
+				basicModule.Initialize();
 			}
 		}
 
@@ -190,14 +190,14 @@ namespace Node.Cs
 			var an = new AssemblyName(args.Name);
 			var path = an.Name.Split(',').Skip(1).First().Trim('/').Trim('\\').Trim() + ".dll";
 
-            var seeker = _container.Resolve<IAssemblySeeker>();
+			var seeker = _container.Resolve<IAssemblySeeker>();
 
-            var foundedPath = seeker.FindAssembly(path);
-            if (foundedPath != null)
-            {
-                return Assembly.LoadFrom(foundedPath);
-            }
-			
+			var foundedPath = seeker.FindAssembly(path);
+			if (foundedPath != null)
+			{
+				return Assembly.LoadFrom(foundedPath);
+			}
+
 			var console = _container.Resolve<INodeConsole>();
 			console.WriteLine("Dll '{0}' not found.", path);
 			return null;

@@ -57,6 +57,9 @@
     <Compile Include="CommandHandlers\ICommandParser.cs" />
     <Compile Include="CommandHandlers\ParsedCommand.cs" />
     <Compile Include="Consoles\INodeConsole.cs" />
+    <Compile Include="Exceptions\DuplicateModuleException.cs" />
+    <Compile Include="Exceptions\MissingModuleException.cs" />
+    <Compile Include="Exceptions\ModuleTypeException.cs" />
     <Compile Include="Exceptions\NugetDownloadException.cs" />
     <Compile Include="Exceptions\CompilationException.cs" />
     <Compile Include="Exceptions\DuplicateCommandException.cs" />

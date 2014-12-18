@@ -14,17 +14,34 @@
 
 
 using System;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace Node.Cs.Exceptions
 {
+	[Serializable]
 	public class CompilationException : Exception
 	{
 		public string CompiledSource { get; private set; }
 
-		public CompilationException(string message,string source = "")
+		public CompilationException(string message, string source = "")
 			: base(string.Format(message))
 		{
 			CompiledSource = source;
+		}
+
+		protected CompilationException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
+			CompiledSource = info.GetString("CompiledSource");
+		}
+
+		[SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+		public override void GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			base.GetObjectData(info, context);
+
+			info.AddValue("CompiledSource", CompiledSource);
 		}
 	}
 }

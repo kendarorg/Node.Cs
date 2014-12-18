@@ -13,32 +13,30 @@
 // ===========================================================
 
 
-
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Castle.Windsor.Diagnostics.Extensions;
-using Node.Cs.Consoles;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Reflection;
-using Castle.Windsor;
 using Castle.MicroKernel.Registration;
+using Castle.Windsor;
+using Node.Cs.Consoles;
 using Node.Cs.Exceptions;
 using SharpTemplate.Compilers;
-using Ionic.Zip;
 
 namespace Node.Cs.CommandHandlers
 {
 	public class BasicNodeCommands : IBasicNodeCommands
 	{
+		private readonly IAssemblySeeker _asmSeeker;
 		private readonly INodeConsole _console;
 		private readonly IWindsorContainer _container;
-		private INugetPackagesDownloader _nugetDownloader;
-		private IAssemblySeeker _asmSeeker;
 		private readonly IModulesCollection _modulesCollection;
+		private readonly INugetPackagesDownloader _nugetDownloader;
 
 		private readonly Dictionary<string, RunnableDefinition> _runnables =
-				new Dictionary<string, RunnableDefinition>(StringComparer.InvariantCultureIgnoreCase);
+			new Dictionary<string, RunnableDefinition>(StringComparer.InvariantCultureIgnoreCase);
 
 		public BasicNodeCommands(
 			INodeConsole console,
@@ -55,10 +53,11 @@ namespace Node.Cs.CommandHandlers
 		}
 
 		/// <summary>
-		/// Runs a .cs file
+		///   Runs a .cs file
 		/// </summary>
 		/// <param name="context"></param>
 		/// <param name="path"></param>
+		/// <param name="function"></param>
 		public void Run(INodeExecutionContext context, string path, string function = null)
 		{
 			if (function == null)
@@ -66,19 +65,20 @@ namespace Node.Cs.CommandHandlers
 				function = "Execute";
 			}
 			path = path.ToPath();
-			var absolutePath = Path.Combine(context.CurrentDirectory.Data.Trim(Path.DirectorySeparatorChar), path.Trim(Path.DirectorySeparatorChar));
+			string absolutePath = Path.Combine(context.CurrentDirectory.Data.Trim(Path.DirectorySeparatorChar),
+				path.Trim(Path.DirectorySeparatorChar));
 			if (!File.Exists(absolutePath))
 			{
 				throw new FileNotFoundException("File not found.", path);
 			}
-			var extension = Path.GetExtension(absolutePath);
+			string extension = Path.GetExtension(absolutePath);
 			if (extension.ToLowerInvariant() == ".cs")
 			{
 				RunAndBuild(absolutePath, context, function);
 			}
 			else if (extension.ToLowerInvariant() == ".ncs")
 			{
-				RunNcs(absolutePath, context);
+				RunNcs(absolutePath);
 			}
 			else
 			{
@@ -91,6 +91,7 @@ namespace Node.Cs.CommandHandlers
 			_console.WriteLine(message);
 		}
 
+		[ExcludeFromCodeCoverage]
 		public void Exit(INodeExecutionContext context, int errorCode)
 		{
 			Environment.Exit(errorCode);
@@ -98,10 +99,10 @@ namespace Node.Cs.CommandHandlers
 
 		public void LoadDll(INodeExecutionContext context, string dllPath)
 		{
-			var foundedPath = _asmSeeker.FindAssembly(dllPath);
+			string foundedPath = _asmSeeker.FindAssembly(dllPath);
 			if (foundedPath != null)
 			{
-				var content = File.ReadAllBytes(foundedPath);
+				byte[] content = File.ReadAllBytes(foundedPath);
 				InitializeNewDlls(() => Assembly.Load(content));
 			}
 			else
@@ -110,20 +111,42 @@ namespace Node.Cs.CommandHandlers
 			}
 		}
 
+		public void LoadNuget(INodeExecutionContext context, string packageName, string version = null,
+			bool allowPreRelease = false)
+		{
+			var dlls = new List<string>();
+			foreach (
+				NugetDll dll in _nugetDownloader.DownloadPackage(context.ImageRuntimeVersion, packageName, version, allowPreRelease)
+				)
+			{
+				string path = Path.Combine(context.NodeCsPackagesDirectory, dll.Name);
+				File.WriteAllBytes(path, dll.Data);
+				dlls.Add(path);
+			}
+			InitializeNewDlls(() =>
+			{
+				foreach (string dllPath in dlls)
+				{
+					byte[] content = File.ReadAllBytes(dllPath);
+					Assembly.Load(content);
+				}
+			});
+		}
+
 		#region Private functions
 
 		private void RunAndBuild(string path, INodeExecutionContext context, string function)
 		{
-			var loadedAssembly = string.Empty;
-			var dllName = "dll_" + Guid.NewGuid().ToString("N");
-			var className = "class_" + dllName;
-			var namespaceName = "ns_" + dllName;
+			string loadedAssembly = string.Empty;
+			string dllName = "dll_" + Guid.NewGuid().ToString("N");
+			string className = "class_" + dllName;
+			string namespaceName = "ns_" + dllName;
 			try
 			{
 				Type type;
 				if (_runnables.ContainsKey(path))
 				{
-					var def = _runnables[path];
+					RunnableDefinition def = _runnables[path];
 					if (def.Timestamp < File.GetLastWriteTime(path))
 					{
 						_runnables.Remove(path);
@@ -131,21 +154,21 @@ namespace Node.Cs.CommandHandlers
 				}
 				if (!_runnables.ContainsKey(path))
 				{
-					var originalSource = File.ReadAllText(path);
-					var source = "namespace " + namespaceName + " {" + originalSource + "}";
+					string originalSource = File.ReadAllText(path);
+					string source = "namespace " + namespaceName + " {" + originalSource + "}";
 
-					var sc = SetupSourceCompiler(context, dllName, namespaceName, className, source);
+					SourceCompiler sc = SetupSourceCompiler(context, dllName, namespaceName, className, source);
 					loadedAssembly = sc.Compile(0);
 					if (sc.HasErrors)
 					{
 						ThrowCompilationErrors(path, sc, originalSource);
 					}
-					var content = File.ReadAllBytes(loadedAssembly);
-					var compileSimpleObjectAsm = Assembly.Load(content);
+					byte[] content = File.ReadAllBytes(loadedAssembly);
+					Assembly compileSimpleObjectAsm = Assembly.Load(content);
 					type =
-					compileSimpleObjectAsm.GetTypes()
+						compileSimpleObjectAsm.GetTypes()
 							.FirstOrDefault(a =>
-									a.GetMethods().
+								a.GetMethods().
 									Any(m => String.Equals(m.Name, function, StringComparison.InvariantCultureIgnoreCase)));
 
 					ThrowIfFindsErrors(type, function, namespaceName, originalSource);
@@ -159,12 +182,15 @@ namespace Node.Cs.CommandHandlers
 				}
 				else
 				{
-					var def = _runnables[path];
+					RunnableDefinition def = _runnables[path];
 					type = def.Type;
 				}
 
-				var instance = _container.Resolve(type);
-				var methodInfo = instance.GetType().GetMethods().First(m => String.Equals(m.Name, function, StringComparison.InvariantCultureIgnoreCase));
+				object instance = _container.Resolve(type);
+				MethodInfo methodInfo =
+					instance.GetType()
+						.GetMethods()
+						.First(m => String.Equals(m.Name, function, StringComparison.InvariantCultureIgnoreCase));
 				methodInfo.Invoke(instance, new object[] { });
 			}
 			finally
@@ -176,6 +202,7 @@ namespace Node.Cs.CommandHandlers
 			}
 		}
 
+		// ReSharper disable UnusedParameter.Local
 		private void ThrowIfFindsErrors(Type type, string function, string namespaceName, string originalSource)
 		{
 			if (type == null)
@@ -188,9 +215,10 @@ namespace Node.Cs.CommandHandlers
 				throw new CompilationException("Must not set the namespace for scripts!!.", originalSource);
 			}
 		}
+		// ReSharper restore UnusedParameter.Local
 
 		private static SourceCompiler SetupSourceCompiler(INodeExecutionContext context, string dllName, string namespaceName,
-				string className, string source)
+			string className, string source)
 		{
 			var sc = new SourceCompiler(dllName, context.TempPath)
 			{
@@ -204,20 +232,20 @@ namespace Node.Cs.CommandHandlers
 		private static void ThrowCompilationErrors(string path, SourceCompiler sc, string originalSource)
 		{
 			var errs = new HashSet<string>();
-			var compilationErrors = "Error compiling " + path;
+			string compilationErrors = "Error compiling " + path;
 			foreach (var errorList in sc.Errors)
 			{
-				var singleErrorList = errorList;
-				foreach (var error in singleErrorList)
+				List<string> singleErrorList = errorList;
+				foreach (string error in singleErrorList)
 				{
 					if (!errs.Contains(error))
 					{
 						// ReSharper disable once AssignNullToNotNullAttribute
-						var where = error.IndexOf(".cs\t", StringComparison.InvariantCultureIgnoreCase);
+						int where = error.IndexOf(".cs\t", StringComparison.InvariantCultureIgnoreCase);
 						if (@where > 0)
 						{
 							// ReSharper disable once PossibleNullReferenceException
-							var newError = error.Substring(@where + ".cs\t".Length).TrimStart();
+							string newError = error.Substring(@where + ".cs\t".Length).TrimStart();
 							compilationErrors += "\r\n" + newError;
 						}
 						else
@@ -232,44 +260,26 @@ namespace Node.Cs.CommandHandlers
 			throw new CompilationException(compilationErrors, originalSource);
 		}
 
-		private void RunNcs(string absolutePath, INodeExecutionContext context)
+		private void RunNcs(string absolutePath)
 		{
 			var cmdHandler = _container.Resolve<IUiCommandsHandler>();
-			var src = File.ReadAllLines(absolutePath);
-			foreach (var line in src)
+			string[] src = File.ReadAllLines(absolutePath);
+			foreach (string line in src)
 			{
 				cmdHandler.Run(line);
 			}
 		}
-		#endregion
 
-		public void LoadNuget(INodeExecutionContext context, string packageName, string version = null, bool allowPreRelease = false)
-		{
-			var dlls = new List<string>();
-			foreach (var dll in _nugetDownloader.DownloadPackage(context.ImageRuntimeVersion, packageName, version, allowPreRelease))
-			{
-				var path = Path.Combine(context.NodeCsPackagesDirectory, dll.Name);
-				File.WriteAllBytes(path, dll.Data);
-				dlls.Add(path);
-			}
-			InitializeNewDlls(() =>
-			{
-				foreach (var dllPath in dlls)
-				{
-					var content = File.ReadAllBytes(dllPath);
-					Assembly.Load(content);
-				}
-			});
-		}
+		#endregion
 
 		private void InitializeNewDlls(Action action)
 		{
-			var beforeDlls = AppDomain.CurrentDomain.GetAssemblies();
+			Assembly[] beforeDlls = AppDomain.CurrentDomain.GetAssemblies();
 			action();
-			var afterDlls = AppDomain.CurrentDomain.GetAssemblies();
+			Assembly[] afterDlls = AppDomain.CurrentDomain.GetAssemblies();
 			for (int i = (beforeDlls.Length); i < afterDlls.Length; i++)
 			{
-				var dllToElaborate = afterDlls[i];
+				Assembly dllToElaborate = afterDlls[i];
 				InitializeModulesInDll(dllToElaborate);
 			}
 		}

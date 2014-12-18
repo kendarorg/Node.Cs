@@ -59,7 +59,8 @@ echo cd ..  >> %TMP_BATCH%
 echo Starting OpenCover
 echo Result: %SLN_DIR%\.report\output.xml
 
-
+REM ^(+Test\.dll)$
+REM "-coverbytest:+[*]* -[*.Test]* -[*.TestUtils]*"
 if "%VERBOSITY%"=="TRUE" (
 	
 	build_utils\opencover\OpenCover.Console.exe -register:user "-target:%OUT_DIR%\tmptest.bat" -mergebyhash "-filter:+[*]* -[*.Test]* -[*.TestUtils]*" "-output:.report\bin\output.xml"
@@ -74,7 +75,7 @@ if "%VERBOSITY%"=="TRUE" (
 		
 ) ELSE (
 
-	build_utils\opencover\OpenCover.Console.exe -register:user "-target:%OUT_DIR%\tmptest.bat" -mergebyhash "-filter:+[*]* -[*.Test]* -[*.TestUtils]*" "-output:.report\bin\output.xml"  >NUL 2>NUL
+	build_utils\opencover\OpenCover.Console.exe -register:user "-target:%OUT_DIR%\tmptest.bat"  -mergebyhash "-filter:+[*]* -[*.Test]* -[*.TestUtils]*" "-output:.report\bin\output.xml"  >NUL 2>NUL
 
 	echo Generate the report
 

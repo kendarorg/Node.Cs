@@ -18,42 +18,43 @@ using System.Collections.Generic;
 
 namespace Node.Cs.Mocks
 {
-    public class MockNodeConsole : INodeConsole
-    {
-        public List<string> Data { get; private set; }
-        public int ErrorCode { get; private set; }
-        public string LineContent { get; set; }
+	public class MockNodeConsole : INodeConsole
+	{
+		public List<string> Data { get; private set; }
+		// ReSharper disable once UnusedAutoPropertyAccessor.Local
+		public int ErrorCode { get; private set; }
+		public string LineContent { get; set; }
 
-        public MockNodeConsole()
-        {
-            Data = new List<string> { string.Empty };
-        }
+		public MockNodeConsole()
+		{
+			Data = new List<string> { string.Empty };
+		}
 
-        public void Write(string formatString, params object[] formatParameters)
-        {
-	        var value = string.Format(formatString, formatParameters);
-					if (Data.Count == 0)
-					{
-						Data.Add(string.Empty);
-					}
-					if (Data[Data.Count - 1].EndsWith("\r\n"))
-					{
-						Data.Add(value);
-					}
-					else
-					{
-						Data[Data.Count - 1] += value;
-					}
-        }
+		public void Write(string formatString, params object[] formatParameters)
+		{
+			var value = string.Format(formatString, formatParameters);
+			if (Data.Count == 0)
+			{
+				Data.Add(string.Empty);
+			}
+			if (Data[Data.Count - 1].EndsWith("\r\n"))
+			{
+				Data.Add(value);
+			}
+			else
+			{
+				Data[Data.Count - 1] += value;
+			}
+		}
 
-        public void WriteLine(string formatString, params object[] formatParameters)
-        {
-						Data.Add(string.Format(formatString, formatParameters)+"\r\n");
-        }
+		public void WriteLine(string formatString, params object[] formatParameters)
+		{
+			Data.Add(string.Format(formatString, formatParameters) + "\r\n");
+		}
 
-        public string ReadLine()
-        {
-            return LineContent;
-        }
-    }
+		public string ReadLine()
+		{
+			return LineContent;
+		}
+	}
 }

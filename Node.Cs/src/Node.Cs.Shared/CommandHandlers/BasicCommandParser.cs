@@ -93,7 +93,7 @@ namespace Node.Cs.CommandHandlers
 							(index == 0 && IsStringDelimiter(' ', ch)))
 					{
 						stringDelimiter = ch;
-						lastItem = ch.ToString();
+						lastItem = ch.ToString(CultureInfo.InvariantCulture);
 						inString = true;
 					}
 					else

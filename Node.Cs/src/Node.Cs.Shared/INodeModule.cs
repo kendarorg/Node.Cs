@@ -13,10 +13,25 @@
 // ===========================================================
 
 
+using System;
+
 namespace Node.Cs
 {
+	/// <summary>
+	/// This class must stay into the INodeModule Namespace and file!!
+	/// </summary>
+	public static class NodeModuleExtension
+	{
+		public static string Print(this INodeModule module)
+		{
+			return string.Format("{0},{1}", module.Name, module.Version);
+		}
+	}
+
 	public interface INodeModule
 	{
-		void PreInitialize();
+		string Name { get; }
+		Version Version { get; }
+		void Initialize();
 	}
 }

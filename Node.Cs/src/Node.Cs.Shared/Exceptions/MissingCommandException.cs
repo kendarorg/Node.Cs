@@ -17,12 +17,13 @@ using System;
 
 namespace Node.Cs.Exceptions
 {
-    public class MissingCommandException : Exception
-    {
-        public MissingCommandException(string format, params object[] pars)
-            : base(string.Format(format, pars))
-        {
+	[Serializable]
+	public class MissingCommandException : Exception
+	{
+		public MissingCommandException(string format, params object[] pars)
+			: base(string.Format(format, pars))
+		{
 
-        }
-    }
+		}
+	}
 }

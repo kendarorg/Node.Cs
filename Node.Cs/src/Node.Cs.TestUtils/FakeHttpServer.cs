@@ -15,11 +15,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Threading;
 
 namespace Node.Cs.Test
 {
+	[SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly", Justification = "Used only for testing")]
 	public class FakeHttpServer : IDisposable
 	{
 		public int Port { get; private set; }
@@ -63,6 +66,8 @@ namespace Node.Cs.Test
 			}
 		}
 
+		[SuppressMessage("Microsoft.Usage", "CA2213:DisposableFieldsShouldBeDisposed", MessageId = "_listener", Justification = "Used only for testing"),
+		SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly", Justification = "Used only for testing")]
 		public void Dispose()
 		{
 			try
@@ -70,9 +75,9 @@ namespace Node.Cs.Test
 				_listener.Abort();
 				_thread.Abort();
 			}
-			catch
+			catch (Exception ex)
 			{
-				
+				Debug.WriteLine(ex);
 			}
 		}
 
@@ -95,9 +100,9 @@ namespace Node.Cs.Test
 					}
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
-				
+				Debug.WriteLine(ex);
 			}
 		}
 

@@ -15,15 +15,14 @@
 
 using System;
 
-namespace Node.Cs.Exceptions
+namespace Node.Cs.Mocks
 {
-	[Serializable]
-	public class DuplicateCommandException:Exception
+	public class FakeModuleFirstDuplicate : FakeModuleFirst
 	{
-		public DuplicateCommandException(string format,params object[] pars)
-			:base(string.Format(format,pars))
+		private static readonly Version _version = new Version("2.0.0.1");
+		public override Version Version
 		{
-			
+			get { return _version; }
 		}
 	}
 }

@@ -18,12 +18,12 @@ using System;
 namespace Node.Cs.Exceptions
 {
 	[Serializable]
-	public class DuplicateCommandException:Exception
+	public class DuplicateModuleException : Exception
 	{
-		public DuplicateCommandException(string format,params object[] pars)
-			:base(string.Format(format,pars))
+		public DuplicateModuleException(string format, params object[] pars)
+			: base(string.Format(format, pars))
 		{
-			
+
 		}
 	}
 }

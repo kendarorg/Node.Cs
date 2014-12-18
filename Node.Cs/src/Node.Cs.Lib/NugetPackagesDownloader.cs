@@ -13,11 +13,8 @@
 // ===========================================================
 
 
-using System.Collections.Specialized;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Xml.Linq;
-using System.Xml.XPath;
 using Ionic.Zip;
 using Node.Cs.Exceptions;
 using System;
@@ -67,6 +64,7 @@ namespace Node.Cs
 				allServers.Add(NUGET_ORG);
 			}
 
+			// ReSharper disable once ForCanBeConvertedToForeach
 			for (var i = 0; i < allServers.Count; i++)
 			{
 				byte[] result = DownloadSingleItem(allServers[i], packageName, version, allowPreRelease);
@@ -129,16 +127,12 @@ namespace Node.Cs
 					if (String.Compare(itemKey, package.Framework, StringComparison.OrdinalIgnoreCase) > 0) continue;
 					return ExtractDllsForFramework(zip, items[itemKey]);
 				}
-				if (items.ContainsKey("net00"))
-				{
-					return ExtractDllsForFramework(zip, items["net00"]);
-				}
 				throw new DllNotFoundException(
 					string.Format("Unable to find a suitable framework version for package '{0}.{1}'.", package.Id, package.Version));
 			}
 		}
 
-		private IEnumerable<NugetDll> ExtractDllsForFramework(ZipFile zip, List<string> list)
+		private IEnumerable<NugetDll> ExtractDllsForFramework(ZipFile zip, IEnumerable<string> list)
 		{
 			foreach (var dll in list)
 			{
@@ -172,7 +166,6 @@ namespace Node.Cs
 			package.Data.Seek(0, SeekOrigin.Begin);
 			using (var zip = ZipFile.Read(package.Data))
 			{
-				////var e = zip.First(r => r.FileName.Equals(package.Id + ".nuspec",StringComparison.OrdinalIgnoreCase));
 				var e = zip[package.Id + ".nuspec"];
 				var outStream = new MemoryStream();
 				e.Extract(outStream);
@@ -180,82 +173,8 @@ namespace Node.Cs
 				return XDocument.Load(outStream);
 			}
 		}
-		/*
-		private IEnumerable<object> LoadNugetDlls(MemoryStream stream)
-		{
-			stream.Seek(0, SeekOrigin.Begin);
-			var files = nuspec.XPathSelectElements("//dependencies/dependency");
-			while (resultsCount == 0 && framework != null)
-			{
-				foreach (var item in ExtractDllsBase(bytes, framework))
-				{
-					resultsCount++;
-					yield return item;
-				}
-				framework = DowngradeFramework(framework);
-			}
-		}
 
-		private XDocument ExtractNuspec(MemoryStream stream, string packageName)
-		{
-			stream.Seek(0, SeekOrigin.Begin);
-			using (var zip = ZipFile.Read(stream))
-			{
-
-				zip.ExtractSelectedEntries();
-			}
-			return XDocument.Load(stream);
-		}
-
-		private string DowngradeFramework(string framework)
-		{
-			framework = framework.ToLower();
-			switch (framework)
-			{
-				case ("net45"): return "net40";
-				case ("net40"): return "net35";
-				case ("net35"): return "net30";
-				case ("net30"): return "net20";
-				case ("net20"): return "";
-				default:
-					return null;
-			}
-		}
-
-		private static string DOUBLE_SEPARATOR = Path.DirectorySeparatorChar.ToString() + Path.DirectorySeparatorChar.ToString();
-
-		private IEnumerable<NugetDll> ExtractDllsBase(byte[] bytes, string framework)
-		{
-			using (var stream = new MemoryStream(bytes))
-			{
-				stream.Seek(0, SeekOrigin.Begin);
-				using (var zip = ZipFile.Read(stream))
-				{
-					// here, we extract every entry, but we could extract conditionally
-					// based on entry name, size, date, checkbox status, etc.  
-					foreach (ZipEntry e in zip)
-					{
-						var path = e.FileName.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
-
-
-						path = path.Replace(DOUBLE_SEPARATOR, Path.DirectorySeparatorChar.ToString());
-						var pointer = "lib" + Path.DirectorySeparatorChar + framework + Path.DirectorySeparatorChar;
-						pointer = pointer.Replace(DOUBLE_SEPARATOR, Path.DirectorySeparatorChar.ToString());
-						var ext = Path.GetExtension(path);
-						var isRealPath = path
-							.StartsWith(pointer) && !string.IsNullOrWhiteSpace(ext) && ext.ToLowerInvariant() == ".dll";
-
-						if (isRealPath)
-						{
-							var ms = new MemoryStream();
-							e.Extract(ms);
-							yield return new NugetDll(Path.GetFileName(path), ms.ToArray());
-						}
-					}
-				}
-			}
-		}
-		*/
+		// ReSharper disable once UnusedParameter.Local
 		private byte[] DownloadSingleItem(string format, string packageName, string version, bool allowPreRelease)
 		{
 			var remoteUri = string.Format(format, packageName, version).Trim('/');

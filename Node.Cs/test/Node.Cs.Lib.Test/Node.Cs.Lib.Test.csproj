@@ -111,9 +111,15 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
     <Compile Include="BasicNodeConsoleTest.cs" />
+    <Compile Include="CompilationExceptionTest.cs" />
+    <Compile Include="Mocks\FakeModuleFirst.cs" />
+    <Compile Include="Mocks\FakeModuleFirstDuplicate.cs" />
+    <Compile Include="Mocks\FakeModuleSecond.cs" />
     <Compile Include="Mocks\IUiCommandsHandlerTestMock.cs" />
     <Compile Include="Mocks\MockNodeConsole.cs" />
+    <Compile Include="ModulesCollectionTest.cs" />
     <Compile Include="NugetPackagesDownloaderTest.cs" />
+    <Compile Include="StringPathExtensionTest.cs" />
     <Compile Include="UiCommandsHandlerTest.cs" />
     <Compile Include="BasicCommandParserTest.cs" />
     <Compile Include="NodeCsEntryPointTest.cs" />
@@ -134,6 +140,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Nuget\NugetPackageWithDependencies.Test.1.0.0.nupkg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Nuget\NugetWithoutSuitableFramework.Test.1.0.0.nupkg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />

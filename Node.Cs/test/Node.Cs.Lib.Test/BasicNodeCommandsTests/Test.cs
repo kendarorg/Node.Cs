@@ -13,7 +13,6 @@
 // ===========================================================
 
 
-using Node.Cs;
 using Node.Cs.Consoles;
 
 
@@ -21,12 +20,10 @@ using Node.Cs.Consoles;
 public class Test
 {
 	private readonly INodeConsole _console;
-	private readonly INodeExecutionContext _context;
 
-	public Test(INodeConsole console, INodeExecutionContext context)
+	public Test(INodeConsole console)
 	{
 		_console = console;
-		_context = context;
 	}
 
 	public void Execute()

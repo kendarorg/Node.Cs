@@ -15,12 +15,8 @@
 
 using GenericHelpers;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Node.Cs.Test
 {
@@ -32,17 +28,17 @@ namespace Node.Cs.Test
 				string nodeCsExecutablePath = null,
 				string nodeCsExtraBinDirecotry = null,
 				string currentDirectory = null,
-			    string tempPath = null,
-                string nodeCsPackagesDirectory = null,
-                string imageRuntimeMessage = "net45",
+					string tempPath = null,
+								string nodeCsPackagesDirectory = null,
+								string imageRuntimeMessage = "net45",
 				Assembly caller = null)
 			: base(args, version,
 					nodeCsExecutablePath ?? RelativeToTest("node.cs.exe", caller ?? Assembly.GetExecutingAssembly()),
 					nodeCsExtraBinDirecotry ?? RelativeToTest("bin", caller ?? Assembly.GetExecutingAssembly()),
 					currentDirectory ?? RelativeToTest("", caller ?? Assembly.GetExecutingAssembly()),
 					tempPath ?? RelativeToTest("tmp", caller ?? Assembly.GetExecutingAssembly()),
-                    nodeCsPackagesDirectory ?? RelativeToTest("packages", caller ?? Assembly.GetExecutingAssembly()),
-                    imageRuntimeMessage)
+										nodeCsPackagesDirectory ?? RelativeToTest("packages", caller ?? Assembly.GetExecutingAssembly()),
+										imageRuntimeMessage)
 		{
 
 		}
@@ -52,6 +48,7 @@ namespace Node.Cs.Test
 			var asmUri = new UriBuilder(caller.CodeBase);
 			var asmPath = asmUri.Path;
 			var baseDir = Path.GetDirectoryName(asmPath);
+			if (baseDir == null) return path;
 			return Path.Combine(baseDir, path);
 		}
 	}

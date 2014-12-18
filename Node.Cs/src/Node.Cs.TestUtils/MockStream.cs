@@ -16,11 +16,10 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.ConstrainedExecution;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Node.Cs.TestHelpers
+namespace Node.Cs.Test
 {
 	public class MockStream : MemoryStream
 	{
@@ -52,14 +51,14 @@ namespace Node.Cs.TestHelpers
 				Start = DateTime.Now;
 				Sw.Start();
 			}
-            AddBytes(count);
+			AddBytes(count);
 			base.Write(buffer, offset, count);
 		}
 
-        private void AddBytes(int count)
-        {
-            WrittenBytes += count;
-        }
+		private void AddBytes(int count)
+		{
+			WrittenBytes += count;
+		}
 
 		public int WrittenBytes { get; private set; }
 
@@ -70,7 +69,7 @@ namespace Node.Cs.TestHelpers
 				Start = DateTime.Now;
 				Sw.Start();
 			}
-            AddBytes( count);
+			AddBytes(count);
 			return base.WriteAsync(buffer, offset, count, cancellationToken);
 		}
 	}

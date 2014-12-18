@@ -13,17 +13,33 @@
 // ===========================================================
 
 
-using System;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Node.Cs.Exceptions;
 
-namespace Node.Cs.Exceptions
+namespace Node.Cs
 {
-	[Serializable]
-	public class DuplicateCommandException:Exception
+	[TestClass]
+	public class CompilationExceptionTest
 	{
-		public DuplicateCommandException(string format,params object[] pars)
-			:base(string.Format(format,pars))
+		[TestMethod]
+		public void Serialization_ShouldPropagateSource()
 		{
-			
+			//Setup
+			var cs = new CompilationException("message", "source");
+			var stream = new MemoryStream();
+
+			//Act
+			var bf = new BinaryFormatter();
+			bf.Serialize(stream, cs);
+			stream.Seek(0, SeekOrigin.Begin);
+			var result = bf.Deserialize(stream) as CompilationException;
+
+			//Verify
+			Assert.IsNotNull(result);
+			Assert.AreEqual(cs.CompiledSource,result.CompiledSource);
+			Assert.AreEqual(cs.Message, result.Message);
 		}
 	}
 }

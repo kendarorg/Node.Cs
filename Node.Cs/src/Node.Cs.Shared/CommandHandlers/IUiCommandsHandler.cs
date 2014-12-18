@@ -36,7 +36,6 @@ namespace Node.Cs.CommandHandlers
 		/// </summary>
 		/// <param name="context"></param>
 		/// <param name="command"></param>
-		/// <param name="subcommand"></param>
 		void Help(INodeExecutionContext context, string command = null);
 
 		/// <summary>
@@ -44,7 +43,7 @@ namespace Node.Cs.CommandHandlers
 		/// </summary>
 		/// <param name="name"></param>
 		/// <param name="paramTypes"></param>
-		void UnregisterCommand(string name,params Type[] paramTypes);
+		void UnregisterCommand(string name, params Type[] paramTypes);
 
 		/// <summary>
 		/// Verify if a command exists with the given parameters types and name

@@ -13,8 +13,6 @@
 // ===========================================================
 
 
-using System.ComponentModel;
-using System.Threading;
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.Resolvers;
 using Castle.Windsor;
@@ -37,10 +35,10 @@ namespace Node.Cs.Test
 
 		public IRegistration Load(string key, Type service, IDictionary arguments)
 		{
-			var mockInterfaceType = typeof (Mock<>).MakeGenericType(service);
-			var constructor = mockInterfaceType.GetConstructor(new Type[] {});
+			var mockInterfaceType = typeof(Mock<>).MakeGenericType(service);
+			var constructor = mockInterfaceType.GetConstructor(new Type[] { });
 			Debug.Assert(constructor != null, "LazyComponentAutoMocker::Load, constructor != null");
-			var mockedObject = constructor.Invoke(new object[] {});
+			var mockedObject = constructor.Invoke(new object[] { });
 			var mock = (Mock)mockedObject;
 			var realObject = mock.Object;
 

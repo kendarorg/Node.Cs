@@ -15,12 +15,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 
 namespace Node.Cs.Test
 {
+	[SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly", Justification = "Used only for testing")]
 	public class AssemblyVerifier : IDisposable
 	{
 		private CustomDomain _cd;
@@ -31,7 +33,7 @@ namespace Node.Cs.Test
 			_newAppDomain = AppDomain.CreateDomain(
 				Guid.NewGuid().ToString("N"),
 			AppDomain.CurrentDomain.Evidence,
-										new AppDomainSetup()
+										new AppDomainSetup
 										{
 											ApplicationBase = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
 											LoaderOptimization = LoaderOptimization.MultiDomainHost
@@ -52,7 +54,9 @@ namespace Node.Cs.Test
 				}
 			}
 			var an = new AssemblyName(args.Name);
-			var path = an.Name.Split(',').Skip(1).First().Trim('/').Trim('\\').Trim()+".dll";
+			var path = an.Name.Split(',').Skip(1).First().Trim('/').Trim('\\').Trim() + ".dll";
+			// ReSharper disable once LoopCanBeConvertedToQuery
+			// ReSharper disable once ForCanBeConvertedToForeach
 			for (int index = 0; index < _sp.Count; index++)
 			{
 				var dir = _sp[index];
@@ -80,10 +84,7 @@ namespace Node.Cs.Test
 		{
 			get
 			{
-				foreach (var type in _cd.GetTypes())
-				{
-					yield return type;
-				}
+				return _cd.GetTypes();
 			}
 		}
 
@@ -113,6 +114,7 @@ namespace Node.Cs.Test
 		}
 
 
+		[SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly", Justification = "Used only for testing")]
 		public void Dispose()
 		{
 			AppDomain.Unload(_newAppDomain);

@@ -145,7 +145,12 @@ namespace Node.Cs.Test
 		private void AddMessage(Exception exception, string message)
 		{
 			var fi = exception.GetType().GetField("_message", BindingFlags.NonPublic | BindingFlags.Instance);
+			if (fi == null)
+			{
+				throw new MissingFieldException(exception.GetType().ToString(), "_message");
+			}
 			var value = fi.GetValue(exception) as string;
+			// ReSharper disable once ConvertIfStatementToNullCoalescingExpression
 			if (value == null)
 			{
 				value = string.Empty;

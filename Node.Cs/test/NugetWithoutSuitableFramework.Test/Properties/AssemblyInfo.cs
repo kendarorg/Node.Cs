@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Node.Cs.TestUtils")]
+[assembly: AssemblyTitle("NugetWithoutSuitableFramework.Test")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Node.Cs.TestUtils")]
+[assembly: AssemblyProduct("NugetWithoutSuitableFramework.Test")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("d28754bd-9221-416d-98b1-9bfc5e1ae7d5")]
+[assembly: Guid("de9bae09-4913-4381-bad6-7455db01e587")]
 
 // Version information for an assembly consists of the following four values:
 //

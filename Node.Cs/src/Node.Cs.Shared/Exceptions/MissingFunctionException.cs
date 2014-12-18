@@ -17,6 +17,7 @@ using System;
 
 namespace Node.Cs.Exceptions
 {
+	[Serializable]
 	public class MissingFunctionException : Exception
 	{
 		public MissingFunctionException(string format, params object[] pars)
