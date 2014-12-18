@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Nugets\INugetArchiveList.cs" />
+    <Compile Include="Nugets\INugetVersionVerifier.cs" />
     <Compile Include="Nugets\NugetPackage.cs" />
     <Compile Include="Nugets\NugetPackages.cs" />
     <Compile Include="Utils\AssemblySeeker.cs" />

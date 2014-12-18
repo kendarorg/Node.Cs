@@ -121,6 +121,7 @@
     <Compile Include="NodeModuleExtensionTest.cs" />
     <Compile Include="NugetArchiveListTest.cs" />
     <Compile Include="NugetPackagesDownloaderTest.cs" />
+    <Compile Include="NugetVersionVerifierTest.cs" />
     <Compile Include="StringPathExtensionTest.cs" />
     <Compile Include="UiCommandsHandlerTest.cs" />
     <Compile Include="BasicCommandParserTest.cs" />

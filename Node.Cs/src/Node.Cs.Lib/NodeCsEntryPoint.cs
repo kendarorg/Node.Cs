@@ -129,10 +129,10 @@ namespace Node.Cs
 
 
 			_container.Register(
-											Component.For<IAssemblySeeker>()
-																			.ImplementedBy<AssemblySeeker>()
-																			.LifestyleSingleton()
-																			.OnlyNewServices());
+							Component.For<IAssemblySeeker>()
+											.ImplementedBy<AssemblySeeker>()
+											.LifestyleSingleton()
+											.OnlyNewServices());
 
 			_container.Register(
 							Component.For<INugetPackagesDownloader>()
@@ -140,6 +140,12 @@ namespace Node.Cs
 											.LifestyleSingleton()
 											.OnlyNewServices());
 
+
+			_container.Register(
+							Component.For<INugetArchiveList>()
+											.ImplementedBy<NugetArchiveList>()
+											.LifestyleSingleton()
+											.OnlyNewServices());
 
 			_container.Register(
 							Component.For<ICommandParser>()
@@ -150,6 +156,12 @@ namespace Node.Cs
 			_container.Register(
 							Component.For<INodeConsole>()
 											.ImplementedBy<BasicNodeConsole>()
+											.LifestyleSingleton()
+											.OnlyNewServices());
+
+			_container.Register(
+							Component.For<IModulesCollection>()
+											.ImplementedBy<ModulesCollection>()
 											.LifestyleSingleton()
 											.OnlyNewServices());
 
@@ -165,10 +177,14 @@ namespace Node.Cs
 											.LifestyleSingleton());
 
 			_container.Register(
-							Classes.FromThisAssembly()
+											Classes.FromAssemblyInThisApplication()
 											.BasedOn<INodeModule>()
+											.WithServiceBase()
 											.LifestyleSingleton()
+											.AllowMultipleMatches()
 							);
+
+			_container.Register(Component.For<IWindsorContainer>().Instance(_container));
 		}
 
 		private void PreInitializeBasicModules()

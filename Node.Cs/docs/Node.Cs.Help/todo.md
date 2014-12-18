@@ -15,3 +15,11 @@ children_required=
 * Show help only when the console is called interactively
 * Find an error for compilation that does not involve the source code
 * Load a dll through the NodeCsEntryPoint
+* NugetPackagesDownloader: Accept version string with limits: [3.2.2, 3.3.0)
+	See NugetVersionVerifierTest
+* UiCommandsHandler: Invoke commands containing default value for
+	* bool
+	* string
+	* double
+	* DateTime
+	* enumerable

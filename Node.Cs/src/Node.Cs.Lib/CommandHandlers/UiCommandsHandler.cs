@@ -225,7 +225,19 @@ namespace Node.Cs.CommandHandlers
 					}
 				}
 				//if (!paramInfo.IsOptional) return null;
-				converted.Add(paramInfo.DefaultValue == DBNull.Value ? UniversalTypeConverter.Convert(null, paramInfo.ParameterType) : paramInfo.DefaultValue);
+				object defaultValue = null;
+				if (paramInfo.ParameterType.IsValueType)
+				{
+					if (paramInfo.ParameterType == typeof (bool))
+					{
+						defaultValue = false;
+					}
+					else
+					{
+						defaultValue = UniversalTypeConverter.Convert("0", paramInfo.ParameterType);
+					}
+				}
+				converted.Add(paramInfo.DefaultValue == DBNull.Value ? defaultValue : paramInfo.DefaultValue);
 			}
 			return converted;
 		}

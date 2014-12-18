@@ -87,6 +87,7 @@
     <Compile Include="CommandHandlers\BasicCommandParser.cs" />
     <Compile Include="Modules\ModulesCollection.cs" />
     <Compile Include="Nugets\NugetArchiveList.cs" />
+    <Compile Include="Nugets\NugetVersionVerifier.cs" />
     <Compile Include="Utils\BaseWebClient.cs" />
     <Compile Include="CommandHandlers\BasicNodeCommands.cs" />
     <Compile Include="CommandHandlers\RunnableDefinition.cs" />
