@@ -18,16 +18,30 @@ using System.Collections.Generic;
 
 namespace Node.Cs.Nugets
 {
+	public class NugetPackageDependency
+	{
+		public NugetPackageDependency(string id, string version)
+		{
+			Id = id;
+			Version = version;
+		}
+		public string Id { get; private set; }
+		public string Version { get; private set; }
+	}
 	public class NugetPackage
 	{
-		public NugetPackage(string id, string version, IEnumerable<string> dlls)
+		public NugetPackage(string id, string version, IEnumerable<string> dlls, IEnumerable<NugetPackageDependency> deps)
 		{
 			Id = id;
 			Version = version;
 			Dlls = new List<string>(dlls);
+			Dependencies = new List<NugetPackageDependency>(deps);
 		}
+
+		public List<NugetPackageDependency> Dependencies { get; private set; }
+
 		public string Id { get; private set; }
 		public string Version { get; private set; }
-		public List<string> Dlls { get; set; }
+		public List<string> Dlls { get; private set; }
 	}
 }

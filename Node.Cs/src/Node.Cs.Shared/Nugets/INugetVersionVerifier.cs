@@ -2,5 +2,7 @@
 {
 	public interface INugetVersionVerifier
 	{
+		string BuildODataQuery(string id, string version);
+		int Compare(string versionA, string versionB);
 	}
 }

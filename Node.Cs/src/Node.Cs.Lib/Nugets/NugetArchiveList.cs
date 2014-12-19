@@ -33,12 +33,12 @@ namespace Node.Cs.Nugets
 			_packages = new NugetPackages();
 		}
 
-		public void Add(string id, string version,IEnumerable<string> dllNames)
+		public void Add(string id, string version, IEnumerable<string> dllNames, IEnumerable<NugetPackageDependency> deps)
 		{
 			EnsurePackages();
 			if (!Check(id))
 			{
-				_packages.Packages.Add(new NugetPackage(id, version, dllNames));
+				_packages.Packages.Add(new NugetPackage(id, version, dllNames,deps));
 			}
 			CommitChanges();
 		}

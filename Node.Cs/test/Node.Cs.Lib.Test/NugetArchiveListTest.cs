@@ -47,7 +47,7 @@ namespace Node.Cs
 			SetupTarget();
 
 			//Act
-			Target.Add("test.module", ("1.0.0.0"), new List<string>());
+			Target.Add("test.module", ("1.0.0.0"), new List<string>(),new List<NugetPackageDependency>());
 
 			//Verify
 			Assert.IsTrue(File.Exists(_path));
@@ -59,7 +59,7 @@ namespace Node.Cs
 		{
 			//Setup
 			SetupTarget();
-			Target.Add("test.module", ("1.0.0.0"), new List<string>());
+			Target.Add("test.module", ("1.0.0.0"), new List<string>(), new List<NugetPackageDependency>());
 
 			//Act
 			var result = Target.Get("aa");
@@ -122,7 +122,7 @@ namespace Node.Cs
 		{
 			//Setup
 			SetupTarget();
-			Target.Add("test.module", ("1.0.0.0"), new List<string>());
+			Target.Add("test.module", ("1.0.0.0"), new List<string>(), new List<NugetPackageDependency>());
 
 			//Act
 			var result = Target.Check("test.module", ("1.0.0.0"));
@@ -138,7 +138,7 @@ namespace Node.Cs
 		{
 			//Setup
 			SetupTarget();
-			Target.Add("test.module", ("1.0.0.0"), new List<string> { "a.dll", "b.dll" });
+			Target.Add("test.module", ("1.0.0.0"), new List<string> { "a.dll", "b.dll" }, new List<NugetPackageDependency>());
 
 			//Act
 			var result = Target.Get("test.module", "1.0.0.0");
@@ -154,6 +154,7 @@ namespace Node.Cs
 		[TestMethod]
 		public void Add_ShouldMakeCheckReturnTrueWithoutVersion()
 		{
+			Assert.Inconclusive("Add_ShouldMakeCheckReturnTrueWithoutVersion");
 			////Setup
 			//SetupTarget();
 			//Target.Add("test.module", ("1.0.0.0"));
@@ -165,10 +166,16 @@ namespace Node.Cs
 			//Assert.IsTrue(result);
 		}
 
+		[TestMethod]
+		public void Add_ShouldConsiderDependencies()
+		{
+			Assert.Inconclusive("Add_ShouldConsiderDependencies");
+		}
 
 		[TestMethod]
 		public void Add_ShouldThrowWithMultipleVersions()
 		{
+			Assert.Inconclusive("Add_ShouldThrowWithMultipleVersions");
 			////Setup
 			//SetupTarget();
 			//Target.Add("test.module", ("1.0.0.0"));

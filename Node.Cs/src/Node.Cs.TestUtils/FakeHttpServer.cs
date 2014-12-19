@@ -112,7 +112,7 @@ namespace Node.Cs.Test
 			httpListenerContext.Response.Close();
 		}
 
-		public string CreateAddress(string subPath)
+		public string CreateAddress(string subPath = "")
 		{
 			return Root + subPath.Trim('/');
 		}

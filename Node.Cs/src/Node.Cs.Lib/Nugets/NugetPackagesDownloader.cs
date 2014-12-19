@@ -34,16 +34,19 @@ namespace Node.Cs.Nugets
 			public string Id;
 			public bool Pre;
 		}
-		public const string NUGET_ORG = "https://www.nuget.org/api/v2/package/{0}/{1}";
+		public const string NUGET_ORG = "https://www.nuget.org/api/v2/";
 
 		private readonly INugetArchiveList _archiveList;
 		private readonly INodeExecutionContext _context;
+		private readonly INugetVersionVerifier _versionVerifier;
 		private readonly IWebClient _client;
 
-		public NugetPackagesDownloader(INugetArchiveList archiveList,INodeExecutionContext context, IWebClient client = null)
+		public NugetPackagesDownloader(INugetArchiveList archiveList, INodeExecutionContext context, INugetVersionVerifier versionVerifier,
+			IWebClient client = null)
 		{
 			_archiveList = archiveList;
 			_context = context;
+			_versionVerifier = versionVerifier;
 			_client = client;
 		}
 
@@ -105,7 +108,7 @@ namespace Node.Cs.Nugets
 		{
 
 			var nuspec = ExtractNuspec(package);
-
+			var deps = new List<NugetPackageDependency>();
 			foreach (var xNode in nuspec.DescendantNodes().Where(el =>
 			{
 				var xe = el as XElement;
@@ -115,19 +118,25 @@ namespace Node.Cs.Nugets
 			{
 				var depDll = (XElement)xNode;
 				var depId = depDll.Attribute("id").Value;
+				var depVersion = depDll.Attribute("version") != null ? depDll.Attribute("version").Value : null;
+
+				deps.Add(new NugetPackageDependency(depId, depVersion ?? string.Empty));
+
 				if (duplicateDetector.Contains(depId)) continue;
 				duplicateDetector.Add(depId);
-				var depVersion = depDll.Attribute("version") != null ? depDll.Attribute("version").Value : null;
+
 				foreach (var depItem in DownloadPackageInternal(package.Framework, depId, depVersion, package.Pre, duplicateDetector))
 				{
 					yield return depItem;
 				}
 			}
-			_archiveList.Add(package.Id, package.Version, new List<string>());
+			var dlls = new List<string>();
 			foreach (var locDll in LoadDlls(package))
 			{
+				dlls.Add(locDll.Name);
 				yield return locDll;
 			}
+			_archiveList.Add(package.Id, package.Version, dlls, deps);
 		}
 
 		private IEnumerable<NugetDll> LoadDlls(NugetDescriptor package)
@@ -193,9 +202,11 @@ namespace Node.Cs.Nugets
 		}
 
 		// ReSharper disable once UnusedParameter.Local
-		private byte[] DownloadSingleItem(string format, string packageName, string version, bool allowPreRelease)
+		private byte[] DownloadSingleItem(string server, string packageName, string version, bool allowPreRelease)
 		{
-			var remoteUri = string.Format(format, packageName, version).Trim('/');
+			server = server.TrimEnd('/');
+			var versionQuery = _versionVerifier.BuildODataQuery(packageName, version);
+			var remoteUri = string.Format("{0}/Packages()?$orderby=LastUpdated desc&$filter={1}", server, versionQuery);
 
 			var client = _client ?? new BaseWebClient();
 			return client.DownloadData(remoteUri);

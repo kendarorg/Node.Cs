@@ -19,7 +19,7 @@ namespace Node.Cs.Nugets
 {
 	public interface INugetArchiveList
 	{
-		void Add(string id, string version, IEnumerable<string> dllNames);
+		void Add(string id, string version, IEnumerable<string> dllNames, IEnumerable<NugetPackageDependency> deps);
 		bool Check(string id, string version = null);
 		void Remove(string id);
 		NugetPackage Get(string id, string version = null);

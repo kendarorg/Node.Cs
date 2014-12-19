@@ -40,8 +40,7 @@ namespace Node.Cs
 				Tuple(" do\r\n","do",new string[0]),
 				Tuple("\tdo\f","do",new string[0]),
 				Tuple("do test.cs","do",new []{"test.cs"}),
-				Tuple("do multiple parameters","do",new []{"multiple","parameters"}
-		)
+				Tuple("do multiple parameters","do",new []{"multiple","parameters"})
 			};
 			RunSeries(
 				(item1, item2, item3) =>

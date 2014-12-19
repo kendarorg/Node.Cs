@@ -13,6 +13,7 @@
 // ===========================================================
 
 
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
@@ -142,6 +143,12 @@ namespace Node.Cs
 
 
 			_container.Register(
+							Component.For<INugetVersionVerifier>()
+											.ImplementedBy<NugetVersionVerifier>()
+											.LifestyleSingleton()
+											.OnlyNewServices());
+
+			_container.Register(
 							Component.For<INugetArchiveList>()
 											.ImplementedBy<NugetArchiveList>()
 											.LifestyleSingleton()
@@ -184,7 +191,14 @@ namespace Node.Cs
 											.AllowMultipleMatches()
 							);
 
-			_container.Register(Component.For<IWindsorContainer>().Instance(_container));
+			try
+			{
+				_container.Register(Component.For<IWindsorContainer>().Instance(_container));
+			}
+			catch (Exception)
+			{
+				Debug.WriteLine("Duplicate Castle Registration.");
+			}
 		}
 
 		private void PreInitializeBasicModules()
