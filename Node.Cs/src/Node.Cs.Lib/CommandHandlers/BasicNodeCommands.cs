@@ -72,7 +72,14 @@ namespace Node.Cs.CommandHandlers
 				path.Trim(Path.DirectorySeparatorChar));
 			if (!File.Exists(absolutePath))
 			{
-				throw new FileNotFoundException("File not found.", path);
+				if (!Path.HasExtension(absolutePath))
+				{
+					absolutePath = absolutePath.Trim('.') + ".cs";
+				}
+				if (!File.Exists(absolutePath))
+				{
+					throw new FileNotFoundException("File not found.", path);
+				}
 			}
 			string extension = Path.GetExtension(absolutePath);
 			if (extension.ToLowerInvariant() == ".cs")
@@ -158,9 +165,11 @@ namespace Node.Cs.CommandHandlers
 				if (!_runnables.ContainsKey(path))
 				{
 					string originalSource = File.ReadAllText(path);
+					
 					string source = "namespace " + namespaceName + " {" + originalSource + "}";
 
 					SourceCompiler sc = SetupSourceCompiler(context, dllName, namespaceName, className, source);
+					sc.UseAppdomain = false;
 					loadedAssembly = sc.Compile(0);
 					if (sc.HasErrors)
 					{
@@ -235,7 +244,8 @@ namespace Node.Cs.CommandHandlers
 		private static void ThrowCompilationErrors(string path, SourceCompiler sc, string originalSource)
 		{
 			var errs = new HashSet<string>();
-			string compilationErrors = "Error compiling " + path;
+			string compilationErrors = "Error compiling " + path +"\r\n";
+			compilationErrors += "Mind: adding namespaces to scripts may lead to unpredictable results!";
 			foreach (var errorList in sc.Errors)
 			{
 				List<string> singleErrorList = errorList;

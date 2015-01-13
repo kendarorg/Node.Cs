@@ -163,7 +163,14 @@ namespace Node.Cs.CommandHandlers
 				var realParams = SetupParams(possibleCommand, parsedCommand.Parameters);
 				if (realParams != null)
 				{
-					possibleCommand.CalledFunction.DynamicInvoke(realParams.ToArray());
+					try
+					{
+						possibleCommand.CalledFunction.DynamicInvoke(realParams.ToArray());
+					}
+					catch (Exception ex)
+					{
+						throw ex.InnerException;
+					}
 					return;
 				}
 			}
