@@ -1,12 +1,13 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Runtime.Remoting.Messaging;
 
 namespace Node.Cs.Nugets
 {
 	public class NugetVersionVerifier : INugetVersionVerifier
 	{
-		private static Dictionary<string, string> _preQuery = new Dictionary<string, string>
+		private static readonly Dictionary<string, string> _preQuery = new Dictionary<string, string>
 		{
 			{"#V1","(Id eq '#ID' and Version ge '#V1')"},
 			{"(,#V2]","(Id eq '#ID' and Version le '#V2')"},
@@ -19,16 +20,29 @@ namespace Node.Cs.Nugets
 			{"(#V1,#V2]","(Id eq '#ID' and Version gt '#V1' and Version le '#V2')"},
 			{"[#V1,#V2)","(Id eq '#ID' and Version ge '#V1' and Version lt '#V2')"},
 			{"","(Id eq '#ID')"}
-
 		};
 
+		private static readonly Dictionary<string, Func<string, string, string, bool>> _isMatchingFuncs = new Dictionary<string, Func<string, string, string, bool>>
+		{
+			{"#V1", (toTest, l, r) => CompareInt(toTest,l)==0 },
+			{"(,#V2]",(toTest, l, r) => CompareInt(toTest,r)<=0},
+			{"(,#V2)",(toTest, l, r) => CompareInt(toTest,r)<0},
+			{"(#V1,)",(toTest, l, r) => CompareInt(toTest,l)>0},
+			{"[#V1,)",(toTest, l, r) => CompareInt(toTest,l)>=0},
+			{"[#V1]",(toTest, l, r) => CompareInt(toTest,l)==0},
+			{"(#V1,#V2)",(toTest, l, r) => CompareInt(toTest,l)>0 && CompareInt(toTest,r)<0},
+			{"[#V1,#V2]", (toTest, l, r) => CompareInt(toTest,l)>=0 && CompareInt(toTest,r)<=0},
+			{"(#V1,#V2]",(toTest, l, r) => CompareInt(toTest,l)>0 && CompareInt(toTest,r)<=0},
+			{"[#V1,#V2)",(toTest, l, r) => CompareInt(toTest,l)>=0 && CompareInt(toTest,r)<0},
+			{"",(toTest, l, r) => true}
+		};
 
 
 		public string BuildODataQuery(string id, string version)
 		{
-			version = version.Trim().Replace(" ", "");
 			id = id.Trim().Replace(" ", "");
 			if (string.IsNullOrEmpty(version)) return DoReplace(string.Empty, id, null, null);
+			version = version.Trim().Replace(" ", "");
 			var parts = version.Split(',');
 			if (parts.Length == 1)
 			{
@@ -64,7 +78,7 @@ namespace Node.Cs.Nugets
 			return DoReplace(resultQuery, id, firstVersion, secondVersion);
 		}
 
-		private string DoReplace(string query, string id, string v1, string v2)
+		private static string DoReplace(string query, string id, string v1, string v2)
 		{
 			var result = _preQuery[query];
 			if (!string.IsNullOrWhiteSpace(v1))
@@ -79,6 +93,10 @@ namespace Node.Cs.Nugets
 		}
 
 		public int Compare(string versionA, string versionB)
+		{
+			return CompareInt(versionA, versionB);
+		}
+		public static int CompareInt(string versionA, string versionB)
 		{
 			var l = ParseVersion(versionA);
 			var r = ParseVersion(versionB);
@@ -119,13 +137,52 @@ namespace Node.Cs.Nugets
 			return 0;
 		}
 
+		public bool IsVersionMatching(string foundedVersion, string version)
+		{
+
+			if (string.IsNullOrEmpty(version)) return true;
+			version = version.Trim().Replace(" ", "");
+			var parts = version.Split(',');
+			if (parts.Length == 1)
+			{
+				if (version.StartsWith("[") || version.StartsWith("(") || version.EndsWith(")") || version.EndsWith("]"))
+				{
+					if (!(version.StartsWith("[") && version.EndsWith("]")))
+					{
+						throw new Exception("Invalid characters in nuget version string.");
+					}
+					return _isMatchingFuncs["[#V1]"](foundedVersion, version.Trim('[', ']'), null);
+				}
+				return _isMatchingFuncs["#V1"](foundedVersion, version.Trim('[', ']'), null);
+			}
+			if (parts.Length != 2)
+			{
+				throw new Exception("Invalid version format.");
+			}
+			if (!((version.StartsWith("[") || version.StartsWith("(")) || !(version.EndsWith(")") || version.EndsWith("]"))))
+			{
+				throw new Exception("Invalid termination characters in nuget version string.");
+			}
+			var resultQuery = "";
+			var firstLimit = version[0] + "";
+			var lastLimit = version[version.Length - 1] + "";
+			var firstVersion = parts[0].Trim('[', '(');
+			var secondVersion = parts[1].Trim(')', ']');
+			if (firstLimit == "[" || firstLimit == "(") resultQuery += firstLimit;
+			if (firstVersion.Length > 0) resultQuery += "#V1";
+			resultQuery += ",";
+			if (secondVersion.Length > 0) resultQuery += "#V2";
+			if (lastLimit == "]" || lastLimit == ")") resultQuery += lastLimit;
+			return _isMatchingFuncs[resultQuery](foundedVersion, firstVersion, secondVersion);
+		}
+
 		internal class VersionNumber
 		{
 			public List<int> Version = new List<int>();
 			public List<string> Pre = new List<string>();
 		}
 
-		private VersionNumber ParseVersion(string v)
+		private static VersionNumber ParseVersion(string v)
 		{
 			var result = new VersionNumber();
 			var exploded = v.Split('-');

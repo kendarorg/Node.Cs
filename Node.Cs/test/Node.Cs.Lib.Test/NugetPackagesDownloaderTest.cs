@@ -13,31 +13,38 @@
 // ===========================================================
 
 
-using System.Collections.Generic;
+using System.Text;
 using Castle.MicroKernel.Registration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Node.Cs.Consoles;
-using Node.Cs.Exceptions;
 using Node.Cs.Nugets;
 using Node.Cs.Test;
+using Node.Cs.Utils;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Node.Cs.Utils;
 
 namespace Node.Cs
 {
 	[TestClass]
 	public class NugetPackagesDownloaderTest : TestBase<NugetPackagesDownloader, INugetPackagesDownloader>
 	{
-		private const string NUGET_ORG =
+		private const string NUGET_ORG_FILTER =
 			"https://www.nuget.org/api/v2/Packages()?$orderby=LastUpdated desc&$filter={0}";
 
 		private const string NUGET_ORG_FILE =
 			"https://www.nuget.org/api/v2/packge/{0}/{1}";
-		private const string EXTRA = "Packages()?$orderby=LastUpdated desc&$filter={0}";
-		private string BuildNugetPath(string id,string version)
+		private const string NUGET_FILTER_QUERY = "Packages()?$orderby=LastUpdated desc&$filter={0}";
+
+		private const string NUGET_PACKAGE_QUERY = "api/v2/packge/{0}/{1}";
+		private string BuildNugetPath(string id)
+		{
+			return id;
+		}
+
+		private string BuildNugetFilePath(string id, string version)
 		{
 			return id + "/" + version;
 		}
@@ -50,7 +57,9 @@ namespace Node.Cs
 			InitializeMock<INugetArchiveList>();
 			var versionVerifier = MockOf<INugetVersionVerifier>();
 			versionVerifier.Setup(a => a.BuildODataQuery(It.IsAny<string>(), It.IsAny<string>()))
-				.Returns((string id, string version) => BuildNugetPath(id ,version));
+				.Returns((string id, string version) => BuildNugetPath(id));
+			versionVerifier.Setup(a => a.IsVersionMatching(It.IsAny<string>(), It.IsAny<string>()))
+				.Returns(true);
 
 
 			Container.Register(Component.For<INodeExecutionContext>().Instance(new MockExecutionContext()));
@@ -67,6 +76,7 @@ namespace Node.Cs
 		{
 			Container.Register(Component.For<IWebClient>().ImplementedBy<BaseWebClient>());
 			SetupTarget();
+
 			const string packageName = "BasicNugetPackageFor.Test";
 			const string version = "1.0.0";
 			const bool allowPreRelease = true;
@@ -81,8 +91,17 @@ namespace Node.Cs
 				var dllContent = File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "Nuget\\BasicNugetPackageFor.Test.1.0.0.nupkg"));
 
 				var address = server.CreateAddress();
-				var expectedCall = address+ String.Format(EXTRA,BuildNugetPath(packageName, version));
-				server.Responses.Add(expectedCall, (c, s) => s.Respond(c, dllContent));
+				var downloadAddress = address + String.Format(NUGET_PACKAGE_QUERY, packageName, version);
+				var listAddress = address + String.Format(NUGET_FILTER_QUERY, BuildNugetPath(packageName));
+
+				var listContent = File.ReadAllText(Path.Combine(context.CurrentDirectory.Data, "Resources\\NugetResponseTemplate.xml"));
+				listContent = listContent.Replace("@ID@", packageName);
+				listContent = listContent.Replace("@VERSION@", version);
+				listContent = listContent.Replace("@ZIP@", downloadAddress);
+
+				server.Responses.Add(downloadAddress, (c, s) => s.Respond(c, dllContent));
+				server.Responses.Add(listAddress, (c, s) => s.Respond(c, Encoding.UTF8.GetBytes(listContent)));
+
 				Target.AddPackageSource(address);
 				var result = Target.DownloadPackage("net45", packageName, version, allowPreRelease)
 					.FirstOrDefault();
@@ -118,21 +137,32 @@ namespace Node.Cs
 			const string packageName = "BasicNugetPackageFor.Test";
 			const string version = "1.0.0";
 			const bool allowPreRelease = true;
-			var address = string.Format(NUGET_ORG, BuildNugetPath(packageName, version));
-			var addressDll = string.Format(NUGET_ORG_FILE, packageName, version);
+			var listAddress = string.Format(NUGET_ORG_FILTER, BuildNugetPath(packageName));
+			var dllAddress = string.Format(NUGET_ORG_FILE, packageName, version);
 
 			var context = Object<INodeExecutionContext>();
 			var client = MockOf<IWebClient>();
+
+
 			var dllContent = File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "Nuget\\BasicNugetPackageFor.Test.1.0.0.nupkg"));
-			client.Setup(a => a.DownloadData(address))
+			client.Setup(a => a.DownloadData(dllAddress))
 					.Returns(dllContent);
+
+			var listContent = File.ReadAllText(Path.Combine(context.CurrentDirectory.Data, "Resources\\NugetResponseTemplate.xml"));
+			listContent = listContent.Replace("@ID@", packageName);
+			listContent = listContent.Replace("@VERSION@", version);
+			listContent = listContent.Replace("@ZIP@", dllAddress);
+
+			client.Setup(a => a.DownloadData(listAddress))
+					.Returns(Encoding.UTF8.GetBytes(listContent));
 
 			//Act
 			var result = Target.DownloadPackage("net45", packageName, version, allowPreRelease)
 					.FirstOrDefault();
 
 			//Verify
-			client.Verify(a=>a.DownloadData(addressDll));
+			client.Verify(a => a.DownloadData(listAddress));
+			client.Verify(a => a.DownloadData(dllAddress));
 			Assert.IsNotNull(result);
 
 			Assert.AreEqual("BasicNugetPackageFor.Test.dll", result.Name);
@@ -162,22 +192,29 @@ namespace Node.Cs
 			const string packageName = "NoFrameworkPackageFor.Test";
 			const string version = "1.0.0";
 			const bool allowPreRelease = true;
-			var address = string.Format(NUGET_ORG, BuildNugetPath(packageName, version));
+			var listAddress = string.Format(NUGET_ORG_FILTER, BuildNugetPath(packageName));
+			var dllAddress = string.Format(NUGET_ORG_FILE, packageName, version);
 
 			var context = Object<INodeExecutionContext>();
 			var client = MockOf<IWebClient>();
-			var dllContent =
-				File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "Nuget\\NoFrameworkPackageFor.Test.1.0.0.nupkg"));
-			client.Setup(a => a.DownloadData(address))
+			var dllContent = File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "Nuget\\NoFrameworkPackageFor.Test.1.0.0.nupkg"));
+			client.Setup(a => a.DownloadData(dllAddress))
 				.Returns(dllContent);
-			var addressDll = string.Format(NUGET_ORG_FILE, packageName, version); 
+
+			var listContent = File.ReadAllText(Path.Combine(context.CurrentDirectory.Data, "Resources\\NugetResponseTemplate.xml"));
+			listContent = listContent.Replace("@ID@", packageName);
+			listContent = listContent.Replace("@VERSION@", version);
+			listContent = listContent.Replace("@ZIP@", dllAddress);
+
+			client.Setup(a => a.DownloadData(listAddress))
+					.Returns(Encoding.UTF8.GetBytes(listContent));
 
 			//Act
 			var result = Target.DownloadPackage("net45", packageName, version, allowPreRelease)
 				.FirstOrDefault();
 
 			//Verify
-			client.Verify(a => a.DownloadData(addressDll));
+			client.Verify(a => a.DownloadData(dllAddress));
 			Assert.IsNotNull(result);
 
 			Assert.AreEqual("NoFrameworkPackageFor.Test.dll", result.Name);
@@ -221,13 +258,6 @@ namespace Node.Cs
 			Assert.Inconclusive();
 		}
 
-
-		[TestMethod]
-		public void DownloadPackage_shouldConsider()
-		{
-			Assert.Inconclusive();
-		}
-
 		[TestMethod]
 		public void DownloadPackage_ShouldThrowTheException()
 		{
@@ -256,15 +286,15 @@ namespace Node.Cs
 			const string packageName1 = "NugetPackageWithDependencies.Test";
 			const string version1 = "1.0.0";
 			const bool allowPreRelease1 = true;
-			var address1 = string.Format(NUGET_ORG, BuildNugetPath(packageName1, version1));
-			var addressDll1 = string.Format(NUGET_ORG_FILE, packageName1, version1); 
+			var listAddresss1 = string.Format(NUGET_ORG_FILTER, BuildNugetPath(packageName1));
+			var addressDll1 = string.Format(NUGET_ORG_FILE, packageName1, version1);
 
 
 			const string packageName2 = "NoFrameworkPackageFor.Test";
 			const string version2 = "1.0.0";
-			var address2 = string.Format(NUGET_ORG, BuildNugetPath(packageName2, version2));
+			var listAddresss2 = string.Format(NUGET_ORG_FILTER, BuildNugetPath(packageName2));
 			var addressDll2 = string.Format(NUGET_ORG_FILE, packageName2, version2);
-			
+
 
 			var context = Object<INodeExecutionContext>();
 			var client = MockOf<IWebClient>();
@@ -272,18 +302,33 @@ namespace Node.Cs
 
 			var dllContent1 =
 				File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "Nuget\\NugetPackageWithDependencies.Test.1.0.0.nupkg"));
-			client.Setup(a => a.DownloadData(address1))
+			client.Setup(a => a.DownloadData(addressDll1))
 				.Returns(dllContent1);
+			var listContent1 = File.ReadAllText(Path.Combine(context.CurrentDirectory.Data, "Resources\\NugetResponseTemplate.xml"));
+			listContent1 = listContent1.Replace("@ID@", packageName1);
+			listContent1 = listContent1.Replace("@VERSION@", version1);
+			listContent1 = listContent1.Replace("@ZIP@", addressDll1);
+			client.Setup(a => a.DownloadData(listAddresss1))
+					.Returns(Encoding.UTF8.GetBytes(listContent1));
 
 			var dllContent2 =
 				File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "Nuget\\NoFrameworkPackageFor.Test.1.0.0.nupkg"));
-			client.Setup(a => a.DownloadData(address2))
+			client.Setup(a => a.DownloadData(addressDll2))
 				.Returns(dllContent2);
+			var listContent2 = File.ReadAllText(Path.Combine(context.CurrentDirectory.Data, "Resources\\NugetResponseTemplate.xml"));
+			listContent2 = listContent2.Replace("@ID@", packageName2);
+			listContent2 = listContent2.Replace("@VERSION@", version2);
+			listContent2 = listContent2.Replace("@ZIP@", addressDll2);
+			client.Setup(a => a.DownloadData(listAddresss2))
+					.Returns(Encoding.UTF8.GetBytes(listContent2));
 
 			//Act
 			var results = Target.DownloadPackage("net45", packageName1, version1, allowPreRelease1).ToArray();
 
 			//Verify
+			client.Verify(a => a.DownloadData(listAddresss1));
+			client.Verify(a => a.DownloadData(listAddresss2));
+
 			client.Verify(a => a.DownloadData(addressDll1));
 			client.Verify(a => a.DownloadData(addressDll2));
 
@@ -334,26 +379,35 @@ namespace Node.Cs
 			const string packageName = "NugetCircularReference.Test";
 			const string version = "1.0.0";
 			const bool allowPreRelease = true;
-			var address = string.Format(NUGET_ORG, BuildNugetPath(packageName, version));
+			var listAddress = string.Format(NUGET_ORG_FILTER, BuildNugetPath(packageName));
+			var dllAddress = string.Format(NUGET_ORG_FILE, packageName, version);
 
-			var addressDll = string.Format(NUGET_ORG_FILE, packageName, version);
-			
 
 			var context = Object<INodeExecutionContext>();
 			var client = MockOf<IWebClient>();
 
 
-			var dllContent1 =
+			var dllContent =
 				File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "Nuget\\NugetCircularReference.Test.1.0.0.nupkg"));
-			client.Setup(a => a.DownloadData(address))
-				.Returns(dllContent1);
+			client.Setup(a => a.DownloadData(dllAddress))
+				.Returns(dllContent);
+
+			var listContent = File.ReadAllText(Path.Combine(context.CurrentDirectory.Data, "Resources\\NugetResponseTemplate.xml"));
+			listContent = listContent.Replace("@ID@", packageName);
+			listContent = listContent.Replace("@VERSION@", version);
+			listContent = listContent.Replace("@ZIP@", dllAddress);
+			client.Setup(a => a.DownloadData(listAddress))
+					.Returns(Encoding.UTF8.GetBytes(listContent));
+
 			var count = 0;
 
 			//Act
-			client.Verify(a => a.DownloadData(addressDll));
 
 			foreach (var result in Target.DownloadPackage("net45", packageName, version, allowPreRelease))
 			{
+				client.Verify(a => a.DownloadData(listAddress));
+				client.Verify(a => a.DownloadData(dllAddress));
+
 				Assert.IsTrue(count <= 1);
 				//Verify
 				Assert.AreEqual("NugetCircularReference.Test.dll", result.Name);
@@ -386,22 +440,30 @@ namespace Node.Cs
 			const string packageName = "NugetWithoutSuitableFramework.Test";
 			const string version = "1.0.0";
 			const bool allowPreRelease = true;
-			var address = string.Format(NUGET_ORG, BuildNugetPath(packageName, version));
+			var listAddress = string.Format(NUGET_ORG_FILTER, BuildNugetPath(packageName));
+			var dllAddress = string.Format(NUGET_ORG_FILE, packageName, version);
 
 			var context = Object<INodeExecutionContext>();
 			var client = MockOf<IWebClient>();
 			var dllContent =
 				File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "Nuget\\NugetWithoutSuitableFramework.Test.1.0.0.nupkg"));
-			client.Setup(a => a.DownloadData(address))
+			client.Setup(a => a.DownloadData(dllAddress))
 				.Returns(dllContent);
-			var addressDll = string.Format(NUGET_ORG_FILE, packageName, version);
-			
+
+			var listContent = File.ReadAllText(Path.Combine(context.CurrentDirectory.Data, "Resources\\NugetResponseTemplate.xml"));
+			listContent = listContent.Replace("@ID@", packageName);
+			listContent = listContent.Replace("@VERSION@", version);
+			listContent = listContent.Replace("@ZIP@", dllAddress);
+			client.Setup(a => a.DownloadData(listAddress))
+					.Returns(Encoding.UTF8.GetBytes(listContent));
+
 
 			//Act
-			// ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-			client.Verify(a => a.DownloadData(addressDll));
 			ExceptionAssert.Throws<DllNotFoundException>(() =>
 				Target.DownloadPackage("net45", packageName, version, allowPreRelease).ToArray());
+
+			client.Verify(a => a.DownloadData(listAddress));
+			client.Verify(a => a.DownloadData(dllAddress));
 		}
 
 		[TestMethod]
@@ -413,28 +475,35 @@ namespace Node.Cs
 			const string packageName = "BasicNugetPackageFor.Test";
 			const string version = "1.0.0";
 			const bool allowPreRelease = true;
-			var address = string.Format(NUGET_ORG, BuildNugetPath(packageName, version));
+			var listAddress = string.Format(NUGET_ORG_FILTER, BuildNugetPath(packageName));
+			var dllAddress = string.Format(NUGET_ORG_FILE, packageName, version);
 
 			var context = Object<INodeExecutionContext>();
 			var client = MockOf<IWebClient>();
 			var archive = MockOf<INugetArchiveList>();
 
 			var dllContent = File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "Nuget\\BasicNugetPackageFor.Test.1.0.0.nupkg"));
-			client.Setup(a => a.DownloadData(address))
+			client.Setup(a => a.DownloadData(dllAddress))
 					.Returns(dllContent);
-			var addressDll = string.Format(NUGET_ORG_FILE, packageName, version);
 
+			var listContent = File.ReadAllText(Path.Combine(context.CurrentDirectory.Data, "Resources\\NugetResponseTemplate.xml"));
+			listContent = listContent.Replace("@ID@", packageName);
+			listContent = listContent.Replace("@VERSION@", version);
+			listContent = listContent.Replace("@ZIP@", dllAddress);
+			client.Setup(a => a.DownloadData(listAddress))
+					.Returns(Encoding.UTF8.GetBytes(listContent));
 
 			//Act
 			var result = Target.DownloadPackage("net45", packageName, version, allowPreRelease)
 					.ToArray().FirstOrDefault();
 
 			//Verify
-			client.Verify(a => a.DownloadData(addressDll));
+			client.Verify(a => a.DownloadData(listAddress));
+			client.Verify(a => a.DownloadData(dllAddress));
 			Assert.IsNotNull(result);
 			archive.Verify(a => a.Add(packageName, version, It.IsAny<IEnumerable<string>>(), It.IsAny<IEnumerable<NugetPackageDependency>>()), Times.Once);
 			archive.Verify(a => a.Check(packageName, version), Times.Once);
-			client.Verify(a => a.DownloadData(It.IsAny<string>()), Times.Once);
+			client.Verify(a => a.DownloadData(It.IsAny<string>()), Times.Exactly(2));
 		}
 
 		[TestMethod]
@@ -449,26 +518,35 @@ namespace Node.Cs
 			const string packageName = "BasicNugetPackageFor.Test";
 			const string version = "1.0.0";
 			const bool allowPreRelease = true;
-			var address = string.Format(NUGET_ORG, BuildNugetPath(packageName, version));
-			var addressDll = string.Format(NUGET_ORG_FILE, packageName, version);
+			var listAddress = string.Format(NUGET_ORG_FILTER, BuildNugetPath(packageName));
+			var dllAddress = string.Format(NUGET_ORG_FILE, packageName, version);
 
 			var client = MockOf<IWebClient>();
 			var archive = MockOf<INugetArchiveList>();
 			archive.Setup(a => a.Check(packageName, version)).Returns(true);
 			archive.Setup(a => a.Get(packageName, version))
-				.Returns(new NugetPackage(packageName, version, new[] { "BasicNugetPackageFor.Test.dll" },new NugetPackageDependency[]{}));
+				.Returns(new NugetPackage(packageName, version, new[] { "BasicNugetPackageFor.Test.dll" }, new NugetPackageDependency[] { }));
 
 			var dllContent = File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "Nuget\\BasicNugetPackageFor.Test.1.0.0.nupkg"));
-			client.Setup(a => a.DownloadData(address))
+			client.Setup(a => a.DownloadData(listAddress))
 					.Returns(dllContent);
 
+			var listContent = File.ReadAllText(Path.Combine(context.CurrentDirectory.Data, "Resources\\NugetResponseTemplate.xml"));
+			listContent = listContent.Replace("@ID@", packageName);
+			listContent = listContent.Replace("@VERSION@", version);
+			listContent = listContent.Replace("@ZIP@", dllAddress);
+			client.Setup(a => a.DownloadData(listAddress))
+					.Returns(Encoding.UTF8.GetBytes(listContent));
 
 			//Act
 			var result = Target.DownloadPackage("net45", packageName, version, allowPreRelease)
 					.FirstOrDefault();
 
 			//Verify
-			client.Verify(a => a.DownloadData(addressDll));
+
+			client.Verify(a => a.DownloadData(listAddress), Times.Never);
+			client.Verify(a => a.DownloadData(dllAddress), Times.Never);
+			client.Verify(a => a.DownloadData(dllAddress), Times.Never);
 			archive.Verify(a => a.Check(packageName, version), Times.Once);
 			archive.Verify(a => a.Get(packageName, version), Times.Once);
 			archive.Verify(a => a.Add(packageName, version, It.IsAny<IEnumerable<string>>(), It.IsAny<IEnumerable<NugetPackageDependency>>()), Times.Never);

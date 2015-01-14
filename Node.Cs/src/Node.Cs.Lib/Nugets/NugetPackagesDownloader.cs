@@ -109,14 +109,8 @@ namespace Node.Cs.Nugets
 
 			var nuspec = ExtractNuspec(package);
 			var deps = new List<NugetPackageDependency>();
-			foreach (var xNode in nuspec.DescendantNodes().Where(el =>
+			foreach (var depDll in nuspec.DescendantsByTag("dependency"))
 			{
-				var xe = el as XElement;
-				if (xe == null) return false;
-				return String.Compare(xe.Name.LocalName, "dependency", StringComparison.OrdinalIgnoreCase) == 0;
-			}))
-			{
-				var depDll = (XElement)xNode;
 				var depId = depDll.Attribute("id").Value;
 				var depVersion = depDll.Attribute("version") != null ? depDll.Attribute("version").Value : null;
 
@@ -205,12 +199,22 @@ namespace Node.Cs.Nugets
 		private byte[] DownloadSingleItem(string server, string packageName, string version, bool allowPreRelease)
 		{
 			server = server.TrimEnd('/');
-			var versionQuery = _versionVerifier.BuildODataQuery(packageName, version);
+			var versionQuery = _versionVerifier.BuildODataQuery(packageName, null);
 			var remoteUri = string.Format("{0}/Packages()?$orderby=LastUpdated desc&$filter={1}", server, versionQuery);
-
 			var client = _client ?? new BaseWebClient();
-			return client.DownloadData(remoteUri);
+			var queryResult = client.DownloadData(remoteUri);
 
+			var queryXml = XmlExtension.LoadDocument(queryResult);
+			foreach (var xNode in queryXml.DescendantsByTag("entry"))
+			{
+				var foundedVersion = xNode.DescendantsByTag("version").First().Value;
+				if (_versionVerifier.IsVersionMatching(foundedVersion, version))
+				{
+					var foundedVersionAddress = xNode.DescendantsByTag("content").First().Attribute("src").Value;
+					return client.DownloadData(foundedVersionAddress);
+				}
+			}
+			return null;
 		}
 	}
 }

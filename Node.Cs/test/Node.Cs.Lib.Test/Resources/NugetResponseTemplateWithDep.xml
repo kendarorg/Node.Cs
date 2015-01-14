@@ -5,10 +5,11 @@
     xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata">
 	<entry>
 		<title type="text">@ID@</title>
-		<content type="application/zip" src="@ZIP@" />
+		<content type="application/zip" src="http://www.nuget.org/api/v2/package/_Atrico.Lib.CommonAssemblyInfo/1.0.0" />
 		<m:properties>
-			<d:Version>@VERSION@</d:Version>
+			<d:Version>1.0.0.0</d:Version>
 			<d:Title>@ID@</d:Title>
+			<!--<d:Dependencies>Microsoft.AspNet.WebPages:[3.2.2, 3.3.0):|Microsoft.AspNet.Razor:[3.2.2, 3.3.0):</d:Dependencies>-->
 		</m:properties>
 	</entry>
 </feed>
