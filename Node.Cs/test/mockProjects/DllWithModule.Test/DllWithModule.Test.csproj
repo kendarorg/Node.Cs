@@ -43,7 +43,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Node.Cs.Shared\Node.Cs.Shared.csproj">
+    <ProjectReference Include="..\..\..\src\Node.Cs.Shared\Node.Cs.Shared.csproj">
       <Project>{0E122DAF-29EE-4D25-9EE8-D4A3D06E23A2}</Project>
       <Name>Node.Cs.Shared</Name>
     </ProjectReference>

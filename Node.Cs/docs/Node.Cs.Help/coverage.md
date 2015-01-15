@@ -13,16 +13,16 @@ The code coverage for Node.Cs.
 <pre>
 
 ﻿Summary
-  Generated on: 1/15/2015 - 9:59:26 AM
+  Generated on: 1/15/2015 - 2:14:59 PM
   Parser: OpenCoverParser
   Assemblies: 2
   Classes: 32
   Files: 31
   Coverage: 98.0%
-  Covered lines: 864
+  Covered lines: 865
   Uncovered lines: 17
-  Coverable lines: 881
-  Total lines: 2462
+  Coverable lines: 882
+  Total lines: 2463
 
 Node.Cs.Lib                                      97.7%
   Node.Cs.CommandHandlers.BasicCommandParser    100.0%

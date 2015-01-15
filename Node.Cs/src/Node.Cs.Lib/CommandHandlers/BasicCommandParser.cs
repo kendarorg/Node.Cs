@@ -106,6 +106,7 @@ namespace Node.Cs.CommandHandlers
 								&& ch == stringDelimiter)
 				{
 					lastItem += ch;
+					lastItem = lastItem.Substring(1, lastItem.Length - 2);
 					inString = false;
 				}
 				else

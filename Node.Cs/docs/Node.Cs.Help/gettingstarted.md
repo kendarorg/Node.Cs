@@ -28,14 +28,18 @@ The main directories are:
 
 ### Node.Cs Prompt
 
-Several command are available (case insensitive)
+Several command are available (case insensitive). 
+Note that parameters containing spaces must be surrounded by double or single quotes.
 
 * help: show the list of all available commands with its short descriptions
-* help [cmd]: show the help for the [cmd] command
-* run [script]: run a Node.cs script (.cs or .ncs). Will run the 'void Execute()' method
-* run [script] [function]: run a Node.cs script (.cs or .ncs). Will run the 'void [function]' method
-* exit: exit from the prompt with errorcode 0
-* exit [number]: exit with the error code [number]
+* help [cmd]: show the help for the [cmd] command.
+* echo [message]: show the given message.
+* run [script]: run a Node.cs script (.cs or .ncs). Will run the 'void Execute()' method. If no file 
+extension is present, .cs is assumed.
+* run [script] [function]: run a Node.cs script (.cs or .ncs). Will run the 'void [function]' method If no file 
+extension is present, .cs is assumed.
+* exit: exit from the prompt with errorcode 0.
+* exit [number]: exit with the error code [number].
 * loaddll [dllPath]: load a dll in memory. If it has not an absolute path it's searched on
 	* CurrentDirectory
 	* Bin directory
@@ -43,7 +47,7 @@ Several command are available (case insensitive)
 	* Node.Cs.exe directory
     * Packages directory
 * loadnuget [nugetPackage] (version): download the package from nuget.org and install it into the packages 
-folder. If the version is specified the EXACT version is taken. Else the LATEST STABLE version is taken
+folder. If the version is specified the EXACT version is taken. Else the LATEST STABLE version is taken.
 
 
 ### Node.Cs Scripts

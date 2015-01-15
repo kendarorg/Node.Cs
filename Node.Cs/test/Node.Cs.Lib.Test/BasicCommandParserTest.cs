@@ -63,9 +63,9 @@ namespace Node.Cs
 		{
 			var commands = new[]
 			{
-				Tuple("do \"string with double commas\" other","do",new []{"\"string with double commas\"","other"}),
-				Tuple("do \"has single'inside\" other","do",new []{"\"has single'inside\"","other"}),
-				Tuple("do \"string with \\\" stuff inside\" other","do",new []{"\"string with \\\" stuff inside\"","other"})
+				Tuple("do \"string with double commas\" other","do",new []{"string with double commas","other"}),
+				Tuple("do \"has single'inside\" other","do",new []{"has single'inside","other"}),
+				Tuple("do \"string with \\\" stuff inside\" other","do",new []{"string with \\\" stuff inside","other"})
 			};
 			RunSeries(
 				(item1, item2, item3) =>
@@ -89,9 +89,9 @@ namespace Node.Cs
 		{
 			var commands = new[]
 			{
-				Tuple("do 'string with double commas' other","do",new []{"'string with double commas'","other"}),
-				Tuple("do 'has single\"inside' other","do",new []{"'has single\"inside'","other"}),
-				Tuple("do 'string with \\' stuff inside' other","do",new []{"'string with \\' stuff inside'","other"})
+				Tuple("do 'string with double commas' other","do",new []{"string with double commas","other"}),
+				Tuple("do 'has single\"inside' other","do",new []{"has single\"inside","other"}),
+				Tuple("do 'string with \\' stuff inside' other","do",new []{"string with \\' stuff inside","other"})
 			};
 			RunSeries(
 				(item1, item2, item3) =>

@@ -47,6 +47,7 @@ echo cd bin >> %TMP_BATCH%
 
 for /F "tokens=*" %%P in ('dir /b "%SLN_DIR%\%OUT_DIR%\*.Test.dll"') do (
 	if "%VERBOSITY%"=="TRUE" (
+		ECHO MsTest.exe /noisolation "/testcontainer:%%P" "/resultsfile:Results.%%P.xml"  /detail:debugtrace /detail:stdout  /detail:traceinfo >> %TMP_BATCH%
 		ECHO MsTest.exe /noresults /noisolation "/testcontainer:%%P" >> %TMP_BATCH%
 	) ELSE (	
 		ECHO MsTest.exe /noresults /noisolation "/testcontainer:%%P" ^>NUL 2^>NUL >> %TMP_BATCH%

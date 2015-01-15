@@ -13,6 +13,7 @@
 // ===========================================================
 
 
+using System;
 using System.IO;
 using Castle.MicroKernel.Registration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -51,7 +52,7 @@ namespace Node.Cs
 			var path = Container.Resolve<INodeExecutionContext>();
 			var expected = Path.Combine(path.CurrentDirectory.Data, "Node.cs.lib.test.dll");
 			var result = Target.FindAssembly(expected);
-			Assert.AreEqual(expected,result);
+			Assert.AreEqual(expected, result);
 			Assert.IsTrue(File.Exists(result));
 		}
 
@@ -92,8 +93,14 @@ namespace Node.Cs
 		{
 			SetupTarget();
 			var path = Container.Resolve<INodeExecutionContext>();
-			var expected = Path.Combine(path.CurrentDirectory.Data, "SimpleNameDll.dll");
-			var result = Target.FindAssembly("SimpleNameDll");
+			const string externalDllName = "SimpleNameDll";
+
+			var expected = Path.Combine(path.CurrentDirectory.Data, externalDllName + ".dll");
+			
+			CopyDllOnTarget(externalDllName, path);
+
+			
+			var result = Target.FindAssembly(externalDllName);
 			Assert.AreEqual(expected, result);
 			Assert.IsTrue(File.Exists(result));
 		}

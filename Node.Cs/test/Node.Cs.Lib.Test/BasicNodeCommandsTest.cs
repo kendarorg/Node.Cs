@@ -340,6 +340,9 @@ namespace Node.Cs
 
 			var context = Object<INodeExecutionContext>();
 			var downloader = MockOf<INugetPackagesDownloader>();
+
+			CopyDllOnTarget("BasicDllFor.Test", context);
+
 			var dllContent = File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "BasicDllFor.Test.dll"));
 			downloader.Setup(a => a.DownloadPackage("net45", packageName, version, allowPreRelease))
 					.Returns(new List<NugetDll> { new NugetDll("BasicDllFor.Test.dll", dllContent) });

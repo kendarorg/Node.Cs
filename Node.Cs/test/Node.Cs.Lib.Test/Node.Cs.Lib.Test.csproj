@@ -173,14 +173,6 @@
       <Project>{fea3774b-6f7a-459b-ab21-95e4b2d5db6d}</Project>
       <Name>Node.Cs</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BasicDllFor.Test\BasicDllFor.Test.csproj">
-      <Project>{0924001c-7faf-4128-97ac-a3a3c02413f5}</Project>
-      <Name>BasicDllFor.Test</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SimpleNameDll\SimpleNameDll.csproj">
-      <Project>{d01d226e-e89f-4945-9a2e-1a745a45a5b2}</Project>
-      <Name>SimpleNameDll</Name>
-    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
