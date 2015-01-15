@@ -245,7 +245,9 @@ empty = latest version.
 				Tuple("1.0.0-beta","1.0.0-beta.2",false),
 				Tuple("1.0.0-beta.2","1.0.0-beta.11",false),
 				Tuple("1.0.0-beta.11","1.0.0-rc.1",false),
-				Tuple("1.0.0-rc.1","1.0.0",false)
+				Tuple("1.0.0-rc.1","1.0.0",false),
+				Tuple("1.0.0-rc.1","",true),
+				Tuple("1.0.0","",true)
 			};
 			RunSeries(
 				(item1, item2, expected) =>

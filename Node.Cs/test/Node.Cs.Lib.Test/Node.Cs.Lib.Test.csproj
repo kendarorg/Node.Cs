@@ -101,6 +101,9 @@
     <Content Include="BasicNodeCommandsTests\TestWithCompilationErrors.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\NugetResponseTemplateMulti.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\NugetResponseTemplateWithDep.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

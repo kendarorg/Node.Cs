@@ -619,5 +619,39 @@ namespace Node.Cs
 			client.Verify(a => a.DownloadData(listAddress), Times.Once);
 			client.Verify(a => a.DownloadData(dllAddress), Times.Never);
 		}
+
+
+		[TestMethod]
+		public void DownloadPackage_ShouldExtractTheCorrectDllsWithMultipleItems()
+		{
+			//Setup 
+			SetupTarget();
+
+			const string packageName = "BasicNugetPackageFor.Test";
+			const bool allowPreRelease = true;
+			const string listAddress = "https://www.nuget.org/api/v2/Packages()?$orderby=LastUpdated desc&$filter=BasicNugetPackageFor.Test";
+			const string dllAddress = "http://www.nuget.org/api/v2/package/BasicNugetPackageFor.Test/3.2.0";
+
+			var context = Object<INodeExecutionContext>();
+			var client = MockOf<IWebClient>();
+
+
+			var dllContent = File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "Nuget\\BasicNugetPackageFor.Test.1.0.0.nupkg"));
+			client.Setup(a => a.DownloadData(dllAddress))
+					.Returns(dllContent);
+
+			var listContent = File.ReadAllText(Path.Combine(context.CurrentDirectory.Data, "Resources\\NugetResponseTemplateMulti.xml"));
+			client.Setup(a => a.DownloadData(listAddress))
+					.Returns(Encoding.UTF8.GetBytes(listContent));
+
+			//Act
+			var result = Target.DownloadPackage("net45", packageName, null, allowPreRelease)
+					.FirstOrDefault();
+
+			//Verify
+			client.Verify(a => a.DownloadData(listAddress));
+			client.Verify(a => a.DownloadData(dllAddress));
+			Assert.IsNotNull(result);
+		}
 	}
 }
