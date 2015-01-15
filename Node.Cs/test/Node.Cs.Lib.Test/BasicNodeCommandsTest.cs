@@ -84,6 +84,20 @@ namespace Node.Cs
 		}
 
 		[TestMethod]
+		public void Run_ShouldLoadCsFileCompileAndRun_AddingCsExtensionIfMissing()
+		{
+			//Setup
+			SetupTarget();
+			var context = Object<INodeExecutionContext>();
+
+			//Act
+			Target.Run(context, "BasicNodeCommandsTests\\test");
+
+			//Verify
+			MockOf<INodeConsole>().Verify(a => a.WriteLine("Executing Test.cs"), Times.Once);
+		}
+
+		[TestMethod]
 		public void Run_ShouldLoadCsFileCompileAndRunDespiteDirectorySeparatorCharAndCasing()
 		{
 			//Setup

@@ -18,6 +18,7 @@ using Castle.MicroKernel.Registration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Node.Cs.Consoles;
+using Node.Cs.Exceptions;
 using Node.Cs.Nugets;
 using Node.Cs.Test;
 using Node.Cs.Utils;
@@ -552,6 +553,71 @@ namespace Node.Cs
 			archive.Verify(a => a.Add(packageName, version, It.IsAny<IEnumerable<string>>(), It.IsAny<IEnumerable<NugetPackageDependency>>()), Times.Never);
 			client.Verify(a => a.DownloadData(It.IsAny<string>()), Times.Never);
 			Assert.IsNotNull(result);
+		}
+
+		[TestMethod]
+		public void DownloadPackage_ShouldThrowNugetDownloadException_WhenNoPackageIsFoundOnServer()
+		{
+			//Setup 
+			SetupTarget();
+
+			const string packageName = "NugetWithoutSuitableFramework.Test";
+			const string version = "1.0.0";
+			const bool allowPreRelease = true;
+			var listAddress = string.Format(NUGET_ORG_FILTER, BuildNugetPath(packageName));
+			var dllAddress = string.Format(NUGET_ORG_FILE, packageName, version);
+
+			var context = Object<INodeExecutionContext>();
+			var client = MockOf<IWebClient>();
+
+			var listContent = File.ReadAllText(Path.Combine(context.CurrentDirectory.Data, "Resources\\NugetResponseTemplate.xml"));
+			listContent = listContent.Replace("@ID@","Dummy" );
+			listContent = listContent.Replace("@VERSION@", "2.0.0-dummy");
+			listContent = listContent.Replace("@ZIP@", "http://test.site");
+			client.Setup(a => a.DownloadData(listAddress))
+					.Returns(Encoding.UTF8.GetBytes(listContent));
+
+
+			//Act
+			ExceptionAssert.Throws<NugetDownloadException>(() =>
+				Target.DownloadPackage("net45", packageName, version, allowPreRelease).ToArray());
+
+			client.Verify(a => a.DownloadData(listAddress),Times.Once);
+			client.Verify(a => a.DownloadData(dllAddress),Times.Never);
+		}
+
+		[TestMethod]
+		public void DownloadPackage_ShouldThrowNugetDownloadException_WhenNoSuitableVersionIsFoundOnServer()
+		{
+			//Setup 
+			SetupTarget();
+
+			const string packageName = "NugetWithoutSuitableFramework.Test";
+			const string version = "1.0.0";
+			const bool allowPreRelease = true;
+			var listAddress = string.Format(NUGET_ORG_FILTER, BuildNugetPath(packageName));
+			var dllAddress = string.Format(NUGET_ORG_FILE, packageName, version);
+
+			var context = Object<INodeExecutionContext>();
+			var client = MockOf<IWebClient>();
+			var versionVerifier = MockOf<INugetVersionVerifier>();
+			versionVerifier.Setup(a => a.IsVersionMatching("2.0.0", "1.0.0"))
+				.Returns(false);
+
+			var listContent = File.ReadAllText(Path.Combine(context.CurrentDirectory.Data, "Resources\\NugetResponseTemplate.xml"));
+			listContent = listContent.Replace("@ID@", "NugetWithoutSuitableFramework.Test");
+			listContent = listContent.Replace("@VERSION@", "2.0.0");
+			listContent = listContent.Replace("@ZIP@", "http://test.site");
+			client.Setup(a => a.DownloadData(listAddress))
+					.Returns(Encoding.UTF8.GetBytes(listContent));
+
+
+			//Act
+			ExceptionAssert.Throws<NugetDownloadException>(() =>
+				Target.DownloadPackage("net45", packageName, version, allowPreRelease).ToArray());
+
+			client.Verify(a => a.DownloadData(listAddress), Times.Once);
+			client.Verify(a => a.DownloadData(dllAddress), Times.Never);
 		}
 	}
 }

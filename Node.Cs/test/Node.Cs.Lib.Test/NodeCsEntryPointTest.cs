@@ -45,7 +45,7 @@ namespace Node.Cs
 			SetupTarget(new NodeCsEntryPointForTest(new CommandLineParser(new string[0], ""), Container, NodeCsEntryPointForTest.Once));
 
 			//Act
-			ExceptionAssert.Throws<NotImplementedException>(()=>Target.Run(true));
+			ExceptionAssert.Throws<NotImplementedException>(() => Target.Run(true));
 		}
 
 		[TestMethod]
@@ -101,8 +101,8 @@ namespace Node.Cs
 
 			//Verify
 			var commandsHandler = MockOf<IUiCommandsHandler>();
-			commandsHandler.Verify(a => a.Run(It.IsAny<string>()), Times.Once);
-			commandsHandler.Verify(a => a.Run(command), Times.Once);
+			commandsHandler.Verify(a => a.Run(It.IsAny<string>(), true), Times.Once);
+			commandsHandler.Verify(a => a.Run(command, true), Times.Once);
 		}
 
 
@@ -118,7 +118,7 @@ namespace Node.Cs
 
 			var expected = new Exception(exceptionMessage);
 
-			commandHandler.Setup(a => a.Run(command)).Throws(expected);
+			commandHandler.Setup(a => a.Run(command, true)).Throws(expected);
 			console.Setup(c => c.ReadLine()).Returns(command);
 			console.Setup(c => c.WriteLine(It.IsAny<string>(), It.IsAny<object[]>()))
 				.Callback<string, object[]>((s, p) => obtainedLines.Add(string.Format(s, p)));
@@ -139,9 +139,9 @@ namespace Node.Cs
 		[TestMethod]
 		public void Run_ShouldBeAbleToRunAsService()
 		{
-            Assert.Inconclusive("Run_ShouldBeAbleToRunAsService");
+			Assert.Inconclusive("Run_ShouldBeAbleToRunAsService");
 			/*
-            //Setup
+						//Setup
 			const bool runAsService = true;
 			InitializeMock<INodeConsole>();
 			SetupTarget(new NodeCsEntryPointForTest(new CommandLineParser(new string[0], ""), Container, NodeCsEntryPointForTest.Once));

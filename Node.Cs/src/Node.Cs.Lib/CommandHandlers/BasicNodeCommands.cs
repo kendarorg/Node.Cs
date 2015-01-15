@@ -261,10 +261,6 @@ namespace Node.Cs.CommandHandlers
 							string newError = error.Substring(@where + ".cs\t".Length).TrimStart();
 							compilationErrors += "\r\n" + newError;
 						}
-						else
-						{
-							compilationErrors += "\r\n" + error;
-						}
 
 						errs.Add(error);
 					}

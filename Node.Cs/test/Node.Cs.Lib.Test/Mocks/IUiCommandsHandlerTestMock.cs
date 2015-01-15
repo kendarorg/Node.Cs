@@ -20,6 +20,8 @@ namespace Node.Cs.Mocks
 	public interface IUiCommandsHandlerTestMock
 	{
 		void DoTest(INodeExecutionContext context);
+		void DoTestBoolean(INodeExecutionContext context,bool par);
+		void DoTestInt(INodeExecutionContext context, int par);
 
 		void CommantWithOverload(INodeExecutionContext context,string par);
 		void CommantWithOverload(INodeExecutionContext context, int par);

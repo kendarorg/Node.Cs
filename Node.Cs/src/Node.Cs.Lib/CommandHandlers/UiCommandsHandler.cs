@@ -143,12 +143,12 @@ namespace Node.Cs.CommandHandlers
 			return result.ToArray();
 		}
 
-		public void Run(string command)
+		public void Run(string command, bool interactive = true)
 		{
 			var parsedCommand = _commandParser.Parse(command);
 			if (!_commands.ContainsKey(parsedCommand.Command))
 			{
-				if (ContainsCommand("help", new[] { typeof(string) }))
+				if (ContainsCommand("help", new[] { typeof(string) }) && interactive)
 				{
 					ShowHelpForCommand("help");
 					return;
@@ -230,12 +230,16 @@ namespace Node.Cs.CommandHandlers
 							continue;
 						}
 					}
+					else
+					{
+						return null;
+					}
 				}
 				//if (!paramInfo.IsOptional) return null;
 				object defaultValue = null;
 				if (paramInfo.ParameterType.IsValueType)
 				{
-					if (paramInfo.ParameterType == typeof (bool))
+					if (paramInfo.ParameterType == typeof(bool))
 					{
 						defaultValue = false;
 					}

@@ -136,5 +136,124 @@ empty = latest version.
 				},
 				commands);
 		}
+
+		[TestMethod]
+		public void IsVersionMatching_ShouldThrowExceptionOnInvalidVersions()
+		{
+			const string testVersion = "1.0.0";
+			var commands = new[]
+			{
+				"[1.0)",
+				"(1.0]",
+				"(1.0)",
+				"(1.0,2.0",
+				"[1.0,2.0",
+				"1.0,2.0)",
+				"1.0,2.0]",
+				"1.0,2.0,3.0"
+			};
+			RunSeries(
+				item1 =>
+				{
+					//Setup
+					SetupTarget();
+
+					//Act
+					ExceptionAssert.Throws<Exception>(() => Target.IsVersionMatching(testVersion, item1));
+				},
+				commands);
+		}
+
+		[TestMethod]
+		public void IsVersionMatching_ShouldHandleTheVariousCombination()
+		{
+			var commands = new[]
+			{
+				Tuple("1.0","1.0",true),
+				Tuple("1.0","2.0",false),
+				Tuple("(,1.0]","0.1",true),
+				Tuple("(,1.0]","1.0",true),
+				Tuple("(,1.0]","2.0",false),
+				Tuple("(,1.0)","1.0",false),
+				Tuple("(,1.0)","0.9",true),
+				Tuple("(1.0,)","0.9",false),
+				Tuple("(1.0,)","1.0",false),
+				Tuple("(1.0,)","10.0",true),
+				Tuple("[1.0,)","0.9",false),
+				Tuple("[1.0,)","1.0",true),
+				Tuple("[1.0,)","10.0",true),
+				Tuple("[1.0]","1.0",true),
+				Tuple("[1.0]","0.9",false),
+				Tuple("[1.0]","1.1",false),
+				Tuple("(1.0,2.0)","1.0",false),
+				Tuple("(1.0,2.0)","2.0",false),
+				Tuple("(1.0,2.0)","1.5",true),
+				Tuple("[1.0,2.0]","0.9",false),
+				Tuple("[1.0,2.0]","1.0",true),
+				Tuple("[1.0,2.0]","2.0",true),
+				Tuple("[1.0,2.0]","2.1",false),
+				Tuple("(1.0,2.0]","1.0",false),
+				Tuple("(1.0,2.0]","2.0",true),
+				Tuple("[1.0,2.0)","1.0",true),
+				Tuple("[1.0,2.0)","2.0",false),
+				Tuple("","9999",true),
+				Tuple("","0.1",true),
+			};
+			RunSeries(
+				(item1, item2, item3) =>
+				{
+					//Setup
+					SetupTarget();
+
+					//Act
+					var result = Target.IsVersionMatching(item2, item1);
+
+					//Verify
+					Assert.AreEqual(item3, result, "Input: " + item1);
+				},
+				commands);
+		}
+
+		[TestMethod]
+		public void IsVersionMatching_ShouldHandleTheVariousCombination_AndViceVersa()
+		{
+			var commands = new[]
+			{
+				Tuple("1.0.0-alpha","1.0.0-alpha.1",false),
+				Tuple("1.0.0-alpha","1.0.0-alpha",true),
+				Tuple("2.0","1.0",false),
+				Tuple("2.0.0","1.0.0",false),
+				Tuple("1.0","1.0",true),
+				Tuple("1.0","2.0",false),
+				Tuple("1.0.0-alpha.1","1.0.0-alpha.beta",false),
+				Tuple("1.0.0-alpha.beta","1.0.0-beta",false),
+				Tuple("1.0.0-beta","1.0.0-beta.2",false),
+				Tuple("1.0.0-beta.2","1.0.0-beta.11",false),
+				Tuple("1.0.0-beta.11","1.0.0-rc.1",false),
+				Tuple("1.0.0-rc.1","1.0.0",false)
+			};
+			RunSeries(
+				(item1, item2, expected) =>
+				{
+					//Setup
+					SetupTarget();
+
+					//Act
+					var result = Target.IsVersionMatching(item1, item2);
+
+					//Verify
+					Assert.AreEqual(expected, result, string.Format("Input: '{0}'-'{1}'.", item1, item2));
+
+					if (!result)
+					{
+						//Act
+						var newResult = Target.IsVersionMatching(item2, item1);
+
+						//Verify
+						Assert.AreEqual(expected, newResult, string.Format("Input: '{0}'-'{1}'.", item2, item1));
+					}
+				},
+				commands);
+		}
 	}
 }

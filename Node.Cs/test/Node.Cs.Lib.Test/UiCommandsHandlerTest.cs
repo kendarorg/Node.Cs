@@ -236,6 +236,122 @@ namespace Node.Cs
 			SetsAssert.Contains(_mockConsole.Data, "test help\r\n");
 			CollectionAssert.DoesNotContain(_mockConsole.Data, "helping help\r\n");
 		}
+		
+		[TestMethod]
+		public void Run_Command_ShouldHandleMissingBooleanParametersAddingDefault()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext,bool>(_handler.DoTestBoolean), "test help");
+			Target.RegisterCommand(cd);
 
+			//Act
+			Target.Run("test");
+
+			//Verify
+			_handlerMock.Verify(a => a.DoTestBoolean(It.IsAny<INodeExecutionContext>(), false), Times.Once);
+		}
+
+		[TestMethod]
+		public void Run_Command_ShouldHandleParametersWithWrongValues_ShowingHelp()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext, bool>(_handler.DoTestBoolean), "test help");
+			Target.RegisterCommand(cd);
+
+			//Act
+			Target.Run("test fuffa");
+
+			//Verify
+			_handlerMock.Verify(a => a.DoTestBoolean(It.IsAny<INodeExecutionContext>(), It.IsAny<bool>()), Times.Never);
+			_handlerMock.Verify(a => a.DoTestInt(It.IsAny<INodeExecutionContext>(), It.IsAny<int>()), Times.Never);
+			_handlerMock.Verify(a => a.DoTest(It.IsAny<INodeExecutionContext>()), Times.Never);
+			_handlerMock.Verify(a => a.CommantWithOverload(It.IsAny<INodeExecutionContext>(), It.IsAny<int>()), Times.Never);
+			_handlerMock.Verify(a => a.CommantWithOverload(It.IsAny<INodeExecutionContext>(), It.IsAny<string>()), Times.Never);
+
+			SetsAssert.Contains(_mockConsole.Data, string.Format("Node.Cs Help for command '{0}':\r\n", "test"));
+		}
+
+		[TestMethod]
+		public void Run_NotInteractiveNotExistingCommand_ShouldThrowWithoutShowingHelp()
+		{
+			//Setup
+			const bool interactive = false;
+			SetupTarget();
+			MissingCommandException result;
+
+			//Act
+			ExceptionAssert.Throws(() => Target.Run("test", interactive), out result);
+
+			//Verify
+			Assert.IsTrue(result.Message.Contains("test"));
+			Assert.AreEqual("", string.Join("",_mockConsole.Data));
+		}
+
+		[TestMethod]
+		public void Run_Command_ShouldHandleBooleanParameters()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext, bool>(_handler.DoTestBoolean), "test help");
+			Target.RegisterCommand(cd);
+
+			//Act
+			Target.Run("test true");
+
+			//Verify
+			_handlerMock.Verify(a => a.DoTestBoolean(It.IsAny<INodeExecutionContext>(), true), Times.Once);
+		}
+
+		[TestMethod]
+		public void Run_Command_ShouldHandleMissingNumericParametersAddingDefault()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext, int>(_handler.DoTestInt), "test help");
+			Target.RegisterCommand(cd);
+
+			//Act
+			Target.Run("test");
+
+			//Verify
+			_handlerMock.Verify(a => a.DoTestInt(It.IsAny<INodeExecutionContext>(), 0), Times.Once);
+		}
+
+		[TestMethod]
+		public void Run_Command_ShouldHandleNumericParameters()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext, int>(_handler.DoTestInt), "test help");
+			Target.RegisterCommand(cd);
+
+			//Act
+			Target.Run("test 33");
+
+			//Verify
+			_handlerMock.Verify(a => a.DoTestInt(It.IsAny<INodeExecutionContext>(), 33), Times.Once);
+		}
+
+		[TestMethod]
+		public void Run_Command_ShouldThrowTheCorrectException()
+		{
+			//Setup
+			var expected = new InsufficientExecutionStackException("test");
+			InsufficientExecutionStackException result = null;
+			SetupTarget();
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>((ctx) =>
+			{
+				throw expected;
+			}), "test help");
+			Target.RegisterCommand(cd);
+
+			//Act
+			ExceptionAssert.Throws(()=>Target.Run("test"),out result);
+
+			//Verify
+			Assert.AreSame(expected,result);
+		}
 	}
 }
