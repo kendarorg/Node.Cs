@@ -28,17 +28,18 @@
 using Node.Cs.Consoles;
 
 
-	class Test
+// ReSharper disable once CheckNamespace
+class Test
+{
+	private readonly INodeConsole _console;
+
+	public Test(INodeConsole console)
 	{
-		private readonly INodeConsole _console;
-
-		public Test(INodeConsole console)
-		{
-			_console = console;
-		}
-
-		public void Execute()
-		{
-			_console.WriteLine("Test called");
-		}
+		_console = console;
 	}
+
+	public void Execute()
+	{
+		_console.WriteLine("Test called");
+	}
+}

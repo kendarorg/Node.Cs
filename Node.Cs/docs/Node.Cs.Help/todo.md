@@ -14,16 +14,15 @@ children_required=
 ### Doing
 
 * Support for var_args in function calls
+	* Declare functions from command line with variable arguments
 * Adding Crontab Module
 
 ### Testing and TODOs
 
+* Adding a "curl" Module
 * Verify nuget download behaviour "in real world"
 * Execption inside a call to "run" in .ncs script
 * Load a dll through the NodeCsEntryPoint
-* UiCommandsHandler: Invoke commands containing default value for
-	* DateTime
-	* enumerable
 * File watcher for source files
 
 ### Done

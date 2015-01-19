@@ -276,7 +276,7 @@ namespace Node.Cs
 
 			//Verify
 			Assert.AreEqual(0, _handler.Run.Count);
-			
+
 			SetsAssert.Contains(_mockConsole.Data, string.Format("Node.Cs Help for command '{0}':\r\n", "test"));
 		}
 
@@ -341,7 +341,7 @@ namespace Node.Cs
 
 			//Verify
 			Assert.AreEqual(1, _handler.Run.Count);
-			_handler.Verify("DoTestInt", _handler.IsAny<INodeExecutionContext>(),33);
+			_handler.Verify("DoTestInt", _handler.IsAny<INodeExecutionContext>(), 33);
 		}
 
 		[TestMethod]
@@ -349,9 +349,9 @@ namespace Node.Cs
 		{
 			//Setup
 			var expected = new InsufficientExecutionStackException("test");
-			InsufficientExecutionStackException result = null;
+			InsufficientExecutionStackException result;
 			SetupTarget();
-			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>((ctx) =>
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext>(ctx =>
 			{
 				throw expected;
 			}), "test help");
@@ -412,7 +412,7 @@ namespace Node.Cs
 
 			//Verify
 			Assert.AreEqual(1, _handler.Run.Count);
-			_handler.Verify("DoTest",_handler.IsAny<INodeExecutionContext>());
+			_handler.Verify("DoTest", _handler.IsAny<INodeExecutionContext>());
 		}
 
 

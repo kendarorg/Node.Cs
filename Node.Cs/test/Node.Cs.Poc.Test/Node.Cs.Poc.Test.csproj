@@ -50,9 +50,11 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="InterfaceParametersEvaluation.cs" />
     <Compile Include="FunctionParametersEvaluation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="samples\FunctionParamsSource.cs" />
+    <Compile Include="samples\IWithFunctionDefaults.cs" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

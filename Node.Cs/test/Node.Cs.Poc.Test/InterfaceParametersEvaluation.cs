@@ -7,12 +7,12 @@ using System.Runtime.InteropServices;
 namespace Node.Cs.Poc.Test
 {
 	[TestClass]
-	public class FunctionParametersEvaluation
+	public class InterfaceParametersEvaluation
 	{
 		[TestMethod]
 		public void WithReflection_ShouldBePossibleToRecognize_OptionalParameters_WithStringType()
 		{
-			var type = typeof(FunctionParamsSource);
+			var type = typeof(IWithFunctionDefaults);
 			var methodArray = type.GetMethod("NonOptionalFunctionString");
 			var parametersMethodArray = methodArray.GetParameters();
 

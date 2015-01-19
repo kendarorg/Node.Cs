@@ -32,10 +32,10 @@ namespace Node.Cs.Mocks
 {
 	public class UiCommandsHandlerTestMock : MockCalls
 	{
-		
+
 		public void DoTest(INodeExecutionContext context)
 		{
-			AddTuple("DoTest",context);
+			AddTuple("DoTest", context);
 		}
 
 		public void DoTestBoolean(INodeExecutionContext context, bool par = false)

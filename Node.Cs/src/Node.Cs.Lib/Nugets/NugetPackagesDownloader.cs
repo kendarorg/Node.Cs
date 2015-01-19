@@ -217,6 +217,7 @@ namespace Node.Cs.Nugets
 			var queryResult = client.DownloadData(remoteUri);
 
 			var queryXml = XmlExtension.LoadDocument(queryResult);
+			// ReSharper disable once LoopCanBeConvertedToQuery
 			foreach (var xNode in queryXml.DescendantsByTag("entry"))
 			{
 				var foundedVersion = xNode.DescendantsByTag("version").First().Value;

@@ -57,11 +57,6 @@ namespace Node.Cs
 			return id;
 		}
 
-		private string BuildNugetFilePath(string id, string version)
-		{
-			return id + "/" + version;
-		}
-
 		[TestInitialize]
 		public override void TestInitialize()
 		{
@@ -472,6 +467,7 @@ namespace Node.Cs
 
 
 			//Act
+			// ReSharper disable once ReturnValueOfPureMethodIsNotUsed
 			ExceptionAssert.Throws<DllNotFoundException>(() =>
 				Target.DownloadPackage("net45", packageName, version, allowPreRelease).ToArray());
 
@@ -583,7 +579,7 @@ namespace Node.Cs
 			var client = MockOf<IWebClient>();
 
 			var listContent = File.ReadAllText(Path.Combine(context.CurrentDirectory.Data, "Resources\\NugetResponseTemplate.xml"));
-			listContent = listContent.Replace("@ID@","Dummy" );
+			listContent = listContent.Replace("@ID@", "Dummy");
 			listContent = listContent.Replace("@VERSION@", "2.0.0-dummy");
 			listContent = listContent.Replace("@ZIP@", "http://test.site");
 			client.Setup(a => a.DownloadData(listAddress))
@@ -591,11 +587,12 @@ namespace Node.Cs
 
 
 			//Act
+			// ReSharper disable once ReturnValueOfPureMethodIsNotUsed
 			ExceptionAssert.Throws<NugetDownloadException>(() =>
 				Target.DownloadPackage("net45", packageName, version, allowPreRelease).ToArray());
 
-			client.Verify(a => a.DownloadData(listAddress),Times.Once);
-			client.Verify(a => a.DownloadData(dllAddress),Times.Never);
+			client.Verify(a => a.DownloadData(listAddress), Times.Once);
+			client.Verify(a => a.DownloadData(dllAddress), Times.Never);
 		}
 
 		[TestMethod]
@@ -625,6 +622,7 @@ namespace Node.Cs
 
 
 			//Act
+			// ReSharper disable once ReturnValueOfPureMethodIsNotUsed
 			ExceptionAssert.Throws<NugetDownloadException>(() =>
 				Target.DownloadPackage("net45", packageName, version, allowPreRelease).ToArray());
 

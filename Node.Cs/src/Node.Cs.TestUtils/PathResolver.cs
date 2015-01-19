@@ -24,10 +24,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ===========================================================
 
-
-
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -64,20 +61,21 @@ namespace Node.Cs.Test
 			return FindFirstOfType(parent, pattern);
 		}
 
-		public static string FindByPath(string path,Assembly asm=null)
+		public static string FindByPath(string path, Assembly asm = null)
 		{
 			path = path.ToPath();
 			if (File.Exists(path))
 			{
 				return path;
 			}
-			
+
 			if (!Path.IsPathRooted(path))
 			{
 				var dir = Path.GetDirectoryName(path);
 				var file = Path.GetFileName(path);
-				var asmDir = GetAssemblyPath(asm??Assembly.GetCallingAssembly());
+				var asmDir = GetAssemblyPath(asm ?? Assembly.GetCallingAssembly());
 				// ReSharper disable AssignNullToNotNullAttribute
+				// ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
 				if (!string.IsNullOrEmpty(dir))
 				{
 					path = Path.Combine(asmDir, dir, file);

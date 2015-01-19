@@ -99,7 +99,7 @@ namespace Node.Cs.Test
 #endif
 			var srcDll = Path.Combine(PathResolver.GetSolutionRoot(), "test", "mockProjects", externalDllName, "bin", dest,
 				externalDllName + ".dll");
-			srcDll = PathResolver.FindByPath(srcDll,Assembly.GetCallingAssembly());
+			srcDll = PathResolver.FindByPath(srcDll, Assembly.GetCallingAssembly());
 			if (string.IsNullOrWhiteSpace(srcDll) || !File.Exists(srcDll))
 			{
 

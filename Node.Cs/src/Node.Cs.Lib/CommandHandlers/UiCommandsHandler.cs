@@ -160,17 +160,19 @@ namespace Node.Cs.CommandHandlers
 			var parsedCommand = _commandParser.Parse(command);
 			for (int i = parsedCommand.Parameters.Count(); i > 0; i--)
 			{
-				var currentParams = parsedCommand.Parameters.Take(i);
+				var currentParams = parsedCommand.Parameters.Take(i).ToArray();
 				var resultCommands = string.Join(" ", currentParams).ToLowerInvariant();
-				if (currentParams.Count() > 0)
+				if (currentParams.Length > 0)
 				{
 					resultCommands = " " + resultCommands;
 				}
 				resultCommands = parsedCommand.Command + resultCommands;
 				if (_commands.ContainsKey(resultCommands))
 				{
-					var newCommand = new ParsedCommand();
-					newCommand.Command = resultCommands;
+					var newCommand = new ParsedCommand
+					{
+						Command = resultCommands
+					};
 					newCommand.Parameters.AddRange(parsedCommand.Parameters.Skip(i));
 					parsedCommand = newCommand;
 					break;

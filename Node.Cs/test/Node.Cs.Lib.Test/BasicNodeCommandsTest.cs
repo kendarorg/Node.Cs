@@ -38,7 +38,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Node.Cs.Utils;
-using System.Threading;
 
 namespace Node.Cs
 {
@@ -167,16 +166,16 @@ namespace Node.Cs
 			Target.Run(context, modPath, "do");
 
 			src = src.Replace("Executing Test.cs::Do", "Executing modified Test.cs::Do");
-            var lastWriteTime = File.GetLastWriteTime(destPath);
+			var lastWriteTime = File.GetLastWriteTime(destPath);
 			File.WriteAllText(destPath, src);
-            lastWriteTime += TimeSpan.FromSeconds(2);
-            File.SetLastWriteTime(destPath,lastWriteTime);
+			lastWriteTime += TimeSpan.FromSeconds(2);
+			File.SetLastWriteTime(destPath, lastWriteTime);
 
 			Target.Run(context, modPath, "do");
 
 			//Verify
 			MockOf<INodeConsole>().Verify(a => a.WriteLine("Executing modified Test.cs::Do"), Times.Once);
-            MockOf<INodeConsole>().Verify(a => a.WriteLine("Executing Test.cs::Do"), Times.Once);
+			MockOf<INodeConsole>().Verify(a => a.WriteLine("Executing Test.cs::Do"), Times.Once);
 		}
 
 		[TestMethod]

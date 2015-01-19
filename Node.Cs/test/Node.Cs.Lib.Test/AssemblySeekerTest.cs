@@ -25,13 +25,12 @@
 // ===========================================================
 
 
-using System;
-using System.IO;
 using Castle.MicroKernel.Registration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Node.Cs.Consoles;
 using Node.Cs.Test;
 using Node.Cs.Utils;
+using System.IO;
 
 namespace Node.Cs
 {
@@ -108,10 +107,10 @@ namespace Node.Cs
 			const string externalDllName = "SimpleNameDll";
 
 			var expected = Path.Combine(path.CurrentDirectory.Data, externalDllName + ".dll");
-			
+
 			CopyDllOnTarget(externalDllName, path);
 
-			
+
 			var result = Target.FindAssembly(externalDllName);
 			Assert.AreEqual(expected, result);
 			Assert.IsTrue(File.Exists(result));
