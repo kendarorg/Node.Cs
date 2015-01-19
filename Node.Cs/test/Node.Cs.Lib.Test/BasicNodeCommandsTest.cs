@@ -220,7 +220,7 @@ namespace Node.Cs
 					out resultException);
 
 			//Verify
-			Assert.IsTrue(resultException.Message.Contains(": 21"));
+			Assert.IsTrue(resultException.Message.Contains(": 33"));
 			Assert.IsTrue(resultException.Message.Contains(": 14"));
 			Assert.IsTrue(resultException.Message.Contains(": 19"));
 			Assert.IsTrue(resultException.CompiledSource.Contains("this is an error"));
