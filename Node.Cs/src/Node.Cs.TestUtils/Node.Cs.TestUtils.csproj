@@ -67,6 +67,7 @@
     <Compile Include="ExceptionAssert.cs" />
     <Compile Include="FakeHttpServer.cs" />
     <Compile Include="LazyComponentAutoMocker.cs" />
+    <Compile Include="MockCalls.cs" />
     <Compile Include="MockExecutionContext.cs" />
     <Compile Include="MockStream.cs" />
     <Compile Include="PathResolver.cs" />

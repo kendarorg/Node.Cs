@@ -1,21 +1,32 @@
 // ===========================================================
-// Copyright (C) 2014-2015 Kendar.org
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
-// files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
-// modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software 
-// is furnished to do so, subject to the following conditions:
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
-// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS 
-// BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF 
-// OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// Copyright (c) 2014-2015, Enrico Da Ros/kendar.org
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+// 
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ===========================================================
 
 
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using Node.Cs.CommandHandlers;
 using Node.Cs.Consoles;
 using Node.Cs.Exceptions;
@@ -29,8 +40,7 @@ namespace Node.Cs
 	[TestClass]
 	public class UiCommandsHandlerTest : TestBase<UiCommandsHandler, IUiCommandsHandler>
 	{
-		private Mock<IUiCommandsHandlerTestMock> _handlerMock;
-		private IUiCommandsHandlerTestMock _handler;
+		private UiCommandsHandlerTestMock _handler;
 		private MockNodeConsole _mockConsole;
 
 		[TestInitialize]
@@ -40,14 +50,13 @@ namespace Node.Cs
 			_mockConsole = new MockNodeConsole();
 
 			Container.Register(
-							Component.For<INodeConsole>().Instance(_mockConsole));
+											Component.For<INodeConsole>().Instance(_mockConsole));
 
 			Container.Register(
-							Component.For<ICommandParser>().
-							ImplementedBy<BasicCommandParser>());
+											Component.For<ICommandParser>().
+											ImplementedBy<BasicCommandParser>());
 
-			_handlerMock = MockOf<IUiCommandsHandlerTestMock>();
-			_handler = Container.Resolve<IUiCommandsHandlerTestMock>();
+			_handler = new UiCommandsHandlerTestMock();
 		}
 
 		[TestMethod]
@@ -118,7 +127,7 @@ namespace Node.Cs
 			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext, string>(_handler.CommantWithOverload), "test help");
 			Target.RegisterCommand(cd);
 			var cds = new CommandDescriptor("test", new Action<INodeExecutionContext, int>(_handler.CommantWithOverload), "test help");
-			
+
 			//Act
 			Target.RegisterCommand(cds);
 
@@ -153,7 +162,8 @@ namespace Node.Cs
 			Target.Run("test");
 
 			//Verify
-			_handlerMock.Verify(a => a.DoTest(It.IsAny<INodeExecutionContext>()), Times.Once);
+			Assert.AreEqual(1, _handler.Run.Count);
+			_handler.Verify("DoTest", _handler.IsAny<INodeExecutionContext>());
 		}
 
 		[TestMethod]
@@ -236,20 +246,21 @@ namespace Node.Cs
 			SetsAssert.Contains(_mockConsole.Data, "test help\r\n");
 			CollectionAssert.DoesNotContain(_mockConsole.Data, "helping help\r\n");
 		}
-		
+
 		[TestMethod]
 		public void Run_Command_ShouldHandleMissingBooleanParametersAddingDefault()
 		{
 			//Setup
 			SetupTarget();
-			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext,bool>(_handler.DoTestBoolean), "test help");
+			var cd = new CommandDescriptor("test", new Action<INodeExecutionContext, bool>(_handler.DoTestBoolean), "test help");
 			Target.RegisterCommand(cd);
 
 			//Act
 			Target.Run("test");
 
 			//Verify
-			_handlerMock.Verify(a => a.DoTestBoolean(It.IsAny<INodeExecutionContext>(), false), Times.Once);
+			Assert.AreEqual(1, _handler.Run.Count);
+			_handler.Verify("DoTestBoolean", _handler.IsAny<INodeExecutionContext>(), false);
 		}
 
 		[TestMethod]
@@ -264,12 +275,8 @@ namespace Node.Cs
 			Target.Run("test fuffa");
 
 			//Verify
-			_handlerMock.Verify(a => a.DoTestBoolean(It.IsAny<INodeExecutionContext>(), It.IsAny<bool>()), Times.Never);
-			_handlerMock.Verify(a => a.DoTestInt(It.IsAny<INodeExecutionContext>(), It.IsAny<int>()), Times.Never);
-			_handlerMock.Verify(a => a.DoTest(It.IsAny<INodeExecutionContext>()), Times.Never);
-			_handlerMock.Verify(a => a.CommantWithOverload(It.IsAny<INodeExecutionContext>(), It.IsAny<int>()), Times.Never);
-			_handlerMock.Verify(a => a.CommantWithOverload(It.IsAny<INodeExecutionContext>(), It.IsAny<string>()), Times.Never);
-
+			Assert.AreEqual(0, _handler.Run.Count);
+			
 			SetsAssert.Contains(_mockConsole.Data, string.Format("Node.Cs Help for command '{0}':\r\n", "test"));
 		}
 
@@ -286,7 +293,7 @@ namespace Node.Cs
 
 			//Verify
 			Assert.IsTrue(result.Message.Contains("test"));
-			Assert.AreEqual("", string.Join("",_mockConsole.Data));
+			Assert.AreEqual("", string.Join("", _mockConsole.Data));
 		}
 
 		[TestMethod]
@@ -301,7 +308,8 @@ namespace Node.Cs
 			Target.Run("test true");
 
 			//Verify
-			_handlerMock.Verify(a => a.DoTestBoolean(It.IsAny<INodeExecutionContext>(), true), Times.Once);
+			Assert.AreEqual(1, _handler.Run.Count);
+			_handler.Verify("DoTestBoolean", _handler.IsAny<INodeExecutionContext>(), true);
 		}
 
 		[TestMethod]
@@ -316,7 +324,8 @@ namespace Node.Cs
 			Target.Run("test");
 
 			//Verify
-			_handlerMock.Verify(a => a.DoTestInt(It.IsAny<INodeExecutionContext>(), 0), Times.Once);
+			Assert.AreEqual(1, _handler.Run.Count);
+			_handler.Verify("DoTestInt", _handler.IsAny<INodeExecutionContext>(), 3);
 		}
 
 		[TestMethod]
@@ -331,7 +340,8 @@ namespace Node.Cs
 			Target.Run("test 33");
 
 			//Verify
-			_handlerMock.Verify(a => a.DoTestInt(It.IsAny<INodeExecutionContext>(), 33), Times.Once);
+			Assert.AreEqual(1, _handler.Run.Count);
+			_handler.Verify("DoTestInt", _handler.IsAny<INodeExecutionContext>(),33);
 		}
 
 		[TestMethod]
@@ -348,10 +358,64 @@ namespace Node.Cs
 			Target.RegisterCommand(cd);
 
 			//Act
-			ExceptionAssert.Throws(()=>Target.Run("test"),out result);
+			ExceptionAssert.Throws(() => Target.Run("test"), out result);
 
 			//Verify
-			Assert.AreSame(expected,result);
+			Assert.AreSame(expected, result);
 		}
+
+		[TestMethod]
+		public void RegisterCommand_ShouldBeAbleToRegisterAndUnregisterCommands_WithMultipleParam()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test example", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
+
+			//Act
+			Target.RegisterCommand(cd);
+
+			//Verify
+			Assert.IsTrue(Target.ContainsCommand("test example", new Type[0]));
+		}
+
+		[TestMethod]
+		public void Run_ShouldExecuteSimpleCommands_WithMultiParams_ChoosingTheLongestAlternative()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test do Stuff", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
+			Target.RegisterCommand(cd);
+			cd = new CommandDescriptor("test do", new Action<INodeExecutionContext, int>(_handler.DoTestInt), "test help");
+			Target.RegisterCommand(cd);
+
+			//Act
+			Target.Run("test do stuff");
+
+			//Verify
+			Assert.AreEqual(1, _handler.Run.Count);
+			_handler.Verify("DoTest", _handler.IsAny<INodeExecutionContext>());
+		}
+
+
+		[TestMethod]
+		public void Run_ShouldExecuteSimpleCommands_WithMultiParams_ChoosingTheLongestAlternativeDespiteOrder()
+		{
+			//Setup
+			SetupTarget();
+			var cd = new CommandDescriptor("test do", new Action<INodeExecutionContext, int>(_handler.DoTestInt), "test help");
+			Target.RegisterCommand(cd);
+			cd = new CommandDescriptor("test do Stuff", new Action<INodeExecutionContext>(_handler.DoTest), "test help");
+			Target.RegisterCommand(cd);
+
+			//Act
+			Target.Run("test do stuff");
+
+			//Verify
+			Assert.AreEqual(1, _handler.Run.Count);
+			_handler.Verify("DoTest",_handler.IsAny<INodeExecutionContext>());
+		}
+
+
+
 	}
 }

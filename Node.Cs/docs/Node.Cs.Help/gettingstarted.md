@@ -40,13 +40,13 @@ extension is present, .cs is assumed.
 extension is present, .cs is assumed.
 * exit: exit from the prompt with errorcode 0.
 * exit [number]: exit with the error code [number].
-* loaddll [dllPath]: load a dll in memory. If it has not an absolute path it's searched on
+* dll load [dllPath]: load a dll in memory. If it has not an absolute path it's searched on
 	* CurrentDirectory
 	* Bin directory
 	* Temp directory
 	* Node.Cs.exe directory
     * Packages directory
-* loadnuget [nugetPackage] (version): download the package from nuget.org and install it into the packages 
+* nuget load [nugetPackage] (version): download the package from nuget.org and install it into the packages 
 folder. If the version is specified the EXACT version is taken. Else the LATEST STABLE version is taken.
 
 

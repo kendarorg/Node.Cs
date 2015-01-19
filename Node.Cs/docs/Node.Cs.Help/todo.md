@@ -11,10 +11,12 @@ children_required=
 
 ### Features
 
+### Doing
 
+* Support for var_args in function calls
+* Adding Crontab Module
 
-### Testing
-
+### Testing and TODOs
 
 * Verify nuget download behaviour "in real world"
 * Execption inside a call to "run" in .ncs script
@@ -22,4 +24,8 @@ children_required=
 * UiCommandsHandler: Invoke commands containing default value for
 	* DateTime
 	* enumerable
-* 
+* File watcher for source files
+
+### Done
+
+* Do not load nuget dlls if don't needed

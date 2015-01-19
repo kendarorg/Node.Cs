@@ -37,6 +37,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="components.md" />
+    <None Include="modules\crontab.md" />
     <None Include="_coverage.template" />
     <None Include="gettingstarted.md" />
     <None Include="architecture.md" />

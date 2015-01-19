@@ -124,7 +124,7 @@
     <Compile Include="Mocks\FakeModuleFirst.cs" />
     <Compile Include="Mocks\FakeModuleFirstDuplicate.cs" />
     <Compile Include="Mocks\FakeModuleSecond.cs" />
-    <Compile Include="Mocks\IUiCommandsHandlerTestMock.cs" />
+    <Compile Include="Mocks\UiCommandsHandlerTestMock.cs" />
     <Compile Include="Mocks\MockNodeConsole.cs" />
     <Compile Include="ModulesCollectionTest.cs" />
     <Compile Include="NodeModuleExtensionTest.cs" />
