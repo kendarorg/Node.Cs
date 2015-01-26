@@ -15,7 +15,7 @@ using System;
 using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Node.Cs.Test
+namespace Kendar.TestUtils
 {
 
 	/// <summary>

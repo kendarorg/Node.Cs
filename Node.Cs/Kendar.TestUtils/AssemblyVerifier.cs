@@ -32,7 +32,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace Node.Cs.Test
+namespace Kendar.TestUtils
 {
 	[SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly", Justification = "Used only for testing")]
 	public class AssemblyVerifier : IDisposable

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Node.Cs.Test
+namespace Kendar.TestUtils
 {
 	public class MockCalls
 	{

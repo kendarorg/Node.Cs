@@ -27,6 +27,7 @@
 
 using System.Text;
 using Castle.MicroKernel.Registration;
+using Kendar.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Node.Cs.Consoles;

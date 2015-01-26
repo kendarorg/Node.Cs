@@ -25,64 +25,57 @@
 // ===========================================================
 
 
-using System;
-using System.Diagnostics;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Text;
 
-namespace Node.Cs.Test
+namespace Kendar.TestUtils
 {
-	public class MockStream : MemoryStream
+	public class ConsoleRedirector : TextWriter
 	{
-		public void Initialize()
+		public List<string> Data { get; private set; }
+
+		public ConsoleRedirector()
 		{
-			Sw = new Stopwatch();
-			ClosesCall = 0;
-			WrittenBytes = 0;
-			Seek(0, SeekOrigin.Begin);
-			SetLength(0);
+			Data = new List<string>();
 		}
 
-		public Stopwatch Sw { get; private set; }
-		public DateTime Start { get; private set; }
-		public DateTime End { get; private set; }
-
-		public int ClosesCall { get; private set; }
-		public override void Close()
+		public override void Write(char value)
 		{
-			End = DateTime.Now;
-			Sw.Stop();
-			ClosesCall++;
-		}
-
-		public override void Write(byte[] buffer, int offset, int count)
-		{
-			if (WrittenBytes == 0)
+			if (Data.Count == 0)
 			{
-				Start = DateTime.Now;
-				Sw.Start();
+				Data.Add(string.Empty);
 			}
-			AddBytes(count);
-			base.Write(buffer, offset, count);
-		}
-
-		private void AddBytes(int count)
-		{
-			WrittenBytes += count;
-		}
-
-		public int WrittenBytes { get; private set; }
-
-		public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-		{
-			if (WrittenBytes == 0)
+			if (Data[Data.Count - 1].EndsWith("\r\n"))
 			{
-				Start = DateTime.Now;
-				Sw.Start();
+				Data.Add(value.ToString(CultureInfo.InvariantCulture));
 			}
-			AddBytes(count);
-			return base.WriteAsync(buffer, offset, count, cancellationToken);
+			else
+			{
+				Data[Data.Count - 1] += value.ToString(CultureInfo.InvariantCulture);
+			}
+		}
+
+		public override void Write(string value)
+		{
+			if (Data.Count == 0)
+			{
+				Data.Add(string.Empty);
+			}
+			if (Data[Data.Count - 1].EndsWith("\r\n"))
+			{
+				Data.Add(value.ToString(CultureInfo.InvariantCulture));
+			}
+			else
+			{
+				Data[Data.Count - 1] += value.ToString(CultureInfo.InvariantCulture);
+			}
+		}
+
+		public override Encoding Encoding
+		{
+			get { return Encoding.ASCII; }
 		}
 	}
 }

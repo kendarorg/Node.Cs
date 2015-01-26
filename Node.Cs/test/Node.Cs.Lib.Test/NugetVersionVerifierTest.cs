@@ -27,6 +27,7 @@
 
 using System;
 using Castle.MicroKernel.Registration;
+using Kendar.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Node.Cs.Consoles;
 using Node.Cs.Nugets;

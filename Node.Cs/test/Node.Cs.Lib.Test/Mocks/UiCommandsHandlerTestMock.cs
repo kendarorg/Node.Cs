@@ -25,6 +25,7 @@
 // ===========================================================
 
 
+using Kendar.TestUtils;
 using Node.Cs.Test;
 using Node.Cs.Utils;
 

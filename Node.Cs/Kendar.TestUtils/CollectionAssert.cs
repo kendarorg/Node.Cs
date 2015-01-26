@@ -33,7 +33,7 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Node.Cs.Test
+namespace Kendar.TestUtils
 {
 	[DebuggerStepThrough]
 	[DebuggerNonUserCode]

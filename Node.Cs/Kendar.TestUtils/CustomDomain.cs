@@ -1,4 +1,4 @@
-// ===========================================================
+﻿// ===========================================================
 // Copyright (c) 2014-2015, Enrico Da Ros/kendar.org
 // All rights reserved.
 // 
@@ -25,57 +25,68 @@
 // ===========================================================
 
 
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Text;
+using System;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Versioning;
 
-namespace Node.Cs.Test
+namespace Kendar.TestUtils
 {
-	public class ConsoleRedirector : TextWriter
+	[Serializable]
+	public class CustomDomain : MarshalByRefObject
 	{
-		public List<string> Data { get; private set; }
 
-		public ConsoleRedirector()
+
+		private Assembly _dll;
+		private string _name;
+
+
+		public void LoadDll(string path)
 		{
-			Data = new List<string>();
+			_dll = Assembly.LoadFrom(path);
 		}
 
-		public override void Write(char value)
+		public string GetName()
 		{
-			if (Data.Count == 0)
+			return _dll.GetName().FullName;
+		}
+
+		public string[] GetTypes()
+		{
+			var types = _dll.GetTypes();
+			var result = new string[types.Length];
+			for (int index = 0; index < types.Length; index++)
 			{
-				Data.Add(string.Empty);
+				var type = types[index];
+				result[index] = type.Namespace + "." + type.Name;
 			}
-			if (Data[Data.Count - 1].EndsWith("\r\n"))
+			return result;
+		}
+
+		public void LoadDll(byte[] bytes)
+		{
+			try
 			{
-				Data.Add(value.ToString(CultureInfo.InvariantCulture));
+				_dll = Assembly.Load(bytes);
+				var tar = (TargetFrameworkAttribute)_dll
+					.GetCustomAttributes(typeof(TargetFrameworkAttribute)).First();
+				var las = tar.FrameworkName.LastIndexOf("v", StringComparison.Ordinal);
+				_name = tar.FrameworkName.Substring(las + 1).Replace(".", "");
 			}
-			else
+			catch (Exception ex)
 			{
-				Data[Data.Count - 1] += value.ToString(CultureInfo.InvariantCulture);
+				Console.WriteLine(ex);
 			}
 		}
 
-		public override void Write(string value)
+		public bool IsDllLoaded()
 		{
-			if (Data.Count == 0)
-			{
-				Data.Add(string.Empty);
-			}
-			if (Data[Data.Count - 1].EndsWith("\r\n"))
-			{
-				Data.Add(value.ToString(CultureInfo.InvariantCulture));
-			}
-			else
-			{
-				Data[Data.Count - 1] += value.ToString(CultureInfo.InvariantCulture);
-			}
+			return _dll != null;
 		}
 
-		public override Encoding Encoding
+		internal string GetFrameworkVersion()
 		{
-			get { return Encoding.ASCII; }
+			return _name;
 		}
 	}
 }

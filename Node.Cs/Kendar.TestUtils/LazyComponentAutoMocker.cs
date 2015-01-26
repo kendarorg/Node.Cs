@@ -1,4 +1,4 @@
-﻿// ===========================================================
+// ===========================================================
 // Copyright (c) 2014-2015, Enrico Da Ros/kendar.org
 // All rights reserved.
 // 
@@ -25,68 +25,37 @@
 // ===========================================================
 
 
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.Resolvers;
+using Castle.Windsor;
+using Moq;
 using System;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.Versioning;
+using System.Collections;
+using System.Diagnostics;
+using Component = Castle.MicroKernel.Registration.Component;
 
-namespace Node.Cs.Test
+namespace Kendar.TestUtils
 {
-	[Serializable]
-	public class CustomDomain : MarshalByRefObject
+	public class LazyComponentAutoMocker : ILazyComponentLoader
 	{
+		private readonly WindsorContainer _container;
 
-
-		private Assembly _dll;
-		private string _name;
-
-
-		public void LoadDll(string path)
+		public LazyComponentAutoMocker(WindsorContainer container)
 		{
-			_dll = Assembly.LoadFrom(path);
+			_container = container;
 		}
 
-		public string GetName()
+		public IRegistration Load(string key, Type service, IDictionary arguments)
 		{
-			return _dll.GetName().FullName;
-		}
+			var mockInterfaceType = typeof(Mock<>).MakeGenericType(service);
+			var constructor = mockInterfaceType.GetConstructor(new Type[] { });
+			Debug.Assert(constructor != null, "LazyComponentAutoMocker::Load, constructor != null");
+			var mockedObject = constructor.Invoke(new object[] { });
+			var mock = (Mock)mockedObject;
+			var realObject = mock.Object;
 
-		public string[] GetTypes()
-		{
-			var types = _dll.GetTypes();
-			var result = new string[types.Length];
-			for (int index = 0; index < types.Length; index++)
-			{
-				var type = types[index];
-				result[index] = type.Namespace + "." + type.Name;
-			}
-			return result;
-		}
-
-		public void LoadDll(byte[] bytes)
-		{
-			try
-			{
-				_dll = Assembly.Load(bytes);
-				var tar = (TargetFrameworkAttribute)_dll
-					.GetCustomAttributes(typeof(TargetFrameworkAttribute)).First();
-				var las = tar.FrameworkName.LastIndexOf("v", StringComparison.Ordinal);
-				_name = tar.FrameworkName.Substring(las + 1).Replace(".", "");
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine(ex);
-			}
-		}
-
-		public bool IsDllLoaded()
-		{
-			return _dll != null;
-		}
-
-		internal string GetFrameworkVersion()
-		{
-			return _name;
+			_container.Register(Component.For(mockInterfaceType).Instance(mockedObject));
+			return Component.For(service).Instance(realObject);
 		}
 	}
 }

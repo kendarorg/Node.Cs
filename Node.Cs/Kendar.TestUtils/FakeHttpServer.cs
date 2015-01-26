@@ -32,7 +32,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Threading;
 
-namespace Node.Cs.Test
+namespace Kendar.TestUtils
 {
 	[SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly", Justification = "Used only for testing")]
 	public class FakeHttpServer : IDisposable

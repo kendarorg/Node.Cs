@@ -160,6 +160,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Kendar.TestUtils\Kendar.TestUtils.csproj">
+      <Project>{B78572F5-FDE6-4D06-BD62-6EE60511EF34}</Project>
+      <Name>Kendar.TestUtils</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\Node.Cs.Lib\Node.Cs.Lib.csproj">
       <Project>{1E1C8C29-0B0F-4598-AC91-F2E43E8B33EB}</Project>
       <Name>Node.Cs.Lib</Name>

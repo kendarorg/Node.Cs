@@ -26,6 +26,7 @@
 
 
 using Castle.MicroKernel.Registration;
+using Kendar.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Node.Cs.Consoles;
 using Node.Cs.Test;
@@ -108,7 +109,7 @@ namespace Node.Cs
 
 			var expected = Path.Combine(path.CurrentDirectory.Data, externalDllName + ".dll");
 
-			CopyDllOnTarget(externalDllName, path);
+			NodeCopyUtils.CopyDllOnTarget(externalDllName, path);
 
 
 			var result = Target.FindAssembly(externalDllName);

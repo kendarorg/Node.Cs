@@ -26,6 +26,7 @@
 
 
 using Castle.MicroKernel.Registration;
+using Kendar.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Node.Cs.CommandHandlers;
@@ -356,7 +357,7 @@ namespace Node.Cs
 			var context = Object<INodeExecutionContext>();
 			var downloader = MockOf<INugetPackagesDownloader>();
 
-			CopyDllOnTarget("BasicDllFor.Test", context);
+			NodeCopyUtils.CopyDllOnTarget("BasicDllFor.Test", context);
 
 			var dllContent = File.ReadAllBytes(Path.Combine(context.CurrentDirectory.Data, "BasicDllFor.Test.dll"));
 			downloader.Setup(a => a.DownloadPackage("net45", packageName, version, allowPreRelease))

@@ -26,6 +26,7 @@
 
 
 using System;
+using Kendar.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Node.Cs.CommandHandlers;
 using Node.Cs.Consoles;

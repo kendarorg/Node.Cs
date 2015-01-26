@@ -29,10 +29,17 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace Node.Cs.Test
+namespace Kendar.TestUtils
 {
 	public static class PathResolver
 	{
+		public static string ToPath( string src)
+		{
+			return src
+				.Replace('/', Path.DirectorySeparatorChar)
+				.Replace('\\', Path.DirectorySeparatorChar);
+		}
+
 		public static string GetAssemblyPath(Assembly asm)
 		{
 			var asmUri = new UriBuilder(asm.CodeBase);
@@ -47,7 +54,7 @@ namespace Node.Cs.Test
 
 		public static string FindFirstOfType(string path, string pattern)
 		{
-			path = path.ToPath();
+			path = ToPath(path);
 			if (Directory.Exists(path))
 			{
 				var filesMatching = Directory.GetFiles(path, pattern);
@@ -63,7 +70,7 @@ namespace Node.Cs.Test
 
 		public static string FindByPath(string path, Assembly asm = null)
 		{
-			path = path.ToPath();
+			path = ToPath(path);
 			if (File.Exists(path))
 			{
 				return path;

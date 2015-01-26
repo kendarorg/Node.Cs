@@ -4,14 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{53F344B1-C1F5-4E0D-8C1A-9CF6150E8BFD}</ProjectGuid>
+    <ProjectGuid>{B78572F5-FDE6-4D06-BD62-6EE60511EF34}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Node.Cs.Test</RootNamespace>
-    <AssemblyName>Node.Cs.TestUtils</AssemblyName>
+    <RootNamespace>Kendar.TestUtils</RootNamespace>
+    <AssemblyName>Kendar.TestUtils</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -32,24 +32,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Castle.Core, Version=3.3.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Castle.Core.3.3.0\lib\net45\Castle.Core.dll</HintPath>
+    <Reference Include="Castle.Core">
+      <HintPath>..\packages\Castle.Core.3.3.0\lib\net45\Castle.Core.dll</HintPath>
     </Reference>
     <Reference Include="Castle.Windsor">
-      <HintPath>..\..\packages\Castle.Windsor.3.3.0\lib\net45\Castle.Windsor.dll</HintPath>
-    </Reference>
-    <Reference Include="ConcurrencyHelpers, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\ConcurrencyHelpers.4.0.0-alpha\lib\net45\ConcurrencyHelpers.dll</HintPath>
-    </Reference>
-    <Reference Include="GenericHelpers">
-      <HintPath>..\..\packages\GenericHelpers.1.0.5\lib\net45\GenericHelpers.dll</HintPath>
+      <HintPath>..\packages\Castle.Windsor.3.3.0\lib\net45\Castle.Windsor.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="Moq, Version=4.2.1409.1722, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Moq.4.2.1409.1722\lib\net40\Moq.dll</HintPath>
+    <Reference Include="Moq">
+      <HintPath>..\packages\Moq.4.2.1409.1722\lib\net40\Moq.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -60,26 +51,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MockExecutionContext.cs" />
+    <Compile Include="AssemblyVerifier.cs" />
+    <Compile Include="CollectionAssert.cs" />
+    <Compile Include="ConsoleRedirectore.cs" />
+    <Compile Include="CopyUtils.cs" />
+    <Compile Include="CustomDomain.cs" />
+    <Compile Include="ExceptionAssert.cs" />
+    <Compile Include="FakeHttpServer.cs" />
+    <Compile Include="LazyComponentAutoMocker.cs" />
+    <Compile Include="MockCalls.cs" />
+    <Compile Include="MockStream.cs" />
+    <Compile Include="PathResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="NodeCopyUtils.cs" />
+    <Compile Include="TestBase.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Kendar.TestUtils.nuspec" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Kendar.TestUtils\Kendar.TestUtils.csproj">
-      <Project>{b78572f5-fde6-4d06-bd62-6ee60511ef34}</Project>
-      <Name>Kendar.TestUtils</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Node.Cs.Lib\Node.Cs.Lib.csproj">
-      <Project>{1E1C8C29-0B0F-4598-AC91-F2E43E8B33EB}</Project>
-      <Name>Node.Cs.Lib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Node.Cs.Shared\Node.Cs.Shared.csproj">
-      <Project>{0e122daf-29ee-4d25-9ee8-d4a3d06e23a2}</Project>
-      <Name>Node.Cs.Shared</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

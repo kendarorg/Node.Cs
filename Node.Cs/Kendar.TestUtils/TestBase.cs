@@ -27,15 +27,13 @@
 
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.Resolvers;
 using Castle.Windsor;
 using Moq;
-using Node.Cs.Utils;
 
-namespace Node.Cs.Test
+namespace Kendar.TestUtils
 {
 	public abstract class TestBase<T, TI> : TestBase
 		where T : class, TI
@@ -75,7 +73,7 @@ namespace Node.Cs.Test
 		}
 	}
 
-	public abstract class TestBase
+	public class TestBase
 	{
 		public WindsorContainer Container { get; private set; }
 
@@ -89,34 +87,6 @@ namespace Node.Cs.Test
 		}
 
 
-
-		protected void CopyDllOnTarget(string externalDllName, INodeExecutionContext context)
-		{
-#if DEBUG
-			const string dest = "Debug";
-#else
-			const string dest = "Release";
-#endif
-			var srcDll = Path.Combine(PathResolver.GetSolutionRoot(), "test", "mockProjects", externalDllName, "bin", dest,
-				externalDllName + ".dll");
-			srcDll = PathResolver.FindByPath(srcDll, Assembly.GetCallingAssembly());
-			if (string.IsNullOrWhiteSpace(srcDll) || !File.Exists(srcDll))
-			{
-
-				srcDll = PathResolver.FindByPath(Path.Combine(PathResolver.GetAssemblyPath(Assembly.GetCallingAssembly()), externalDllName + ".dll"), Assembly.GetCallingAssembly());
-			}
-			var destDll = Path.Combine(context.CurrentDirectory.Data, externalDllName + ".dll");
-			if (srcDll == destDll)
-			{
-				return;
-			}
-
-			if (File.Exists(destDll))
-			{
-				File.Delete(destDll);
-			}
-			File.Copy(srcDll, destDll);
-		}
 
 		protected void InitializeMock<T>() where T : class
 		{
@@ -233,4 +203,5 @@ namespace Node.Cs.Test
 			}
 		}
 	}
+
 }

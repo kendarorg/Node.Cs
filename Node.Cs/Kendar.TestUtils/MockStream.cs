@@ -25,37 +25,64 @@
 // ===========================================================
 
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.Resolvers;
-using Castle.Windsor;
-using Moq;
 using System;
-using System.Collections;
 using System.Diagnostics;
-using Component = Castle.MicroKernel.Registration.Component;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Node.Cs.Test
+namespace Kendar.TestUtils
 {
-	public class LazyComponentAutoMocker : ILazyComponentLoader
+	public class MockStream : MemoryStream
 	{
-		private readonly WindsorContainer _container;
-
-		public LazyComponentAutoMocker(WindsorContainer container)
+		public void Initialize()
 		{
-			_container = container;
+			Sw = new Stopwatch();
+			ClosesCall = 0;
+			WrittenBytes = 0;
+			Seek(0, SeekOrigin.Begin);
+			SetLength(0);
 		}
 
-		public IRegistration Load(string key, Type service, IDictionary arguments)
-		{
-			var mockInterfaceType = typeof(Mock<>).MakeGenericType(service);
-			var constructor = mockInterfaceType.GetConstructor(new Type[] { });
-			Debug.Assert(constructor != null, "LazyComponentAutoMocker::Load, constructor != null");
-			var mockedObject = constructor.Invoke(new object[] { });
-			var mock = (Mock)mockedObject;
-			var realObject = mock.Object;
+		public Stopwatch Sw { get; private set; }
+		public DateTime Start { get; private set; }
+		public DateTime End { get; private set; }
 
-			_container.Register(Component.For(mockInterfaceType).Instance(mockedObject));
-			return Component.For(service).Instance(realObject);
+		public int ClosesCall { get; private set; }
+		public override void Close()
+		{
+			End = DateTime.Now;
+			Sw.Stop();
+			ClosesCall++;
+		}
+
+		public override void Write(byte[] buffer, int offset, int count)
+		{
+			if (WrittenBytes == 0)
+			{
+				Start = DateTime.Now;
+				Sw.Start();
+			}
+			AddBytes(count);
+			base.Write(buffer, offset, count);
+		}
+
+		private void AddBytes(int count)
+		{
+			WrittenBytes += count;
+		}
+
+		public int WrittenBytes { get; private set; }
+
+		public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+		{
+			if (WrittenBytes == 0)
+			{
+				Start = DateTime.Now;
+				Sw.Start();
+			}
+			AddBytes(count);
+			return base.WriteAsync(buffer, offset, count, cancellationToken);
 		}
 	}
 }
