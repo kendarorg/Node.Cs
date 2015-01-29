@@ -9,7 +9,7 @@ description=Getting started
 
 ### Introduction
 
-First download the source from github [https://github.com/endaroza](https://github.com/endaroza)
+First download the source from github [https://github.com/kendarorg](https://github.com/kendarorg)
 
 And build all.
 
