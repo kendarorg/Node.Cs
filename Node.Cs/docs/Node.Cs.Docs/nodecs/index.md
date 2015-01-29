@@ -15,7 +15,7 @@ First and most important: If you use these libraries, please give me some feedba
 disqus form at the end of the page or with this site contact form. Without your support i'll follow only my
 selfish development needs!
 
-The sample can be downloaded from [NodeCsMusicStore repository on Github](https://github.com/endaroza/NodeCsMusicStore)
+The sample can be downloaded from [NodeCsMusicStore repository on Github](https://github.com/kendarorg/NodeCsMusicStore)
 
 <!--include(shared/childrensmall.php)-->
 
