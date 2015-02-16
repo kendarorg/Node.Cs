@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyVerifier.cs" />
+    <Compile Include="Bdd.cs" />
     <Compile Include="CollectionAssert.cs" />
     <Compile Include="ConsoleRedirectore.cs" />
     <Compile Include="CopyUtils.cs" />
